@@ -1,8 +1,10 @@
 package mastersthesis.model;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class PartSupp {
+    public final String id;
     public final Part part;
     public final Supplier supplier;
     public final int availqty;
@@ -10,6 +12,9 @@ public class PartSupp {
     public final String comment;
     
     public PartSupp(Part part, Supplier supplier, int availqty, BigDecimal supplyCost, String comment) {
+        // this is needed, cause schema does not have a key
+        // and LineItem table must have indexed access to this class
+        this.id = "" + part.partkey + "," + supplier.suppkey;
         this.part = part;
         this.supplier = supplier;
         this.availqty = availqty;
@@ -23,24 +28,22 @@ public class PartSupp {
         if (o == null || getClass() != o.getClass()) return false;
         
         PartSupp partSupp = (PartSupp) o;
-        
-        if (part != null ? !part.equals(partSupp.part) : partSupp.part != null) return false;
-        return supplier != null ? supplier.equals(partSupp.supplier) : partSupp.supplier == null;
+    
+        return Objects.equals(id, partSupp.id);
     
     }
     
     @Override
     public int hashCode() {
-        int result = part != null ? part.hashCode() : 0;
-        result = 31 * result + (supplier != null ? supplier.hashCode() : 0);
-        return result;
+        return id.hashCode();
     }
     
     @Override
     public String toString() {
         return "PartSupp{" +
-                "partId=" + part.partkey +
-                ", supplierId=" + supplier.suppkey +
+                "id=" + id +
+                ", part=" + part +
+                ", supplier=" + supplier +
                 ", availqty=" + availqty +
                 ", supplyCost=" + supplyCost +
                 '}';

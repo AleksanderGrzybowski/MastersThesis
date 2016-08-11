@@ -9,7 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.Integer.parseInt;
@@ -19,13 +22,13 @@ import static java.util.stream.Collectors.toSet;
 public class Store {
     
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public Set<Region> regions;
+    public Map<Long, Region> regions;
     public Set<Nation> nations;
-    public Set<Supplier> suppliers;
-    public Set<Customer> customers;
-    public Set<Order> orders;
-    public Set<Part> parts;
-    public Set<PartSupp> partSupps;
+    public Map<Long, Supplier> suppliers;
+    public Map<Long, Customer> customers;
+    public Map<Long, Order> orders;
+    public Map<Long, Part> parts;
+    public Map<String, PartSupp> partSupps;
     public Set<LineItem> lineItems;
     
     private Stream<String> fileLines(String basePath, String dataFilename) throws IOException {
@@ -33,8 +36,8 @@ public class Store {
     }
     
     public Store(String basePath) throws Exception {
-    
-        System.out.println("1");
+        
+        System.err.println("regions");
         regions = fileLines(basePath, "region.tbl")
                 .map(line -> {
                     String[] split = line.split("\\|");
@@ -43,13 +46,13 @@ public class Store {
                             split[1],
                             split[2]
                     );
-                })
-                .collect(toSet());
+                }).collect(Collectors.toMap(e -> e.regionkey, Function.identity()));
         
+        System.err.println("nations");
         nations = fileLines(basePath, "nation.tbl")
                 .map(line -> {
                     String[] split = line.split("\\|");
-                    Region region = regions.stream()
+                    Region region = regions.values().stream()
                             .filter(r -> r.regionkey == parseLong(split[2]))
                             .findFirst().orElseThrow(RuntimeException::new);
                     return new Nation(
@@ -60,8 +63,8 @@ public class Store {
                     );
                 })
                 .collect(toSet());
-    
-        System.out.println("2");
+        
+        System.err.println("suppliers");
         suppliers = fileLines(basePath, "supplier.tbl")
                 .map(line -> {
                     String[] split = line.split("\\|");
@@ -77,9 +80,9 @@ public class Store {
                             new BigDecimal(split[5]),
                             split[6]
                     );
-                })
-                .collect(toSet());
+                }).collect(Collectors.toMap(e -> e.suppkey, Function.identity()));
         
+        System.err.println("customers");
         customers = fileLines(basePath, "customer.tbl")
                 .map(line -> {
                     String[] split = line.split("\\|");
@@ -95,15 +98,13 @@ public class Store {
                             new BigDecimal(split[5]),
                             split[6],
                             split[7]);
-                })
-                .collect(toSet());
+                }).collect(Collectors.toMap(e -> e.custkey, Function.identity()));
         
+        System.err.println("orders");
         orders = fileLines(basePath, "orders.tbl")
                 .map(line -> {
                     String[] split = line.split("\\|");
-                    Customer customer = customers.stream()
-                            .filter(r -> r.custkey == parseLong(split[1]))
-                            .findFirst().orElseThrow(RuntimeException::new);
+                    Customer customer = customers.get(parseLong(split[1]));
                     return new Order(parseLong(split[0]),
                             customer,
                             split[2],
@@ -113,9 +114,9 @@ public class Store {
                             split[6],
                             parseInt(split[7]),
                             split[8]);
-                })
-                .collect(toSet());
+                }).collect(Collectors.toMap(e -> e.orderkey, Function.identity()));
         
+        System.err.println("parts");
         parts = fileLines(basePath, "part.tbl")
                 .map(line -> {
                     String[] split = line.split("\\|");
@@ -129,19 +130,14 @@ public class Store {
                             new BigDecimal(split[7]),
                             split[8]
                     );
-                })
-                .collect(toSet());
-    
-        System.out.println("3");
+                }).collect(Collectors.toMap(e -> e.partkey, Function.identity()));
+        
+        System.err.println("partSupps");
         partSupps = fileLines(basePath, "partsupp.tbl")
                 .map(line -> {
                     String[] split = line.split("\\|");
-                    Part part = parts.stream()
-                            .filter(p -> p.partkey == parseLong(split[0]))
-                            .findFirst().orElseThrow(RuntimeException::new);
-                    Supplier supplier = suppliers.stream()
-                            .filter(s -> s.suppkey == parseLong(split[1]))
-                            .findFirst().orElseThrow(RuntimeException::new);
+                    Part part = parts.get(parseLong(split[0]));
+                    Supplier supplier = suppliers.get(parseLong(split[1]));
                     
                     return new PartSupp(
                             part,
@@ -149,19 +145,16 @@ public class Store {
                             parseInt(split[2]),
                             new BigDecimal(split[3]),
                             split[4]);
-                })
-                .collect(toSet());
+                }).collect(Collectors.toMap(e -> e.id, Function.identity()));
         
+        System.err.println("lineItems");
         lineItems = Files.lines(Paths.get(basePath + File.separator + "lineitem.tbl"))
                 .map(line -> {
                     String[] split = line.split("\\|");
-                    Order order = orders.stream()
-                            .filter(o -> o.orderkey == parseLong(split[0]))
-                            .findFirst().orElseThrow(RuntimeException::new);
-                    PartSupp partSupp = partSupps.stream()
-                            .filter(ps -> ps.part.partkey == parseLong(split[1]) && ps.supplier.suppkey == parseLong
-                                    (split[2]))
-                            .findFirst().orElseThrow(RuntimeException::new);
+                    Order order = orders.get(parseLong(split[0]));
+                    long partKey = parseLong(split[1]);
+                    long suppKey = parseLong (split[2]);
+                    PartSupp partSupp = partSupps.get("" + partKey + "," + suppKey);
                     
                     return new LineItem(order,
                             partSupp,
