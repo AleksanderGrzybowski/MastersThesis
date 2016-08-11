@@ -30,10 +30,6 @@ class Main {
 
 
     public static void main(String[] args) {
-        Connection connection = newDatabase()
-        createSchema(connection)
-
-        prettyPrint(connection.createStatement().executeQuery("SELECT * FROM region"))
-
+        new Store("dbgen")
     }
 }
