@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -21,15 +22,47 @@ import static java.util.stream.Collectors.toSet;
 
 public class Store {
     
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public Map<Long, Region> regions;
-    public Set<Nation> nations;
-    public Map<Long, Supplier> suppliers;
-    public Map<Long, Customer> customers;
-    public Map<Long, Order> orders;
-    public Map<Long, Part> parts;
-    public Map<String, PartSupp> partSupps;
-    public Set<LineItem> lineItems;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private Map<Long, Region> regions;
+    private Set<Nation> nations;
+    private Map<Long, Supplier> suppliers;
+    private Map<Long, Customer> customers;
+    private Map<Long, Order> orders;
+    private Map<Long, Part> parts;
+    private Map<String, PartSupp> partSupps;
+    private Set<LineItem> lineItems;
+    
+    public Collection<Region> getRegions() {
+        return regions.values();
+    }
+    
+    public Collection<Nation> getNations() {
+        return nations;
+    }
+    
+    public Collection<Supplier> getSuppliers() {
+        return suppliers.values();
+    }
+    
+    public Collection<Customer> getCustomers() {
+        return customers.values();
+    }
+    
+    public Collection<Order> getOrders() {
+        return orders.values();
+    }
+    
+    public Collection<Part> getParts() {
+        return parts.values();
+    }
+    
+    public Collection<PartSupp> getPartSupps() {
+        return partSupps.values();
+    }
+    
+    public Collection<LineItem> getLineItems() {
+        return lineItems;
+    }
     
     private Stream<String> fileLines(String basePath, String dataFilename) throws IOException {
         return Files.lines(Paths.get(basePath, dataFilename));
@@ -145,7 +178,7 @@ public class Store {
                             parseInt(split[2]),
                             new BigDecimal(split[3]),
                             split[4]);
-                }).collect(Collectors.toMap(e -> e.id, Function.identity()));
+                }).distinct().collect(Collectors.toMap(e -> e.id, Function.identity())); // TODO they aren' unique?
         
         System.err.println("lineItems");
         lineItems = Files.lines(Paths.get(basePath + File.separator + "lineitem.tbl"))
