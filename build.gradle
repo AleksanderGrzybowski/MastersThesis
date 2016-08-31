@@ -1,8 +1,10 @@
+plugins {
+    id 'me.champeau.gradle.jmh' version '0.3.1'
+    id 'java'
+    id 'groovy'
+}
 group 'pl.polsl'
 version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
-apply plugin: 'groovy'
 
 sourceCompatibility = 1.8
 
@@ -14,5 +16,24 @@ dependencies {
     dependencies {
         compile group: 'com.h2database', name: 'h2', version: '1.4.192'
         compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.6'
+    }
+}
+
+
+boolean development = false
+
+jmh {
+    jmhVersion = '1.13'
+    
+    if (development) {
+        threads = 1
+        fork = 0
+        warmupIterations = 0
+        iterations = 5
+    } else {
+        threads = 4
+        fork = 2
+        warmupIterations = 1
+        iterations = 10
     }
 }
