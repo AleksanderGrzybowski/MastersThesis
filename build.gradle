@@ -16,14 +16,18 @@ dependencies {
     dependencies {
         compile group: 'com.h2database', name: 'h2', version: '1.4.192'
         compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.6'
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     }
 }
 
 
-boolean development = false
+boolean development = true
 
 jmh {
     jmhVersion = '1.13'
+    
+    // Use ./gradlew -Pinclude='regex' to run specific class
+    include = project.hasProperty('include') ? project.getProperty('include') : ''
     
     if (development) {
         threads = 1

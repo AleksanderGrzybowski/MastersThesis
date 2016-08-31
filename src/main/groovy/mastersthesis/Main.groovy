@@ -29,7 +29,8 @@ class Main {
         connection.createStatement().execute("RUNSCRIPT FROM 'dbgen/dss.ddl'")
     }
 
+    
+    
     public static void main(String[] args) {
-//        new Store("dbgen")
     }
 }
