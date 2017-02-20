@@ -21,7 +21,7 @@ dependencies {
 }
 
 
-boolean development = true
+boolean development = false
 
 jmh {
     jmhVersion = '1.13'
