@@ -1,4 +1,4 @@
-package masterthesis;
+package masterthesis.samples;
 
 import org.openjdk.jmh.annotations.*;
 
@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import static mastersthesis.Main.newDatabase;
+import static mastersthesis.Utils.newDatabase;
 
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)

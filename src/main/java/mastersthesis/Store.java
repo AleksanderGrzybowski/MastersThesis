@@ -192,7 +192,7 @@ public class Store {
                     return new LineItem(order,
                             partSupp,
                             parseInt(split[3]),
-                            parseInt(split[4]),
+                            new BigDecimal(split[4]),
                             new BigDecimal(split[5]),
                             new BigDecimal(split[6]),
                             new BigDecimal(split[7]),

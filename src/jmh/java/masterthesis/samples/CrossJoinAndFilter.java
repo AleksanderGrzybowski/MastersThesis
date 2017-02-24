@@ -1,4 +1,4 @@
-package masterthesis;
+package masterthesis.samples;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static mastersthesis.Main.newDatabase;
+import static mastersthesis.Utils.newDatabase;
 
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)

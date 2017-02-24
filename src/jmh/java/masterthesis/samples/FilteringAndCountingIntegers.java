@@ -1,4 +1,4 @@
-package masterthesis;
+package masterthesis.samples;
 
 import org.openjdk.jmh.annotations.*;
 
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static mastersthesis.Main.newDatabase;
+import static mastersthesis.Utils.newDatabase;
 
 @SuppressWarnings({"SqlResolve", "SqlDialectInspection"})
 @State(Scope.Thread)

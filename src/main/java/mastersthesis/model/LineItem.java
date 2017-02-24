@@ -7,7 +7,7 @@ public class LineItem {
     public final Order order;
     public final PartSupp partSupp;
     public final int linenumber;
-    public final int quantity;
+    public final BigDecimal quantity;
     public final BigDecimal extendedPrice;
     public final BigDecimal discount;
     public final BigDecimal tax;
@@ -20,7 +20,7 @@ public class LineItem {
     public final String shipMode;
     public final String comment;
     
-    public LineItem(Order order, PartSupp partSupp, int linenumber, int quantity, BigDecimal extendedPrice, BigDecimal discount, BigDecimal tax, String returnFlag, String lineStatus, LocalDate shipDate, LocalDate receiptDate, LocalDate commitDate, String shipInstruct, String shipMode, String comment) {
+    public LineItem(Order order, PartSupp partSupp, int linenumber, BigDecimal quantity, BigDecimal extendedPrice, BigDecimal discount, BigDecimal tax, String returnFlag, String lineStatus, LocalDate shipDate, LocalDate receiptDate, LocalDate commitDate, String shipInstruct, String shipMode, String comment) {
         this.order = order;
         this.partSupp = partSupp;
         this.linenumber = linenumber;

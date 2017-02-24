@@ -25,6 +25,7 @@ boolean development = false
 
 jmh {
     jmhVersion = '1.13'
+    jvmArgs = '-Xms256m -Xmx8192m'
     
     // Use ./gradlew -Pinclude='regex' to run specific class
     include = project.hasProperty('include') ? project.getProperty('include') : ''
@@ -35,7 +36,7 @@ jmh {
         warmupIterations = 0
         iterations = 5
     } else {
-        threads = 4
+        threads = 1
         fork = 2
         warmupIterations = 1
         iterations = 10
