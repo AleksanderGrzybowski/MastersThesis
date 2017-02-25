@@ -75,6 +75,7 @@ public class Tpc1Benchmark {
             results.add(row);
         }
         
+        System.out.println(results);
         return results;
     }
     
@@ -144,7 +145,8 @@ public class Tpc1Benchmark {
             row.count_order = ((IntSummaryStatistics) entry.getValue().get(7)).getSum();
             results.add(row);
         }
-        
+    
+        System.out.println(results);
         return results;
     }
 }
