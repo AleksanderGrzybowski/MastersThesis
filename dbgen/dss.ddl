@@ -5,7 +5,7 @@ CREATE TABLE REGION (
   R_NAME      CHAR(25) NOT NULL,
   R_COMMENT   VARCHAR(152)
 ) AS SELECT *
-     FROM CSVREAD('dbgen/region.tbl', NULL, 'fieldSeparator=|');
+     FROM CSVREAD('dbgen/region.tbl', 'a|a|a', 'fieldSeparator=|');
 
 CREATE TABLE NATION (
   N_NATIONKEY INTEGER  NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE NATION (
   N_REGIONKEY INTEGER  NOT NULL,
   N_COMMENT   VARCHAR(152)
 ) AS SELECT *
-     FROM CSVREAD('dbgen/nation.tbl', NULL, 'fieldSeparator=|');
+     FROM CSVREAD('dbgen/nation.tbl', 'a|a|a|a', 'fieldSeparator=|');
 
 CREATE TABLE PART (
   P_PARTKEY     INTEGER        NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE PART (
   P_RETAILPRICE DECIMAL(15, 2) NOT NULL,
   P_COMMENT     VARCHAR(23)    NOT NULL
 ) AS SELECT *
-     FROM CSVREAD('dbgen/part.tbl', NULL, 'fieldSeparator=|');
+     FROM CSVREAD('dbgen/part.tbl', 'a|a|a|a|a|a|a|a|a', 'fieldSeparator=|');
 
 CREATE TABLE SUPPLIER (
   S_SUPPKEY   INTEGER        NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE SUPPLIER (
   S_ACCTBAL   DECIMAL(15, 2) NOT NULL,
   S_COMMENT   VARCHAR(101)   NOT NULL
 ) AS SELECT *
-     FROM CSVREAD('dbgen/supplier.tbl', NULL, 'fieldSeparator=|');
+     FROM CSVREAD('dbgen/supplier.tbl', 'a|a|a|a|a|a|a', 'fieldSeparator=|');
 
 CREATE TABLE PARTSUPP (
   PS_PARTKEY    INTEGER        NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE PARTSUPP (
   PS_SUPPLYCOST DECIMAL(15, 2) NOT NULL,
   PS_COMMENT    VARCHAR(199)   NOT NULL
 ) AS SELECT *
-     FROM CSVREAD('dbgen/partsupp.tbl', NULL, 'fieldSeparator=|');
+     FROM CSVREAD('dbgen/partsupp.tbl', 'a|a|a|a|a', 'fieldSeparator=|');
 
 
 CREATE TABLE CUSTOMER (
@@ -59,20 +59,20 @@ CREATE TABLE CUSTOMER (
   C_MKTSEGMENT CHAR(10)       NOT NULL,
   C_COMMENT    VARCHAR(117)   NOT NULL
 ) AS SELECT *
-     FROM CSVREAD('dbgen/customer.tbl', NULL, 'fieldSeparator=|');
+     FROM CSVREAD('dbgen/customer.tbl', 'a|a|a|a|a|a|a|a', 'fieldSeparator=|');
 
 CREATE TABLE ORDERS (
-  O_ORDERKEY      INTEGER        NOT NULL,
-  O_CUSTKEY       INTEGER        NOT NULL,
-  O_ORDERSTATUS   CHAR(1)        NOT NULL,
-  O_TOTALPRICE    DECIMAL(15, 2) NOT NULL,
-  O_ORDERDATE     DATE           NOT NULL,
-  O_ORDERPRIORITY CHAR(15)       NOT NULL,
-  O_CLERK         CHAR(15)       NOT NULL,
-  O_SHIPPRIORITY  INTEGER        NOT NULL,
-  O_COMMENT       VARCHAR(79)    NOT NULL
+  O_ORDERKEY      INTEGER PRIMARY KEY       NOT NULL,
+  O_CUSTKEY       INTEGER                   NOT NULL,
+  O_ORDERSTATUS   CHAR(1)                   NOT NULL,
+  O_TOTALPRICE    DECIMAL(15, 2)            NOT NULL,
+  O_ORDERDATE     DATE                      NOT NULL,
+  O_ORDERPRIORITY CHAR(15)                  NOT NULL,
+  O_CLERK         CHAR(15)                  NOT NULL,
+  O_SHIPPRIORITY  INTEGER                   NOT NULL,
+  O_COMMENT       VARCHAR(79)               NOT NULL
 ) AS SELECT *
-     FROM CSVREAD('dbgen/orders.tbl', NULL, 'fieldSeparator=|');
+     FROM CSVREAD('dbgen/orders.tbl', 'a|a|a|a|a|a|a|a|a', 'fieldSeparator=|');
 
 CREATE TABLE LINEITEM (
   L_ORDERKEY      INTEGER        NOT NULL,
@@ -92,4 +92,6 @@ CREATE TABLE LINEITEM (
   L_SHIPMODE      CHAR(10)       NOT NULL,
   L_COMMENT       VARCHAR(44)    NOT NULL
 ) AS SELECT *
-     FROM CSVREAD('dbgen/lineitem.tbl', NULL, 'fieldSeparator=|');
+     FROM CSVREAD('dbgen/lineitem.tbl',
+                  'a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a' , 'fieldSeparator=|');
+
