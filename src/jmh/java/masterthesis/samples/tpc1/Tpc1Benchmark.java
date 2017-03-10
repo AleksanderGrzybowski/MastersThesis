@@ -11,6 +11,7 @@ import org.openjdk.jmh.annotations.*;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -34,13 +35,13 @@ public class Tpc1Benchmark {
     }
     
     @Benchmark
-    public Object sql() throws Exception {
+    public List<Tpc1ResultRow> sql() throws Exception {
         ResultSet result = connection.prepareStatement(
                 "        select\n" +
                         "                l_returnflag,\n" +
                         "                l_linestatus,\n" +
                         "        sum(l_quantity) as sum_qty,\n" +
-                        "        sum(l_extendedprice) as sum_base_price,\n" +
+                        "                        sum(l_extendedprice) as sum_base_price,\n" +
                         "        sum(l_extendedprice * (1 - l_discount)) as sum_disc_price,\n" +
                         "        sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) as sum_charge,\n" +
                         "        avg(l_quantity) as avg_qty,\n" +
@@ -49,8 +50,7 @@ public class Tpc1Benchmark {
                         "        count(*) as count_order\n" +
                         "        from\n" +
                         "                lineitem\n" +
-                        "        where\n" +
-                        "        1 = 1\n" +
+                        "        where l_shipdate <=  DATE '1998-09-02'" + // hard-coded from documentation
                         "        group by\n" +
                         "        l_returnflag,\n" +
                         "                l_linestatus\n" +
@@ -75,13 +75,15 @@ public class Tpc1Benchmark {
             results.add(row);
         }
         
-        System.out.println(results);
+        results.forEach(System.out::println);
         return results;
     }
     
     @Benchmark
-    public Object streams() throws Exception {
-        Map<Pair<String, String>, List<Object>> map = store.getLineItems().stream().collect(
+    public List<Tpc1ResultRow> streams() throws Exception {
+        Map<Pair<String, String>, List<Object>> map = store.getLineItems().stream()
+                .filter(l -> l.shipDate.compareTo(LocalDate.of(1998, 9, 2)) <= 0)
+                .collect(
                 Collectors.groupingBy((LineItem e) -> Pair.of(e.returnFlag, e.lineStatus), Collector.of(
                         () -> Arrays.asList(
                                 new BigDecimalSummaryStatistics(),
@@ -146,7 +148,7 @@ public class Tpc1Benchmark {
             results.add(row);
         }
     
-        System.out.println(results);
+        results.forEach(System.out::println);
         return results;
     }
 }
