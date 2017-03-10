@@ -47,14 +47,12 @@ public class LineItem {
         
         if (order != null ? !order.equals(lineItem.order) : lineItem.order != null) return false;
         return partSupp != null ? partSupp.equals(lineItem.partSupp) : lineItem.partSupp == null;
-    
+        
     }
     
     @Override
     public int hashCode() {
-        int result = order != null ? order.hashCode() : 0;
-        result = 31 * result + (partSupp != null ? partSupp.hashCode() : 0);
-        return result;
+        return 31 * ((int) order.orderkey) + linenumber;
     }
     
     @Override
