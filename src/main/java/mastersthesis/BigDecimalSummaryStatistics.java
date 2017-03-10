@@ -23,6 +23,10 @@ public class BigDecimalSummaryStatistics {
     }
     
     public BigDecimal getAverage() {
-        return getSum().divide(new BigDecimal(list.size()), RoundingMode.HALF_UP);
+        return getSum().divide(new BigDecimal(list.size()), 5, RoundingMode.HALF_UP);
+    }
+    
+    public int getCount() {
+        return list.size();
     }
 }
