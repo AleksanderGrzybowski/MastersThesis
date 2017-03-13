@@ -13,11 +13,13 @@ repositories {
 }
 
 dependencies {
-    dependencies {
-        compile group: 'com.h2database', name: 'h2', version: '1.4.192'
-        compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.6'
-        compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    }
+    compile group: 'com.h2database', name: 'h2', version: '1.4.192'
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+
+    compile group: 'junit', name: 'junit', version: '4.12'
+    compile "org.openjdk.jmh:jmh-core:1.13"
+    compile "org.openjdk.jmh:jmh-generator-bytecode:1.13"
 }
 
 
@@ -26,10 +28,10 @@ boolean development = false
 jmh {
     jmhVersion = '1.13'
     jvmArgs = '-Xms256m -Xmx8192m'
-    
+
     // Use ./gradlew -Pinclude='regex' to run specific class
     include = project.hasProperty('include') ? project.getProperty('include') : ''
-    
+
     if (development) {
         threads = 1
         fork = 0
@@ -40,5 +42,20 @@ jmh {
         fork = 2
         warmupIterations = 1
         iterations = 10
+    }
+}
+
+sourceSets {
+    test {
+        java {
+            srcDirs += ['src/jmh/java']
+        }
+    }
+}
+
+// http://mrhaki.blogspot.com/2014/10/gradle-goodness-show-standard-out-or.html
+test {
+    testLogging {
+        showStandardStreams = true
     }
 }
