@@ -1,6 +1,5 @@
-package masterthesis;
+package masterthesis.tpc1;
 
-import masterthesis.samples.tpc1.Tpc1Benchmark;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

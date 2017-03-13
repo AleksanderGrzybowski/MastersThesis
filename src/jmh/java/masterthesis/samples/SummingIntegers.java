@@ -18,7 +18,7 @@ public class SummingIntegers {
     private int[] numbersArray;
     
     @Param({"1000000"})
-    private int numberCount;
+    public int numberCount;
     
     @Setup
     public void setup() throws Exception {
@@ -33,7 +33,7 @@ public class SummingIntegers {
     }
     
     @Benchmark
-    public Object loop_over_list() throws Exception {
+    public int loop_over_list() throws Exception {
         int sum = 0;
         for (int i : numbers) {
             sum += i;
@@ -42,7 +42,7 @@ public class SummingIntegers {
     }
     
     @Benchmark
-    public Object loop_over_array() throws Exception {
+    public int loop_over_array() throws Exception {
         int sum = 0;
         for (int i : numbersArray) {
             sum += i;
@@ -51,20 +51,20 @@ public class SummingIntegers {
     }
     
     @Benchmark
-    public Object sql() throws Exception {
+    public int sql() throws Exception {
         ResultSet resultSet = connection.createStatement().executeQuery("SELECT sum(val) FROM numbers");
         resultSet.next();
         
-        return resultSet.getObject(1);
+        return resultSet.getInt(1);
     }
     
     @Benchmark
-    public Object stream() throws Exception {
+    public int stream() throws Exception {
         return numbers.stream().mapToInt(i -> i).sum();
     }
     
     @Benchmark
-    public Object parallelStream() throws Exception {
+    public int parallelStream() throws Exception {
         return numbers.parallelStream().mapToInt(i -> i).sum();
     }
 }

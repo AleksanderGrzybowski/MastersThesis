@@ -6,6 +6,7 @@ import org.openjdk.jmh.annotations.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +24,7 @@ public class CrossJoinAndFilter {
     private List<Pair<Integer, String>> secondList = new ArrayList<>();
     
     @Param({"300000"})
-    private int numberCount;
+    public int numberCount;
     
     @Setup
     public void setup() throws Exception {
@@ -49,14 +50,21 @@ public class CrossJoinAndFilter {
             statement.setInt(2, i % 5);
             statement.execute();
         }
-        
     }
     
     @Benchmark
-    public Object sql() throws Exception {
-        return connection.createStatement().executeQuery(
+    public List<Pair<Pair<Integer, Integer>, Pair<Integer, String>>> sql() throws Exception {
+        ResultSet rs = connection.createStatement().executeQuery(
                 "SELECT * FROM firstList JOIN secondList ON firstList.val2 = secondList.val1"
         );
+        List<Pair<Pair<Integer, Integer>, Pair<Integer, String>>> result = new ArrayList<>();
+        while (rs.next()) {
+            result.add(new ImmutablePair<>(
+                    new ImmutablePair<>(rs.getInt(1), rs.getInt(2)),
+                    new ImmutablePair<>(rs.getInt(3), rs.getString(4))
+            ));
+        }
+        return result;
     }
     
     
@@ -67,9 +75,10 @@ public class CrossJoinAndFilter {
     }
     
     @Benchmark
-    public Object streams() throws Exception {
+    public List<Pair<Pair<Integer, Integer>, Pair<Integer, String>>> streams() throws Exception {
         return crossJoin(firstList, secondList)
                 .filter(e -> Objects.equals(e.getLeft().getRight(), e.getRight().getLeft()))
+                .distinct()
                 .collect(toList());
     }
 }

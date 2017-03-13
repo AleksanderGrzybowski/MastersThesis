@@ -6,6 +6,7 @@ import org.openjdk.jmh.annotations.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,7 @@ public class GroupingAndSumming {
     private List<Pair<Integer, Integer>> pairs = new ArrayList<>();
     
     @Param({"10000"})
-    private int numberCount;
+    public int numberCount;
     
     @Setup
     public void setup() throws Exception {
@@ -39,9 +40,9 @@ public class GroupingAndSumming {
     }
     
     @Benchmark
-    public Object loop() {
+    public Map<Integer, Integer> loop() {
         Map<Integer, Integer> result = new HashMap<>();
-        for (int i = 0; i <= 5; i++) {
+        for (int i = 0; i < 5; i++) {
             result.put(i, 0);
         }
         for (Pair<Integer, Integer> pair : pairs) {
@@ -51,12 +52,18 @@ public class GroupingAndSumming {
     }
     
     @Benchmark
-    public Object sql() throws Exception {
-        return connection.createStatement().executeQuery("select sum(val1), val2 from pairs group by val2");
+    public Map<Integer, Integer> sql() throws Exception {
+        ResultSet rs = connection.createStatement().executeQuery("select sum(val1), val2 from pairs group by val2");
+        
+        Map<Integer, Integer> result = new HashMap<>();
+        while (rs.next()) {
+            result.put(rs.getInt(2), rs.getInt(1));
+        }
+        return result;
     }
     
     @Benchmark
-    public Object streams() throws Exception {
-        return pairs.stream().collect(Collectors.groupingBy(Pair::getValue));
+    public Map<Integer, Integer> streams() throws Exception {
+        return pairs.stream().collect(Collectors.groupingBy(Pair::getRight, Collectors.summingInt(Pair::getLeft)));
     }
 }

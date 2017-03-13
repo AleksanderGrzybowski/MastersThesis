@@ -1,4 +1,4 @@
-package masterthesis.samples.tpc1;
+package masterthesis.tpc1;
 
 import mastersthesis.BigDecimalSummaryStatistics;
 import mastersthesis.Store;

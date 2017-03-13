@@ -19,7 +19,7 @@ public class FilteringAndCountingIntegers {
     private int[] numbersArray;
     
     @Param({"1000000"})
-    private int numberCount;
+    public int numberCount;
     
     @Setup
     public void setup() throws Exception {
@@ -37,7 +37,7 @@ public class FilteringAndCountingIntegers {
     
     @SuppressWarnings("Convert2streamapi")
     @Benchmark
-    public Object loop_array() throws Exception {
+    public int loop_array() throws Exception {
         int count = 0;
         for (int i : numbersArray) {
             if (i > 0) {
@@ -49,7 +49,7 @@ public class FilteringAndCountingIntegers {
     
     @SuppressWarnings("Convert2streamapi")
     @Benchmark
-    public Object loop_list() throws Exception {
+    public int loop_list() throws Exception {
         int count = 0;
         for (int i : numbers) {
             if (i > 0) {
@@ -61,17 +61,17 @@ public class FilteringAndCountingIntegers {
     
     
     @Benchmark
-    public Object sql() throws Exception {
+    public int sql() throws Exception {
         ResultSet resultSet = connection.createStatement().executeQuery(
                 "select count(*) from numbers where val > 0"
         );
         resultSet.next();
         
-        return resultSet.getObject(1);
+        return resultSet.getInt(1);
     }
     
     @Benchmark
-    public Object streams() throws Exception {
-        return numbers.stream().filter(i -> i > 0).count();
+    public int streams() throws Exception {
+        return (int) numbers.stream().filter(i -> i > 0).count();
     }
 }
