@@ -1,6 +1,7 @@
 package mastersthesis;
 
 import java.sql.*;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -9,7 +10,7 @@ public class Utils {
     
     public static Connection newDatabase() throws Exception {
         Class.forName("org.h2.Driver");
-        return DriverManager.getConnection("jdbc:h2:mem:testdb${new Random().nextInt(1000)};QUERY_CACHE_SIZE=0");
+        return DriverManager.getConnection("jdbc:h2:mem:testdb" + new Random().nextInt(1000) + ";QUERY_CACHE_SIZE=0");
     }
     
     public static void prettyPrint(ResultSet resultSet) throws Exception {
