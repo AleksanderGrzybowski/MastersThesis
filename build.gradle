@@ -43,6 +43,8 @@ jmh {
         warmupIterations = 1
         iterations = 10
     }
+    // https://github.com/melix/jmh-gradle-plugin/issues/79
+    duplicateClassesStrategy 'warn'
 }
 
 sourceSets {
