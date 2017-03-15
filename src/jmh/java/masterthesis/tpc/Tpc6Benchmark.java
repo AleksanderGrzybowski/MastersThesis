@@ -1,6 +1,6 @@
 
 
-package masterthesis.tpc1;
+package masterthesis.tpc;
 
 import mastersthesis.Store;
 import mastersthesis.Utils;

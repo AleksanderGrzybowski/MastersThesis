@@ -1,4 +1,4 @@
-package masterthesis.tpc1;
+package masterthesis.tpc;
 
 import org.junit.Test;
 
