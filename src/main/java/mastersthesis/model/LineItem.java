@@ -50,6 +50,11 @@ public class LineItem {
         
     }
     
+    
+    public long getPartKey() {
+        return partSupp.part.partkey;
+    }
+    
     @Override
     public int hashCode() {
         return 31 * ((int) order.orderkey) + linenumber;
