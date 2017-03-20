@@ -22,7 +22,7 @@ public class GroupingAndSumming {
     private Connection connection;
     private List<Pair<Integer, Integer>> pairs = new ArrayList<>();
     
-    @Param({"10000"})
+    @Param({"1000", "10000", "100000"})
     public int numberCount;
     
     @Setup

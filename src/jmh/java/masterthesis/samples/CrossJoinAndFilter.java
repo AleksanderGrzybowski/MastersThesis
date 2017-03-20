@@ -10,10 +10,10 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static mastersthesis.Utils.newDatabase;
+import static masterthesis.tpc.StreamUtils.crossJoin;
 
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
@@ -23,7 +23,7 @@ public class CrossJoinAndFilter {
     private List<Pair<Integer, Integer>> firstList = new ArrayList<>();
     private List<Pair<Integer, String>> secondList = new ArrayList<>();
     
-    @Param({"300000"})
+    @Param({"1000", "10000", "100000", "1000000"})
     public int numberCount;
     
     @Setup
@@ -65,13 +65,6 @@ public class CrossJoinAndFilter {
             ));
         }
         return result;
-    }
-    
-    
-    private <T, U> Stream<ImmutablePair<T, U>> crossJoin(List<T> first, List<U> second) {
-        return first.stream().flatMap(
-                firstItem -> second.stream().map(secondItem -> new ImmutablePair<>(firstItem, secondItem))
-        );
     }
     
     @Benchmark

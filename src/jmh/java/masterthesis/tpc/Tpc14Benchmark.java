@@ -27,8 +27,12 @@ public class Tpc14Benchmark {
     Connection connection;
     Store store;
     
+    @Param({"0.01", "0.02"})
+    public String scaleFactor;
+    
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         connection = Utils.newDatabase();
         createSchema(connection);
         store = new Store("dbgen");

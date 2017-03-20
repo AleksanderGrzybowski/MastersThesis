@@ -11,6 +11,7 @@ public class Tpc14Test {
     @Test
     public void test() throws Exception {
         Tpc14Benchmark benchmark = new Tpc14Benchmark();
+        benchmark.scaleFactor = "0.01";
         benchmark.setup();
         
         assertEquals(

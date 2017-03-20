@@ -17,7 +17,7 @@ public class SummingIntegers {
     private List<Integer> numbers = new ArrayList<>();
     private int[] numbersArray;
     
-    @Param({"1000000"})
+    @Param({"1000", "10000", "100000", "1000000"})
     public int numberCount;
     
     @Setup
