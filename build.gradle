@@ -27,6 +27,8 @@ boolean development = false
 
 jmh {
     jmhVersion = '1.13'
+    
+    // change memory here, DEFAULT_JVM_OPTS doesn't work for some reason
     jvmArgs = '-Xms256m -Xmx8192m'
 
     // Use ./gradlew -Pinclude='regex' to run specific class
