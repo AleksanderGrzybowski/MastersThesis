@@ -74,4 +74,9 @@ public class FilteringAndCountingIntegers {
     public int streams() throws Exception {
         return (int) numbers.stream().filter(i -> i > 0).count();
     }
+    
+    @Benchmark
+    public int parallelStreams() throws Exception {
+        return (int) numbers.parallelStream().filter(i -> i > 0).count();
+    }
 }

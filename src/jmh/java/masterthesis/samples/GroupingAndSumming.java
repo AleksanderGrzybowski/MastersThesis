@@ -66,4 +66,9 @@ public class GroupingAndSumming {
     public Map<Integer, Integer> streams() throws Exception {
         return pairs.stream().collect(Collectors.groupingBy(Pair::getRight, Collectors.summingInt(Pair::getLeft)));
     }
+    
+    @Benchmark
+    public Map<Integer, Integer> parallelStreams() throws Exception {
+        return pairs.parallelStream().collect(Collectors.groupingBy(Pair::getRight, Collectors.summingInt(Pair::getLeft)));
+    }
 }

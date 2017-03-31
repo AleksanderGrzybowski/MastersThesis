@@ -74,4 +74,12 @@ public class CrossJoinAndFilter {
                 .distinct()
                 .collect(toList());
     }
+    
+    @Benchmark
+    public List<Pair<Pair<Integer, Integer>, Pair<Integer, String>>> parallelStreams() throws Exception {
+        return crossJoin(firstList, secondList).parallel()
+                .filter(e -> Objects.equals(e.getLeft().getRight(), e.getRight().getLeft()))
+                .distinct()
+                .collect(toList());
+    }
 }
