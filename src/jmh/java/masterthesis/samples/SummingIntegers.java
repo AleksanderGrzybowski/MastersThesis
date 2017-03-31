@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static mastersthesis.Utils.newDatabase;
 
@@ -24,10 +25,12 @@ public class SummingIntegers {
     public void setup() throws Exception {
         connection = newDatabase();
         connection.createStatement().execute("CREATE TABLE numbers (val INT)");
+        Random random = new Random();
         
         for (int i = 0; i < numberCount; ++i) {
-            numbers.add(i);
-            connection.createStatement().execute("insert into numbers values (" + i + ")");
+            int randomNumber = random.nextInt(1000);
+            numbers.add(randomNumber);
+            connection.createStatement().execute("insert into numbers values (" + randomNumber + ")");
         }
         numbersArray = numbers.stream().mapToInt(i -> i).toArray();
     }
