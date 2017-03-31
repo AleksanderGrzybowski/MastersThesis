@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static mastersthesis.Utils.createSchema;
 
@@ -84,50 +85,58 @@ public class Tpc1Benchmark {
     
     @Benchmark
     public List<Tpc1ResultRow> streams() throws Exception {
-        Map<Pair<String, String>, List<Object>> map = store.getLineItems().stream()
-                .filter(l -> l.shipDate.compareTo(LocalDate.of(1998, 9, 2)) <= 0)
+        return work(store.getLineItems().stream());
+    }
+    
+    @Benchmark
+    public List<Tpc1ResultRow> parallelStreams() throws Exception {
+        return work(store.getLineItems().parallelStream());
+    }
+    
+    private List<Tpc1ResultRow> work(Stream<LineItem> stream) throws Exception {
+        Map<Pair<String, String>, List<Object>> map = stream.filter(l -> l.shipDate.compareTo(LocalDate.of(1998, 9, 2)) <= 0)
                 .collect(
-                Collectors.groupingBy((LineItem e) -> Pair.of(e.returnFlag, e.lineStatus), Collector.of(
-                        () -> Arrays.asList(
-                                new BigDecimalSummaryStatistics(),
-                                new BigDecimalSummaryStatistics(),
-                                new BigDecimalSummaryStatistics(),
-                                new BigDecimalSummaryStatistics(),
-                                new BigDecimalSummaryStatistics(),
-                                new BigDecimalSummaryStatistics(),
-                                new BigDecimalSummaryStatistics(),
-                                new IntSummaryStatistics()
-                        ),
-                        
-                        (result, newValue) -> {
-                            ((BigDecimalSummaryStatistics) result.get(0)).accept(newValue.quantity);
-                            ((BigDecimalSummaryStatistics) result.get(1)).accept(newValue.extendedPrice);
-                            ((BigDecimalSummaryStatistics) result.get(2)).accept(
-                                    newValue.extendedPrice.multiply((BigDecimal.ONE.subtract(newValue.discount)
-                                    )));
-                            ((BigDecimalSummaryStatistics) result.get(3)).accept(
-                                    newValue.extendedPrice.multiply((BigDecimal.ONE.subtract(newValue.discount)
-                                    )).multiply(BigDecimal.ONE.add(newValue.tax))
-                            );
-                            ((BigDecimalSummaryStatistics) result.get(4)).accept(newValue.quantity);
-                            ((BigDecimalSummaryStatistics) result.get(5)).accept(newValue.extendedPrice);
-                            ((BigDecimalSummaryStatistics) result.get(6)).accept(newValue.discount);
-                            ((IntSummaryStatistics) result.get(7)).accept(1);
-                        },
-                        
-                        (r1, r2) -> {
-                            for (int i = 0; i < 7; i++) {
-                                ((BigDecimalSummaryStatistics) r1.get(i)).combine(
-                                        ((BigDecimalSummaryStatistics) r2.get(i))
-                                );
-                            }
-                            ((IntSummaryStatistics) r1.get(7)).combine(
-                                    ((IntSummaryStatistics) r2.get(7))
-                            );
-                            return r1;
-                        }
-                ))
-        );
+                        Collectors.groupingBy((LineItem e) -> Pair.of(e.returnFlag, e.lineStatus), Collector.of(
+                                () -> Arrays.asList(
+                                        new BigDecimalSummaryStatistics(),
+                                        new BigDecimalSummaryStatistics(),
+                                        new BigDecimalSummaryStatistics(),
+                                        new BigDecimalSummaryStatistics(),
+                                        new BigDecimalSummaryStatistics(),
+                                        new BigDecimalSummaryStatistics(),
+                                        new BigDecimalSummaryStatistics(),
+                                        new IntSummaryStatistics()
+                                ),
+                                
+                                (result, newValue) -> {
+                                    ((BigDecimalSummaryStatistics) result.get(0)).accept(newValue.quantity);
+                                    ((BigDecimalSummaryStatistics) result.get(1)).accept(newValue.extendedPrice);
+                                    ((BigDecimalSummaryStatistics) result.get(2)).accept(
+                                            newValue.extendedPrice.multiply((BigDecimal.ONE.subtract(newValue.discount)
+                                            )));
+                                    ((BigDecimalSummaryStatistics) result.get(3)).accept(
+                                            newValue.extendedPrice.multiply((BigDecimal.ONE.subtract(newValue.discount)
+                                            )).multiply(BigDecimal.ONE.add(newValue.tax))
+                                    );
+                                    ((BigDecimalSummaryStatistics) result.get(4)).accept(newValue.quantity);
+                                    ((BigDecimalSummaryStatistics) result.get(5)).accept(newValue.extendedPrice);
+                                    ((BigDecimalSummaryStatistics) result.get(6)).accept(newValue.discount);
+                                    ((IntSummaryStatistics) result.get(7)).accept(1);
+                                },
+                                
+                                (r1, r2) -> {
+                                    for (int i = 0; i < 7; i++) {
+                                        ((BigDecimalSummaryStatistics) r1.get(i)).combine(
+                                                ((BigDecimalSummaryStatistics) r2.get(i))
+                                        );
+                                    }
+                                    ((IntSummaryStatistics) r1.get(7)).combine(
+                                            ((IntSummaryStatistics) r2.get(7))
+                                    );
+                                    return r1;
+                                }
+                        ))
+                );
         
         List<Tpc1ResultRow> results = new ArrayList<>();
         TreeMap<Pair<String, String>, List<Object>> sorted = new TreeMap<>(
@@ -150,8 +159,9 @@ public class Tpc1Benchmark {
             row.count_order = ((IntSummaryStatistics) entry.getValue().get(7)).getSum();
             results.add(row);
         }
-    
+        
         results.forEach(System.out::println);
         return results;
     }
+    
 }

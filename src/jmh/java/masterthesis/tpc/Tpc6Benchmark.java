@@ -4,12 +4,14 @@ package masterthesis.tpc;
 
 import mastersthesis.Store;
 import mastersthesis.Utils;
+import mastersthesis.model.LineItem;
 import org.openjdk.jmh.annotations.*;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.util.stream.Stream;
 
 import static mastersthesis.Utils.createSchema;
 
@@ -53,14 +55,22 @@ public class Tpc6Benchmark {
     
     @Benchmark
     public BigDecimal streams() throws Exception {
-        BigDecimal result = store.getLineItems().stream()
-                .filter(item -> (
-                        item.shipDate.compareTo(LocalDate.of(1994, 1, 1)) >= 0 &&
-                                item.shipDate.compareTo(LocalDate.of(1995, 1, 1)) < 0 &&
-                                item.discount.compareTo(new BigDecimal("0.05")) >= 0 &&
-                                item.discount.compareTo(new BigDecimal("0.07")) <= 0 &&
-                                item.quantity.intValue() < 24
-                ))
+        return work(store.getLineItems().stream());
+    }
+    
+    @Benchmark
+    public BigDecimal parallelStreams() throws Exception {
+        return work(store.getLineItems().parallelStream());
+    }
+    
+    private BigDecimal work(Stream<LineItem> stream) {
+        BigDecimal result = stream.filter(item -> (
+                item.shipDate.compareTo(LocalDate.of(1994, 1, 1)) >= 0 &&
+                        item.shipDate.compareTo(LocalDate.of(1995, 1, 1)) < 0 &&
+                        item.discount.compareTo(new BigDecimal("0.05")) >= 0 &&
+                        item.discount.compareTo(new BigDecimal("0.07")) <= 0 &&
+                        item.quantity.intValue() < 24
+        ))
                 .map(item -> item.extendedPrice.multiply(item.discount))
                 .reduce(BigDecimal::add).orElseThrow(RuntimeException::new);
         
