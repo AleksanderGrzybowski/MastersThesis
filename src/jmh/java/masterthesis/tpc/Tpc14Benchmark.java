@@ -21,7 +21,6 @@ import static mastersthesis.Utils.createSchema;
 
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
-@BenchmarkMode(Mode.AverageTime)
 public class Tpc14Benchmark {
     
     Connection connection;
