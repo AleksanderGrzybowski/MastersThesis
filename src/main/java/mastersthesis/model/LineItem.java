@@ -20,7 +20,7 @@ public class LineItem {
     public final String shipMode;
     public final String comment;
     
-    public LineItem(Order order, PartSupp partSupp, int linenumber, BigDecimal quantity, BigDecimal extendedPrice, BigDecimal discount, BigDecimal tax, String returnFlag, String lineStatus, LocalDate shipDate, LocalDate receiptDate, LocalDate commitDate, String shipInstruct, String shipMode, String comment) {
+    public LineItem(Order order, PartSupp partSupp, int linenumber, BigDecimal quantity, BigDecimal extendedPrice, BigDecimal discount, BigDecimal tax, String returnFlag, String lineStatus, LocalDate shipDate, LocalDate commitDate, LocalDate receiptDate, String shipInstruct, String shipMode, String comment) {
         this.order = order;
         this.partSupp = partSupp;
         this.linenumber = linenumber;
@@ -31,8 +31,8 @@ public class LineItem {
         this.returnFlag = returnFlag;
         this.lineStatus = lineStatus;
         this.shipDate = shipDate;
-        this.receiptDate = receiptDate;
         this.commitDate = commitDate;
+        this.receiptDate = receiptDate;
         this.shipInstruct = shipInstruct;
         this.shipMode = shipMode;
         this.comment = comment;
@@ -75,7 +75,6 @@ public class LineItem {
                 ", shipDate=" + shipDate +
                 ", commitDate=" + commitDate +
                 ", receiptDate=" + receiptDate +
-                ", commitDate=" + commitDate +
                 ", shipInstruct='" + shipInstruct + '\'' +
                 ", shipMode='" + shipMode + '\'' +
                 '}';
