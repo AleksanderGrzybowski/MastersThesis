@@ -21,6 +21,9 @@ import java.util.stream.Stream;
 
 import static mastersthesis.Utils.createSchema;
 
+/**
+ * Because of joins, SQL rocks here and streams are 50x slower.
+ */
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
 public class Tpc14Benchmark {

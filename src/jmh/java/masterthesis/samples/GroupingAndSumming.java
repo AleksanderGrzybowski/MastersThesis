@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 
 import static mastersthesis.Utils.newDatabase;
 
+/**
+ * Parallel faster for bigger datasets.
+ * SQL 10x slower.
+ */
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
 public class GroupingAndSumming {

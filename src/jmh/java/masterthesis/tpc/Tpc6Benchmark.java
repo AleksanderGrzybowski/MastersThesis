@@ -1,5 +1,3 @@
-
-
 package masterthesis.tpc;
 
 import mastersthesis.Store;
@@ -15,6 +13,9 @@ import java.util.stream.Stream;
 
 import static mastersthesis.Utils.createSchema;
 
+/**
+ * SQL is 2-3x slower.
+ */
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
 public class Tpc6Benchmark {

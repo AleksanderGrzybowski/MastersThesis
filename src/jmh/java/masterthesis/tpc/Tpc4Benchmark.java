@@ -1,5 +1,3 @@
-
-
 package masterthesis.tpc;
 
 import mastersthesis.Store;
@@ -20,6 +18,9 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static mastersthesis.Utils.createSchema;
 
+/**
+ * Because of inner query, SQL is blazing fast, and streams are 100x slower than this.
+ */
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
 public class Tpc4Benchmark {

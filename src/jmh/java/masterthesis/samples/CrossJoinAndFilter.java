@@ -15,6 +15,10 @@ import static java.util.stream.Collectors.toList;
 import static mastersthesis.Utils.newDatabase;
 import static masterthesis.tpc.StreamUtils.crossJoin;
 
+/**
+ * Sequential streams are almost the same as parallel.
+ * SQL is slower, but only 4x slower.
+ */
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
 public class CrossJoinAndFilter {

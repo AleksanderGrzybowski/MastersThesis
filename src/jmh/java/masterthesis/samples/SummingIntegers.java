@@ -10,6 +10,11 @@ import java.util.Random;
 
 import static mastersthesis.Utils.newDatabase;
 
+/**
+ * Looping over array is faster than list, but this makes perfect sense.
+ * Sequential streams are fast for small datasets, but for larger, parallel win.
+ * SQL is much slower, due to data structure overhead, when we just have some numbers to sum.
+ */
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
 public class SummingIntegers {

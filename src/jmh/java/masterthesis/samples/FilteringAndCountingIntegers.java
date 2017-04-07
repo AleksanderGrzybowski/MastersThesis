@@ -10,6 +10,11 @@ import java.util.Random;
 
 import static mastersthesis.Utils.newDatabase;
 
+/**
+ * Arrays are the fastest, then lists.
+ * As in SummingIntegers, sequential streams are better for small sets, parallel for bigger.
+ * SQL is again way too slow.
+ */
 @SuppressWarnings({"SqlResolve", "SqlDialectInspection"})
 @State(Scope.Thread)
 public class FilteringAndCountingIntegers {

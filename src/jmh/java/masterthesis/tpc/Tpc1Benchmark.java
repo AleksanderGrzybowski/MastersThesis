@@ -20,6 +20,9 @@ import java.util.stream.Stream;
 
 import static mastersthesis.Utils.createSchema;
 
+/**
+ * Streams are just 2-3x times faster than SQL.
+ */
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
 public class Tpc1Benchmark {
