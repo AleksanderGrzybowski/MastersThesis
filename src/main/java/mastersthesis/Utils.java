@@ -15,6 +15,11 @@ import static java.util.Arrays.asList;
 public class Utils {
     
     public static Connection newDatabase() throws Exception {
+        // docker run --rm -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=test -p 127.0.0.1:7777:3306 -ti mysql
+//        String url = "jdbc:mysql://localhost:7777/test";
+//        Class.forName("com.mysql.jdbc.Driver").newInstance();
+//        return  DriverManager.getConnection(url, "root", "password");
+        
         Class.forName("org.h2.Driver");
         return DriverManager.getConnection("jdbc:h2:mem:testdb" + new Random().nextInt(1000) + ";QUERY_CACHE_SIZE=0");
     }
