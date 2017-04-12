@@ -21,7 +21,9 @@ public class Utils {
 //        return  DriverManager.getConnection(url, "root", "password");
         
         Class.forName("org.h2.Driver");
+        
         return DriverManager.getConnection("jdbc:h2:mem:testdb" + new Random().nextInt(1000) + ";QUERY_CACHE_SIZE=0");
+//        return   DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb" +new Random().nextInt(1000), "SA", "");
     }
     
     public static void prettyPrint(ResultSet resultSet) throws Exception {
