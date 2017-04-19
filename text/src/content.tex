@@ -1,0 +1,86 @@
+\documentclass[12pt]{extarticle}
+
+\usepackage[T1]{fontenc}
+\usepackage{polski}
+\usepackage[utf8x]{inputenc}
+\usepackage[polish]{babel}
+\usepackage{url}
+\usepackage{afterpage}
+
+\usepackage[margin=1.3in]{geometry}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{float}
+
+\usepackage{listings}
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true
+}
+\lstset{ % General setup for the package
+	language=JavaScript,
+	basicstyle=\small\sffamily,
+	numbers=left,
+ 	numberstyle=\tiny,
+	frame=tb,
+	tabsize=4,
+	columns=fixed,
+	showstringspaces=false,
+	showtabs=false,
+	keepspaces,
+	commentstyle=\color{red},
+	keywordstyle=\color{blue}
+}
+
+\begin{document}
+\begin{titlepage}
+    \begin{center}
+        \includegraphics[width=4cm]{polsl.png}\\[1cm]
+        \textsc{\LARGE{Politechnika Śląska}}\\[0.5cm]
+        \textsc{\LARGE{Wydział Automatyki, Elektroniki i~Informatyki}}\\[0.5cm]
+        \textsc{\LARGE{Kierunek Informatyka}}\\[2.5cm]
+        \LARGE{Praca magisterska}\\[1cm]
+        \begingroup
+            \fontsize{14pt}{17pt}\selectfont
+            Analiza porównawcza przetwarzania strumieniowego w Java 8 \\ i realizacji zapytań SQL w pamięci
+        \endgroup
+    \end{center}
+    \vspace{2cm}
+    \begingroup
+        \fontsize{14pt}{17pt}\selectfont
+        \textbf{Autor:} Aleksander Grzybowski\\
+        \textbf{Kierujący pracą:} dr inż. Ewa Płuciennik\\
+    \endgroup
+
+    \vspace{1.0cm}
+    \begingroup
+        \fontsize{12pt}{14pt}\selectfont
+        \begin{center}
+        Gliwice, kwiecień 2017
+        \end{center}
+    \endgroup
+\end{titlepage}
+
+\clearpage\mbox{}\clearpage
+
+\tableofcontents
+
+\newpage
+
+\section{Wprowadzenie}
+
+Lorem ipsum dolor sit amet.
+
+\section{Rozpoznanie tematu}
+\subsection{Istniejące rozwiązania}
+
+test
+
+
+\clearpage\mbox{}\clearpage
+\clearpage\mbox{}\clearpage
+\end{document}

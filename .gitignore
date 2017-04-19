@@ -6,3 +6,5 @@ dbgen/*.o
 dbgen/dbgen
 dbgen/qgen
 dbgen/*.tbl
+
+text/*.pdf
