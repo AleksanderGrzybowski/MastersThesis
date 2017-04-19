@@ -7,22 +7,14 @@
 \usepackage{url}
 \usepackage{afterpage}
 
-\usepackage[margin=1.3in]{geometry}
+\usepackage[margin=1.0in]{geometry}
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{float}
 
 \usepackage{listings}
-\lstdefinelanguage{JavaScript}{
-  keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with},
-  morecomment=[l]{//},
-  morecomment=[s]{/*}{*/},
-  morestring=[b]',
-  morestring=[b]",
-  sensitive=true
-}
-\lstset{ % General setup for the package
-	language=JavaScript,
+\lstset{
+	language=Java,
 	basicstyle=\small\sffamily,
 	numbers=left,
  	numberstyle=\tiny,
@@ -73,12 +65,73 @@
 
 \section{Wprowadzenie}
 
-Lorem ipsum dolor sit amet.
+\section{Elementy środowiska badawczego}
 
-\section{Rozpoznanie tematu}
-\subsection{Istniejące rozwiązania}
+    Aby zebrane wyniki były jak najlepsze, konieczne jest utworzenie solidnego środowiska testowego, w którym możliwe będzie wykonanie wszystkich potrzebnych badań. Jako iż elementem badań wydajności będą fragmenty kodu, pożądane jest, by pomiary czasowe odbywały się w miarę możliwości w sposób zautomatyzowany, generując pod koniec szczegółowy raport.
 
-test
+    JMH (Java Microbenchmark Harness) jest najpopularniejszym narzędziem służącym do tzw. microbenchmarkingu, czyli badania wydajności czasowej krótkich fragmentów kodu. Typowe metody pomiaru czasu w kodzie maszyny wirtualnej Javy nie są dokładne ani odporne na błędy, przykładowo często stosowane wywołanie \texttt{System.currentTimeMillis} nie jest odporne na zmiany czasu systemowego w trakcie wykonywania badania i ma różną dokładność na różnych systemach operacyjnych, natomiast \texttt{System.nanoTime()} nie jest bezpieczna wątkowo na poziomie procesora, przez co wykonywanie się zadań testowych na kilku rdzeniach procesora może powodować mylące wyniki. Co więcej, ręczne wykonywanie pomiarów jest dość żmudne i wymagałoby stworzenia własnego narzędzia. Zdecydowano się więc na wykorzystanie narzędzia gotowego. Przy użyciu JMH możliwe jest proste definiowanie metod, których wydajność (wykonania na sekundę) będzie badana, możliwe jest określenie ilości iteracji, ustalanie zmienych parametrów (np. ilość wierszy danych testowych). Raport wynikowy zawiera szczegółowe informacje na temat ilości wykonań metody, wariancje czasów oraz inne statystyki, na podstawie których możliwe jest wyciągnięcie potrzebnych wniosków.
+
+    Do budowania projektu wykorzystano Gradle, które jest popularnym i używanym w zastosowaniach produkcyjnych narzędziem budowania projektów w Javie. Służy ono do uruchamiania kompilacji, uruchamiania testów jednostkowych, jak i wykonywania testów wydajnościowych dzięki integracji z JMH, które dostępne jest w ekosystemie Gradle jako gotowy plugin z możliwością dowolnej konfiguracji.
+
+\section{Schemat klasy testowej (microbenchmark)}
+
+\begin{lstlisting}[label=testclass, caption=Przykładowa klasa JMH]
+
+@State(Scope.Thread)
+public class SampleMicrobenchmark {
+    
+    private Connection connection;
+    private List<Integer> numbers = new ArrayList<>();
+    
+    @Param({"1000", "10000", "100000", "1000000"})
+    public int numberCount;
+    
+    @Setup
+    public void setup() throws Exception {
+        connection = newDatabase();
+        connection.createStatement().execute("CREATE TABLE numbers (val INT)");
+        Random random = new Random();
+        
+        for (int i = 0; i < numberCount; ++i) {
+            int randomNumber = random.nextInt(1000);
+            numbers.add(randomNumber);
+            String query = "insert into numbers values (" + randomNumber + ")";
+            connection.createStatement(query).execute();
+        }
+    }
+    
+    @Benchmark
+    public int loop_over_list() throws Exception {
+        int sum = 0;
+        for (int i : numbers) {
+            sum += i;
+        }
+        return sum;
+    }
+    
+    @Benchmark
+    public int sql() throws Exception {
+        ResultSet resultSet = connection.createStatement()
+                .executeQuery("SELECT sum(val) FROM numbers");
+        resultSet.next();
+        return resultSet.getInt(1);
+    }
+    
+    @Benchmark
+    public int stream() throws Exception {
+        return numbers.stream().mapToInt(i -> i).sum();
+    }
+    
+    @Benchmark
+    public int parallelStream() throws Exception {
+        return numbers.parallelStream().mapToInt(i -> i).sum();
+    }
+}
+
+
+\end{lstlisting}
+
+    Każda zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z pliku w przypadku wykorzystania benchmarka TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Ważnym elementem jest zwrócenie wyniku z takiej metody, ponieważ w przeciwnym razie maszyna wirtualna Javy, widząc brak zwrócenia wyniku, może dokonać optymalizacji i usunąć kod testowy.
 
 
 \clearpage\mbox{}\clearpage
