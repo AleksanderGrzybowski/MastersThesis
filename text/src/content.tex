@@ -63,7 +63,18 @@
 
 \newpage
 
-\section{Omówienie metod dostępu do danych}
+\section{Metody dostępu do danych}
+
+\subsection{Bazy danych SQL w pamięci (in-memory)}
+
+    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odpytywania danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania dla zarówno małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe (Neo4j) tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a niemożliwe jest użycie innego rozwiązania, np. cache. 
+    Jako iż porównanie baz danych i strumieni w Java 8 powinno być miarodajne, konieczne jest wybranie do badań baz in-memory działających w środowisku Java. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one wykorzystywane głównie w celach deweloperskich, jako ulotne środowiska do testowania programów wymagających bazy danych SQL. Dzięki działaniu całkowicie w pamięci, nie jest konieczne żadne zarządzanie, a zawartość bazy jest tracona po zamknięciu programu. Sposób korzystania z tych baz jest identyczny, jak przy korzystaniu z tradycyjnych baz dyskowych, a interfejs programistyczny JDBC nie różni się w żaden sposób. Możliwe jest więc tez porównanie wydajności baz dyskowych z bazami in-memory, które także zostanie wykonane.
+
+
+\subsection{Strumienie w Java 8}
+
+    Stream API jest wprowadzonym w wersji 8 Javy komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest to abstrakcyjna reprezentacja ciągu obiektów, które pochodzą z jakiegoś źródła, zwykle kolekcji, ale mogą być też pobierane bądź tworzone na bierząco. Na strumieniach możliwe jest wykonywanie prostych i złożonych operacji filtrowania, sortowania, mapowania i grupowania, jak i innych, zdefiniowanych przez użytkownika operacji. Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są 'leniwie', tzn. żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej (zwykle zebranie wyników), która łańcuchowo powoduje wykonanie się wszystkich operacji pośrednich.
+    Cechą szczególną strumieni jest możliwość ich łatwego zrównoleglania, udostępniona programistom w postaci metody \texttt{Stream.parallelStream}. Wielowątkowe przetwarzanie danych jest dość trudnym zagadnieniem w Javie, wymagana jest duża wiedza na temat działania maszyny wirtualnej i szczególna ostrożność. Jako iż strumienie definiowane są zwykle przez funkcje nie zmieniające stanu, dodanie równoległości jest znacznie prostsze. Jednym z celów niniejszej pracy jest zbadanie, jaki wpływ na wydajność mogą mieć równoległe strumienie.
 
 
 
