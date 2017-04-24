@@ -29,9 +29,12 @@ public class GroupingAndSumming {
     @Param({"1000", "10000", "100000"})
     public int numberCount;
     
+    @Param({"h2", "mysql"})
+    public String databaseVendor;
+    
     @Setup
     public void setup() throws Exception {
-        connection = newDatabase();
+        connection = newDatabase(databaseVendor);
         connection.createStatement().execute("create table pairs (val1 int, val2 int)");
         
         for (int i = 0; i < numberCount; ++i) {

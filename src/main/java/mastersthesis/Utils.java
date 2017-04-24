@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.*;
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -14,16 +15,33 @@ import static java.util.Arrays.asList;
 @SuppressWarnings("SqlNoDataSourceInspection")
 public class Utils {
     
-    public static Connection newDatabase() throws Exception {
-        // docker run --rm -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=test -p 127.0.0.1:7777:3306 -ti mysql
-//        String url = "jdbc:mysql://localhost:7777/test";
-//        Class.forName("com.mysql.jdbc.Driver").newInstance();
-//        return  DriverManager.getConnection(url, "root", "password");
-        
+    private static Random random = new Random();
+    
+    public static Connection newDatabase(String databaseVendor) throws Exception {
+        Class.forName("com.mysql.jdbc.Driver");
         Class.forName("org.h2.Driver");
-        
-        return DriverManager.getConnection("jdbc:h2:mem:testdb" + new Random().nextInt(1000) + ";QUERY_CACHE_SIZE=0");
-//        return   DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb" +new Random().nextInt(1000), "SA", "");
+    
+        if (Objects.equals(databaseVendor, "mysql")) {
+            // docker run --rm -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=test -p 127.0.0.1:7777:3306 -ti mysql
+            String databaseName = "test" + random.nextInt(10000);
+            DriverManager.getConnection(
+                    "jdbc:mysql://localhost:7777/",
+                    "root",
+                    "password"
+            ).createStatement().executeUpdate("create database " + databaseName);
+            
+            return DriverManager.getConnection(
+                    "jdbc:mysql://localhost:7777/" + databaseName,
+                    "root",
+                    "password"
+            );
+        } else if (Objects.equals(databaseVendor, "h2")) {
+            return DriverManager.getConnection("jdbc:h2:mem:testdb" + random.nextInt(1000) + ";QUERY_CACHE_SIZE=0");
+        } else if (Objects.equals(databaseVendor, "hsqldb")) {
+            return DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb" + random.nextInt(1000), "SA", "");
+        } else {
+            throw new AssertionError("No such database vendor: " + databaseVendor);
+        }
     }
     
     public static void prettyPrint(ResultSet resultSet) throws Exception {

@@ -25,9 +25,12 @@ public class HugeJoining {
     @Param({"2000"})
     public int numberCount;
     
+    @Param({"h2", "mysql"})
+    public String databaseVendor;
+    
     @Setup
     public void setup() throws Exception {
-        connection = newDatabase();
+        connection = newDatabase(databaseVendor);
         connection.createStatement().execute("CREATE TABLE firstList (val1 INT)");
         connection.createStatement().execute("CREATE TABLE secondList (val2 INT)");
         

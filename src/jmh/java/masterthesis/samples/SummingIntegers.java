@@ -26,9 +26,12 @@ public class SummingIntegers {
     @Param({"1000", "10000", "100000", "1000000"})
     public int numberCount;
     
+    @Param({"h2", "mysql"})
+    public String databaseVendor;
+    
     @Setup
     public void setup() throws Exception {
-        connection = newDatabase();
+        connection = newDatabase(databaseVendor);
         connection.createStatement().execute("CREATE TABLE numbers (val INT)");
         Random random = new Random();
         

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.stream.Collectors.joining;
 import static mastersthesis.Utils.newDatabase;
 
 /**
@@ -26,22 +27,28 @@ public class FilteringAndCountingIntegers {
     @Param({"1000", "10000", "100000", "1000000"})
     public int numberCount;
     
+    @Param({"h2", "mysql"})
+    public String databaseVendor;
+    
     @Setup
     public void setup() throws Exception {
         Random random = new Random();
-        connection = newDatabase();
+        connection = newDatabase(databaseVendor);
         connection.createStatement().execute("create table numbers (val int)");
         
         for (int i = 0; i < numberCount; ++i) {
             int rnd = random.nextInt();
             numbers.add(rnd);
-            connection.createStatement().execute("insert into numbers values (" + rnd + ")");
         }
+        connection.createStatement().execute(
+                "insert into numbers values " + numbers.stream().map(i -> "(" + i + ")").collect(joining(","))
+        
+        );
         numbersArray = numbers.stream().mapToInt(i -> i).toArray();
     }
     
-    @SuppressWarnings("Convert2streamapi")
-    @Benchmark
+    //    @SuppressWarnings("Convert2streamapi")
+//    @Benchmark
     public int loop_array() throws Exception {
         int count = 0;
         for (int i : numbersArray) {
@@ -52,8 +59,8 @@ public class FilteringAndCountingIntegers {
         return count;
     }
     
-    @SuppressWarnings("Convert2streamapi")
-    @Benchmark
+    //    @SuppressWarnings("Convert2streamapi")
+//    @Benchmark
     public int loop_list() throws Exception {
         int count = 0;
         for (int i : numbers) {
@@ -75,12 +82,12 @@ public class FilteringAndCountingIntegers {
         return resultSet.getInt(1);
     }
     
-    @Benchmark
+    //    @Benchmark
     public int streams() throws Exception {
         return (int) numbers.stream().filter(i -> i > 0).count();
     }
     
-    @Benchmark
+    //    @Benchmark
     public int parallelStreams() throws Exception {
         return (int) numbers.parallelStream().filter(i -> i > 0).count();
     }

@@ -34,7 +34,7 @@ public class Tpc4Benchmark {
     @Setup
     public void setup() throws Exception {
         Utils.recreateData(scaleFactor);
-        connection = Utils.newDatabase();
+        connection = Utils.newDatabase("h2");
         createSchema(connection);
         store = new Store("dbgen");
     }

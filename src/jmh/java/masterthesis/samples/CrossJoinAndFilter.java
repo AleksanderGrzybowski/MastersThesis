@@ -30,9 +30,12 @@ public class CrossJoinAndFilter {
     @Param({"1000", "10000", "100000", "1000000"})
     public int numberCount;
     
+    @Param({"h2", "mysql"})
+    public String databaseVendor;
+    
     @Setup
     public void setup() throws Exception {
-        connection = newDatabase();
+        connection = newDatabase(databaseVendor);
         connection.createStatement().execute("CREATE TABLE firstList (val1 INT, val2 INT)");
         connection.createStatement().execute("CREATE TABLE secondList (val1 INT PRIMARY KEY, val2 VARCHAR(10))");
         connection.createStatement().execute(
