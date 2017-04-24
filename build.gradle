@@ -42,7 +42,7 @@ jmh {
         threads = 1
         fork = 0
         warmupIterations = 0
-        iterations = 10
+        iterations = 5
     } else {
         threads = 1
         fork = 2

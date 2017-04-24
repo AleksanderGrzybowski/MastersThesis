@@ -8,19 +8,25 @@ public class SummingIntegersTest {
     
     @Test
     public void test() throws Exception {
-        SummingIntegers benchmark = new SummingIntegers();
-        benchmark.numberCount = 10000;
-        benchmark.setup();
-        
-        int sum1 = benchmark.loop_over_list();
-        int sum2 = benchmark.loop_over_array();
-        int sum3 = benchmark.stream();
-        int sum4 = benchmark.parallelStream();
-        int sum5 = benchmark.sql();
-        
-        assertEquals(sum1, sum2);
-        assertEquals(sum2, sum3);
-        assertEquals(sum3, sum4);
-        assertEquals(sum4, sum5);
+        SummingIntegersStreams streams = new SummingIntegersStreams();
+        streams.numberCount = 100;
+        streams.setup();
+    
+        SummingIntegersMysql mysql = new SummingIntegersMysql();
+        mysql.numberCount = 100;
+        mysql.setup();
+    
+        SummingIntegersH2 h2 = new SummingIntegersH2();
+        h2.numberCount = 100;
+        h2.setup();
+    
+        int resultMysql = mysql.sql();
+        int resultH2 = h2.sql();
+        int resultStreams = streams.stream();
+        int resultParallelStreams = streams.parallelStream();
+    
+        assertEquals(resultMysql, resultH2);
+        assertEquals(resultH2, resultStreams);
+        assertEquals(resultStreams, resultParallelStreams);
     }
 }

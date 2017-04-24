@@ -8,18 +8,25 @@ public class FilteringAndCountingIntegersTest {
     
     @Test
     public void test() throws Exception {
-        FilteringAndCountingIntegers benchmark = new FilteringAndCountingIntegers();
-        benchmark.setup();
-        benchmark.numberCount = 10000;
-        benchmark.setup();
+        FilteringAndCountingIntegersStreams streams = new FilteringAndCountingIntegersStreams();
+        streams.numberCount = 100;
+        streams.setup();
         
-        int sum1 = benchmark.loop_array();
-        int sum2 = benchmark.loop_list();
-        int sum3 = benchmark.streams();
-        int sum4 = benchmark.sql();
+        FilteringAndCountingIntegersMysql mysql = new FilteringAndCountingIntegersMysql();
+        mysql.numberCount = 100;
+        mysql.setup();
         
-        assertEquals(sum1, sum2);
-        assertEquals(sum2, sum3);
-        assertEquals(sum3, sum4);
+        FilteringAndCountingIntegersH2 h2 = new FilteringAndCountingIntegersH2();
+        h2.numberCount = 100;
+        h2.setup();
+        
+        int resultMysql = mysql.sql();
+        int resultH2 = h2.sql();
+        int resultStreams = streams.streams();
+        int resultParallelStreams = streams.parallelStreams();
+        
+        assertEquals(resultMysql, resultH2);
+        assertEquals(resultH2, resultStreams);
+        assertEquals(resultStreams, resultParallelStreams);
     }
 }
