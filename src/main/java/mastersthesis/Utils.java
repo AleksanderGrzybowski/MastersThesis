@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.sql.*;
 import java.util.Objects;
 import java.util.Random;
@@ -23,7 +24,7 @@ public class Utils {
     
         if (Objects.equals(databaseVendor, "mysql")) {
             // docker run --rm -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=test -p 127.0.0.1:7777:3306 -ti mysql
-            String databaseName = "test" + random.nextInt(10000);
+            String databaseName = "test" + random.nextInt(1000000);
             DriverManager.getConnection(
                     "jdbc:mysql://localhost:7777/",
                     "root",
@@ -62,7 +63,7 @@ public class Utils {
         }
     }
     
-    public static void createSchema(Connection connection) {
+    public static void createSchemaH2(Connection connection) {
         System.out.println("Starting import");
         try {
             connection.createStatement().execute("RUNSCRIPT FROM 'dbgen/dss.ddl'");
@@ -70,6 +71,61 @@ public class Utils {
             e.printStackTrace();
         }
         System.out.println("Import finished");
+    }
+    
+    public static void createSchemaMysql(Connection connection) throws IOException, SQLException {
+        System.out.println("Starting mysql import to database " + connection.getCatalog());
+    
+        System.out.println("Creating mysql schema");
+        Files.readAllLines(new File("dbgen/dss-mysql.ddl").toPath())
+                .forEach(line -> {
+                    try {
+                        connection.createStatement().execute(line);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                });
+        System.out.println("Mysql schema created, importing tables");
+    
+        asList("region.tbl",
+                "nation.tbl",
+                "part.tbl",
+                "supplier.tbl",
+                "partsupp.tbl",
+                "customer.tbl",
+                "orders.tbl",
+                "lineitem.tbl"
+        ).forEach(filename -> {
+            try {
+                new ProcessBuilder("cp", "dbgen/" + filename, "/tmp/" + filename.toUpperCase()).start().waitFor();
+                
+                Process process = new ProcessBuilder(
+                        asList(
+                                "mysqlimport",
+                                "--protocol",
+                                "tcp",
+                                "-h",
+                                "localhost",
+                                "-p7777",
+                                "-uroot",
+                                "-ppassword",
+                                "--port",
+                                "7777",
+                                "--local",
+                                "--fields-terminated-by=|",
+                                connection.getCatalog(),
+                                "/tmp/" + filename.toUpperCase()
+                        )
+                )
+                        .directory(new File("/mnt/Dysk/Kodzenie/MastersThesis/dbgen"))
+                        .start();
+                process.waitFor();
+                consumeAndPrintOutput(process);
+            } catch (InterruptedException | IOException | SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    
     }
     
     public static void recreateData(String scaleFactor) throws Exception {

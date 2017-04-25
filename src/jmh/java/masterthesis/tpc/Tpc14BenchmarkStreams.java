@@ -2,7 +2,6 @@ package masterthesis.tpc;
 
 import mastersthesis.BigDecimalSummaryStatistics;
 import mastersthesis.Store;
-import mastersthesis.Utils;
 import mastersthesis.model.LineItem;
 import mastersthesis.model.Part;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -11,24 +10,19 @@ import org.openjdk.jmh.annotations.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import static mastersthesis.Utils.createSchema;
-
 /**
  * Because of joins, SQL rocks here and streams are 50x slower.
  */
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
-public class Tpc14Benchmark {
+public class Tpc14BenchmarkStreams {
     
-    Connection connection;
     Store store;
     
     @Param({"0.01", "0.02"})
@@ -36,34 +30,7 @@ public class Tpc14Benchmark {
     
     @Setup
     public void setup() throws Exception {
-        Utils.recreateData(scaleFactor);
-        connection = Utils.newDatabase("h2");
-        createSchema(connection);
         store = new Store("dbgen");
-    }
-    
-    @Benchmark
-    public BigDecimal sql() throws Exception {
-        ResultSet rs = connection.prepareStatement(
-                "select\n" +
-                        "100.00 * sum(case\n" +
-                        "when p_type like 'PROMO%'\n" +
-                        "then l_extendedprice * (1 - l_discount)\n" +
-                        "else 0\n" +
-                        "end) / sum(l_extendedprice * (1 - l_discount)) as promo_revenue\n" +
-                        "from\n" +
-                        "lineitem,\n" +
-                        "part\n" +
-                        "where\n" +
-                        "l_partkey = p_partkey\n" +
-                        "and l_shipdate >= date '1995-09-01'\n" +
-                        "and l_shipdate < date '1995-10-01'\n"
-        ).executeQuery();
-        rs.next();
-        
-        BigDecimal result = rs.getBigDecimal(1);
-        System.out.println("SQL: " + result);
-        return result;
     }
     
     @Benchmark
