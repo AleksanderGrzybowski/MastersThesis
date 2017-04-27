@@ -22,7 +22,7 @@ public class CrossJoinAndFilterH2 {
     
     private Connection connection;
     
-    @Param({"100", "100"})
+    @Param({"100", "1000", "10000"})
     public int numberCount;
     
     @Setup

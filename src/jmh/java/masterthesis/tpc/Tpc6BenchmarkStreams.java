@@ -17,7 +17,7 @@ public class Tpc6BenchmarkStreams {
     
     Store store;
     
-    @Param({"0.01", "0.02"})
+    @Param({"0.01", "0.02", "0.05"})
     public String scaleFactor;
     
     @Setup

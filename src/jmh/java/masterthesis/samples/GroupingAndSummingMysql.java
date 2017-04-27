@@ -20,7 +20,7 @@ public class GroupingAndSummingMysql {
     
     private Connection connection;
     
-    @Param({"100", "1000"})
+    @Param({"100", "1000", "10000"})
     public int numberCount;
     
     @Setup

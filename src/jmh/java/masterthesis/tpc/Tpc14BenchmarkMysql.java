@@ -18,7 +18,7 @@ public class Tpc14BenchmarkMysql {
     
     Connection connection;
     
-    @Param({"0.01", "0.02"})
+    @Param({"0.01"})
     public String scaleFactor;
     
     @Setup

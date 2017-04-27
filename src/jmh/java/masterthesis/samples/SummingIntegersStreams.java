@@ -18,7 +18,7 @@ public class SummingIntegersStreams {
     private List<Integer> numbers = new ArrayList<>();
     private int[] numbersArray;
     
-    @Param({"100", "1000"})
+    @Param({"100", "1000", "10000"})
     public int numberCount;
     
     @Setup
