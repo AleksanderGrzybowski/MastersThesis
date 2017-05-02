@@ -72,6 +72,7 @@
     Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odpytywania danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania dla zarówno małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe (Neo4j) tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a niemożliwe jest użycie innego rozwiązania, np. cache. 
 
     Jako iż porównanie baz danych i strumieni w Java 8 powinno być miarodajne, konieczne jest wybranie do badań baz in-memory działających w środowisku Java. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one wykorzystywane głównie w celach deweloperskich, jako ulotne środowiska do testowania programów wymagających bazy danych SQL. Dzięki działaniu całkowicie w pamięci, nie jest konieczne żadne zarządzanie, a zawartość bazy jest tracona po zamknięciu programu. Sposób korzystania z tych baz jest identyczny, jak przy korzystaniu z tradycyjnych baz dyskowych, a interfejs programistyczny JDBC nie różni się w żaden sposób. Możliwe jest więc tez porównanie wydajności baz dyskowych z bazami in-memory, które także zostanie wykonane.
+    TODO coś więcej o SQL z przykładami
 
 
 \subsection{Strumienie w Java 8}
@@ -113,6 +114,21 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
 \end{lstlisting}
 
+\subsection{Różnice pomiędzy metodami}
+
+    Pomiędzy przetwarzaniem strumieniowym, a bazami SQL działającymi w pamięci występuje bardzo dużo różnic, pomimo pozornie podobnej zasady działania. Celem obu podejść jest uzyskanie wygodnego i względnie szybkiego wykonywania zapytań, natomiast różnice w implementacji znacząco wpływają na ten cel.
+    Głównym blokiem budującym w modelu relacyjnej bazy danych jest relacja (tabela) posiadająca kolumny i rekordy, a integralność danych zapewniona jest w pewnym stopniu przez ograniczenia, klucze i więzy referencyjne. Język SQL pozwala dzięki mechanizmowi JOIN na łatwe łączenie powiązanych ze sobą tabel i uzyskiwanie połączonych wyników. Jeśli baza danych została odpowienio zaprojektowana, uwzględniając wymaganą normalizację danych, to łączenie tabel na podstawie kluczy obcych jest naturalne dla programisty i proste w zrozumieniu. W przetwarzaniu strumieniowym pojęcie tabeli nie istnieje, ponieważ kontenerami danych są zwykłe kolekcje języka Java (listy, zbiory i mapy). O ile istnieją biblioteki bazodanowe typu jOOQ, które pozwalają na konwersję wyniku zapytania JDBC na strumień, to tak naprawdę operacje strumieniowe wykonują się zawsze na kolekcji w pamięci maszyny wirtualnej. W związku, aby operacje strumieniowe były wygodne dla programisty, model danych powinien uwzględniać powiązania między poszczególnymi obiektami w typowy dla języka Java sposób, poprzez referencje do innych obiektów (kompozycja). Łączenie kolekcji, choć możliwe, komplikuje znacznie zapytania i zmniejsza ich ogólną szybkość.
+
+* wiele tabel (model relacyjny) VS wiele kolekcji i trudne ich łączenie (chyba że już są połączone)
+
+* praca na wewn. strukturach danych bazy (nieznanych) VS typowe kolekcje Javy
+* język interpretowany przez silnik BD VS zwykły debugowalny kod Javy
+* silne/słabe typowanie
+* możliwość przepisania kodu imperatywnie VS poleganie na optymalizatorze
+* zrównoleglanie przy streamach, kontrola ilości wątków ?
+* funkcje SQL (vendor-specific) vs dowolny kod w Javie
+    
+
 \section{Badanie wydajności}
 
 \subsection{Kryteria oceny}
@@ -121,7 +137,9 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
     Jedną z trudności, które napotkano przy wykonywaniu eksperymentów, jest znaczny wpływ zastosowanej platformy sprzętowej na uzyskane wyniki. Oczywiście wydajność procesora będzie różnicowała ilość operacji na sekundę, natomiast konieczne jest sprawdzenie, czy relatywne porównanie wyników na różnych platformach jest jest takie same. Jeśli tak, to możliwe jest wyciągnięcie bardziej ogólnych wniosków z uzyskanych wyników, w przeciwnym przypadku możliwe jest, że dobór platformy sprzętowej jest istotny.
     Przy porównywaniu dwóch zupełnie różnych metod dostępu do danych, konieczne jest ustalenie postaci wynikowej pojedynczego eksperymentu. W przypadku języka SQL i metod JDBC wynik zapytania do bazy danych reprezentowany jest przez obiekt \texttt{ResultSet}, który udostępnia metody do poruszania się po wynikowych wierszach i wyciągania pojedynczych kolumn. W przypadku Stream API, rezultat zapytania dostępny jest od razu w formie obiektów standardowych kolekcji języka Java, takich jak \texttt{List<T>} czy \texttt{Map<K,V>}. W związku z tym, aby zapewnić sprawiedliwe porównanie obu metod, po wykonaniu zapytania SQL konieczne jest rozpakowanie obiektu \texttt{ResultSet} i przeniesienie danych do kolekcji Javy, aby uzyskać wynik w tej samej postaci.
 
-\section{Elementy środowiska badawczego}
+\section{Środowisko badawcze}
+
+\subsection{Budowa środowiska badawczego}
 
     Aby zebrane wyniki były jak najbardziej miarodajne, konieczne jest utworzenie solidnego środowiska testowego, w którym możliwe będzie wykonanie wszystkich potrzebnych badań. Jako iż elementem badań wydajności będą fragmenty kodu, pożądane jest, by pomiary czasowe odbywały się w miarę możliwości w sposób zautomatyzowany, generując pod koniec szczegółowy raport.
 
@@ -129,7 +147,7 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
     Do budowania projektu wykorzystano Gradle, które jest popularnym i używanym w zastosowaniach produkcyjnych narzędziem budowania projektów w Javie. Służy ono do uruchamiania kompilacji, uruchamiania testów jednostkowych, jak i wykonywania testów wydajnościowych dzięki integracji z JMH, które dostępne jest w ekosystemie Gradle jako gotowy plugin z możliwością dowolnej konfiguracji.
 
-\section{Schemat klasy testowej (microbenchmark)}
+\subsection{Schemat klasy testowej (microbenchmark)}
 
 \begin{lstlisting}[label=testclass, caption=Przykładowa klasa JMH]
 
@@ -189,5 +207,13 @@ public class SampleMicrobenchmark {
 
     Każda zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z pliku w przypadku wykorzystania benchmarka TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Ważnym elementem jest zwrócenie wyniku z takiej metody, ponieważ w przeciwnym razie maszyna wirtualna Javy, widząc brak zwrócenia wyniku, może dokonać optymalizacji i usunąć kod testowy.
 
+\subsection{Dane testowe syntetyczne}
+TODO
+
+
+\subsection{TPC}
+TODO
+
+\section{Porównanie sposobu formułowania kodu}
 
 \end{document}
