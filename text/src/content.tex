@@ -69,10 +69,9 @@
 
 \subsection{Bazy danych SQL w pamięci (in-memory)}
 
-    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odpytywania danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania dla zarówno małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe (Neo4j) tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a niemożliwe jest użycie innego rozwiązania, np. cache. 
+    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania dla zarówno małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe (Neo4j) tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a niemożliwe jest użycie innego rozwiązania, np. cache. 
 
     Jako iż porównanie baz danych i strumieni w Java 8 powinno być miarodajne, konieczne jest wybranie do badań baz in-memory działających w środowisku Java. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one wykorzystywane głównie w celach deweloperskich, jako ulotne środowiska do testowania programów wymagających bazy danych SQL. Dzięki działaniu całkowicie w pamięci, nie jest konieczne żadne zarządzanie, a zawartość bazy jest tracona po zamknięciu programu. Sposób korzystania z tych baz jest identyczny, jak przy korzystaniu z tradycyjnych baz dyskowych, a interfejs programistyczny JDBC nie różni się w żaden sposób. Możliwe jest więc tez porównanie wydajności baz dyskowych z bazami in-memory, które także zostanie wykonane.
-    TODO coś więcej o SQL z przykładami
 
 
 \subsection{Strumienie w Java 8}
@@ -122,9 +121,9 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
     Bazy in-memory wykorzystują wewnątrz struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i ukrytym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty klas \texttt{org.h2.mvstore.Page} i \texttt{org.h2.value.*}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
 
-    Przy wykonywaniu zapytania SQL z poziomu API JDBC nie istnieje żadne sprawdzanie poprawniości zapytania oraz jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie i przystępuje do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu mapowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator. Przykładowo, wynikiem grupowania zbioru obiektów typu \texttt{T} na podstawie ich pola o typie \texttt{U} będzie zawsze \texttt{Map<T, List<U>>}. Dzięki temu typowe błędy przy odczytywaniu wyników z zapytania SQL przy użyciu obiektu \texttt{ResultSet} (niewłaściwy typ kolumny, niestniejące pole) nie występują.
+    Przy wykonywaniu zapytania SQL z poziomu API JDBC nie istnieje żadne sprawdzanie poprawniości zapytania oraz jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie i przystępuje do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu mapowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator. Przykładowo, wynikiem grupowania zbioru obiektów typu \texttt{T} na podstawie ich pola o typie \texttt{U} będzie zawsze \texttt{Map<T, List<U>}\texttt{>}. Dzięki temu typowe błędy przy odczytywaniu wyników z zapytania SQL przy użyciu obiektu \texttt{ResultSet} (niewłaściwy typ kolumny, niestniejące pole) nie występują.
 
-TODO funkcje SQL (vendor-specific) vs dowolny kod w Javie debugowalny
+    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedure składowane (stored procedures). Przy użyciu Stream możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna.
     
 
 \section{Badanie wydajności}
@@ -206,10 +205,18 @@ public class SampleMicrobenchmark {
     Każda zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z pliku w przypadku wykorzystania benchmarka TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Ważnym elementem jest zwrócenie wyniku z takiej metody, ponieważ w przeciwnym razie maszyna wirtualna Javy, widząc brak zwrócenia wyniku, może dokonać optymalizacji i usunąć kod testowy.
 
 \subsection{Dane testowe syntetyczne}
-TODO
+    W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka benchmarków operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu standardowych mechanizmów Javy, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników.  Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku.
+
+\begin{itemize}
+    \item \texttt{SummingIntegers} - obliczenie sumy liczb w kolumnie
+    \item \texttt{GroupingAndSumming} - obliczenie sum liczb w kolumnie \texttt{val1} po uprzednim pogrupowaniu ich na podstawie kolumny \texttt{val2}
+    \item \texttt{CrossJoinAndFilter} - złączenie naturalne
+    \item \texttt{FilteringAndCountingIntegers} - wyszukanie dodatnich liczb oraz ich policzenie
+    \item \texttt{HugeJoining} - iloczyn kartezjański dwóch kolumn
+\end{itemize}
 
 
-\subsection{TPC}
+\subsection{Zbiór danych TPC}
 TODO
 
 \section{Porównanie sposobu formułowania kodu}
