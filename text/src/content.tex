@@ -69,20 +69,19 @@
 
 \subsection{Bazy danych SQL w pamięci (in-memory)}
 
-    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania dla zarówno małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe (Neo4j) tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a niemożliwe jest użycie innego rozwiązania, np. cache. 
+    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania dla zarówno małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a wykorzystanie pamięci podręcznych nie spełnia wymagań biznesowych.
 
-    Jako iż porównanie baz danych i strumieni w Java 8 powinno być miarodajne, konieczne jest wybranie do badań baz in-memory działających w środowisku Java. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one wykorzystywane głównie w celach deweloperskich, jako ulotne środowiska do testowania programów wymagających bazy danych SQL. Dzięki działaniu całkowicie w pamięci, nie jest konieczne żadne zarządzanie, a zawartość bazy jest tracona po zamknięciu programu. Sposób korzystania z tych baz jest identyczny, jak przy korzystaniu z tradycyjnych baz dyskowych, a interfejs programistyczny JDBC nie różni się w żaden sposób. Możliwe jest więc tez porównanie wydajności baz dyskowych z bazami in-memory, które także zostanie wykonane.
-
+    Jako iż porównanie baz danych i strumieni w Java 8 powinno być rzetelne, konieczne jest wybranie do badań baz in-memory działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one wykorzystywane głównie w celach deweloperskich, jako tymczasowe środowiska do testowania programów wymagających bazy danych SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i in-memory obsługuje się praktycznie w ten sam sposób. Dzięki temu możliwe jest dokonanie łatwego i miarodajnego pomiaru wydajności.
 
 \subsection{Strumienie w Java 8}
 
-    Stream API jest wprowadzonym w wersji 8 Javy komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest to abstrakcyjna reprezentacja ciągu obiektów, które pochodzą z jakiegoś źródła, zwykle kolekcji, ale mogą być też pobierane bądź tworzone na bieżąco. Na strumieniach możliwe jest wykonywanie prostych i złożonych operacji filtrowania, sortowania, mapowania i grupowania, jak i innych, zdefiniowanych przez użytkownika operacji. Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są 'leniwie', tzn. żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej (zwykle zebranie wyników), która łańcuchowo powoduje wykonanie się wszystkich operacji pośrednich.
+    Stream API jest wprowadzonym w wersji 8 Javy komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest abstrakcyjną reprezentacją ciągu obiektów, które pochodzą z jakiegoś źródła, na podstawie którego strumień został utworzony. Zazwyczaj strumienie tworzone są na podstawie kolekcji, ale możliwe jest także generowanie obiektów w locie. Strumienie obsługują wykonywanie prostych i złożonych operacji filtrowania, sortowania, mapowania i grupowania, przy czym możliwe jest też samodzielne tworzenie obiektów przetwarzających dane (interfejs \texttt{Collector}). Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są 'leniwie', to znaczy, żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej. Wystąpienie operacji terminalnej powoduje łańcuchowe wykonanie się wszystkich operacji pośrednich.
 
-    Cechą szczególną strumieni jest możliwość ich łatwego zrównoleglania, udostępniona programistom w postaci metody \texttt{Stream.parallelStream}. Wielowątkowe przetwarzanie danych jest dość trudnym zagadnieniem w Javie, wymagana jest duża wiedza na temat działania maszyny wirtualnej i szczególna ostrożność. Jako iż strumienie definiowane są zwykle przez funkcje nie zmieniające stanu, dodanie równoległości jest znacznie prostsze. Jednym z celów niniejszej pracy jest zbadanie, jaki wpływ na wydajność mogą mieć równoległe strumienie.
+    Cechą szczególną strumieni jest możliwość ich łatwego zrównoleglania, udostępniona programistom w postaci metody \texttt{Stream.parallelStream}. Wielowątkowe przetwarzanie danych jest dość złożonym zagadnieniem w Javie, wymagana jest duża wiedza na temat działania maszyny wirtualnej (Java Memory Model) i szczególna ostrożność przy blokowaniu zasobów. Jako iż strumienie definiowane są zwykle przez funkcje nie zmieniające stanu, dodanie równoległości jest znacznie prostsze. Jednym z celów niniejszej pracy jest zbadanie, jaki wpływ na wydajność mogą mieć równoległe strumienie.
 
-    Poniższy listing prezentuje przykładowe użycie strumieni. Dostępna jest kolekcja \newline \texttt{Collection<Customer> customers}, która zawiera obiekty reprezentujące klientów. Każdy klient posiada pola danych informujące między innymi o kraju jego pochodzenia oraz stanie konta (jest to część modelu danych TPC, który zostanie omówiony szczegółowiej w rozdziale ...). Metoda \texttt{stream} tworzy strumień obiektów typu \texttt{Customer}, na którym dokonuje się operacji. Metoda \texttt{Stream.filter} przyjmuje obiekt funkcyjny typu \texttt{Predicate}, który określa, czy dany element powinien znaleźć się w wynikowym strumieniu. Warto zaznaczyć, że możliwe jest wykorzystanie dowolnego kodu języka Java - nie ma tutaj ograniczeń na konkretny zbiór funkcji, jak to jest w języku SQL. Metoda \texttt{sorted} zwraca nowy strumień, posortowany według podanego klucza - w domyślnej postaci porównywanie są bezpośrednio obiekty znajdujące się w strumieniu, tutaj wykorzystany został wariant metody sortującej z funkcją wyciągającą klucz sortowania z obiektu (tutaj - stan konta klienta). Na koniec wyniki zbierane są do listy typu \texttt{java.util.List}. 
+    Poniższy listing prezentuje przykładowe użycie strumieni. Dostępna jest kolekcja \newline \texttt{Collection<Customer> customers}, która zawiera obiekty reprezentujące klientów. Każdy klient posiada pola danych, informujące między innymi o kraju jego pochodzenia oraz stanie konta (jest to część modelu danych TPC, który zostanie omówiony szczegółowiej w rozdziale 123). Metoda \texttt{stream} tworzy strumień obiektów typu \texttt{Customer}, na którym wywoływane są metody strumieniowe. Metoda \texttt{Stream.filter} przyjmuje obiekt funkcyjny typu \texttt{Predicate}, który określa, czy dany element powinien znaleźć się w wynikowym strumieniu. Warto zaznaczyć, że możliwe jest wykorzystanie dowolnego kodu języka Java - nie ma tutaj ograniczeń na konkretny zbiór funkcji, jak to jest w języku SQL. Metoda \texttt{sorted} zwraca nowy strumień, posortowany według podanego klucza - w domyślnej postaci porównywanie są bezpośrednio obiekty znajdujące się w strumieniu. W tym przypadku wykorzystany został wariant metody sortującej, wykorzystujący funkcję wyciągającą klucz sortowania z obiektu (tutaj - stan konta klienta). Na koniec wyniki zbierane są do listy typu \texttt{java.util.List}. 
 
-\begin{lstlisting}[label=testclass, caption=Przykładowe wykorzystanie Stream API]
+\begin{lstlisting}[label=streamexample, caption=Przykładowe wykorzystanie Stream API]
 
 List<Customer> canadiansSortedByBalance = customers.stream()
         .filter(customer -> Objects.equals(
@@ -96,9 +95,16 @@ List<Customer> canadiansSortedByBalance = customers.stream()
 
 \end{lstlisting}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=11cm]{flow.png}
+\caption{Przepływ danych}
+\label{fig:flow}
+\end{figure}
+
     Bardziej złożony przykład zaprezentowany jest na następnym listingu. Kolekcja zamówień, na której opiera się zapytanie, składa się z obiektów typu \texttt{Order} posiadająch status oraz przyporządkowanego do zamówienia klienta. Podobnie jak w poprzednim przykładzie, w pierwszym kroku przeprowadza się filtrowanie jedynie zamówień o wyższym priorytecie. Następnie wykorzystana jest metoda \texttt{collect}, której zadaniem jest zebranie i przetworzenie wyników w ostateczną postać wynikową. Wykorzystano tutaj dwa zagnieżdżone kolektory, z których pierwszy dokonuje grupowania zamówień na podstawie przypisanego klienta, a drugi kolektor przejmuje pogrupowane zamówienia i dla każdej grupy określa ich wielkość, zliczając wszystkie obiekty w grupie. W ten sposób wyznaczone zostają liczby ważnych zamówień dla poszczególnych klientów.
 
-\begin{lstlisting}[label=testclass, caption=Zaawansowane wykorzystanie Stream API]
+\begin{lstlisting}[label=advanced, caption=Zaawansowane wykorzystanie Stream API]
 
 List<String> high = asList("1-URGENT", "2-HIGH");
 Map<Customer, Long> orderCountsByCustomer = orders.stream()
@@ -112,6 +118,17 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
         
 
 \end{lstlisting}
+
+    Jednym z ciekawszych zastosowań strumieni jest równoległe przetwarzanie danych. Równoległe strumienie wykorzystują \texttt{ForkJoinPool} wprowadzony w Java 7. Jest to wzorzec aplikacyjny, który wykorzystuje jako zasadę działania regułę dziel i rządź. Zastosowanie tego narzędzia jest poza zakresem niniejszej pracy, natomiast strumienie w pełni enkapsulują jego wykorzystanie tak, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na następującym przykładzie, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.
+
+\begin{lstlisting}{label=parallelstreams, caption=Strumienie}
+
+IntStream.range(1, 100).parallel()
+        .forEach(e -> System.out.println(Thread.currentThread().getName()));
+
+\end{lstlisting}
+
+    Wynikiem wywołania tego programu jest przemieszana lista wątków, w której znajdują się wątek główny programu \texttt{main} oraz wątki znajdujące się w puli o nazwach podobnych do \texttt{ForkJoinPool.commonPool-worker-3} z numerami od 1 do 7 (test przeprowadzony na maszynie z 8 logicznymi procesorami).
 
 \subsection{Różnice pomiędzy metodami}
 
@@ -148,64 +165,53 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
 \begin{lstlisting}[label=testclass, caption=Przykładowa klasa JMH]
 
+@SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
-public class SampleMicrobenchmark {
+public class SummingIntegersH2 {
     
     private Connection connection;
-    private List<Integer> numbers = new ArrayList<>();
     
-    @Param({"1000", "10000", "100000", "1000000"})
+    @Param({"100", "1000", "10000"})
     public int numberCount;
     
     @Setup
     public void setup() throws Exception {
-        connection = newDatabase();
-        connection.createStatement().execute("CREATE TABLE numbers (val INT)");
-        Random random = new Random();
+        connection = newDatabase("h2");
+        connection.createStatement().execute(
+                "CREATE TABLE numbers (val INT)"
+        );
+        Random random = new Random(12345L);
         
         for (int i = 0; i < numberCount; ++i) {
             int randomNumber = random.nextInt(1000);
-            numbers.add(randomNumber);
-            String query = "insert into numbers values (" + randomNumber + ")";
-            connection.createStatement(query).execute();
+            connection.createStatement()
+                    .execute(
+                            "insert into numbers values ("
+                                    + randomNumber +
+                                    ")"
+                    );
         }
-    }
-    
-    @Benchmark
-    public int loop_over_list() throws Exception {
-        int sum = 0;
-        for (int i : numbers) {
-            sum += i;
-        }
-        return sum;
     }
     
     @Benchmark
     public int sql() throws Exception {
-        ResultSet resultSet = connection.createStatement()
+        ResultSet resultSet = connection
+                .createStatement()
                 .executeQuery("SELECT sum(val) FROM numbers");
         resultSet.next();
+        
         return resultSet.getInt(1);
-    }
-    
-    @Benchmark
-    public int stream() throws Exception {
-        return numbers.stream().mapToInt(i -> i).sum();
-    }
-    
-    @Benchmark
-    public int parallelStream() throws Exception {
-        return numbers.parallelStream().mapToInt(i -> i).sum();
     }
 }
 
 
 \end{lstlisting}
 
-    Każda zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z pliku w przypadku wykorzystania benchmarka TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Ważnym elementem jest zwrócenie wyniku z takiej metody, ponieważ w przeciwnym razie maszyna wirtualna Javy, widząc brak zwrócenia wyniku, może dokonać optymalizacji i usunąć kod testowy.
+    Każda zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z pliku w przypadku wykorzystania benchmarka TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Biblioteka JMH zapewnia dokładny pomiar czasu wykonywania się fragmentów kodu, chroni przed zbyt agresywnymi optymalizacjami maszyny wirtualnej oraz udostępnia wygodny raport z przeprowadzonych testów, wraz z danymi statystycznymi typu wariancja.
 
 \subsection{Dane testowe syntetyczne}
-    W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka benchmarków operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu standardowych mechanizmów Javy, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników. Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku.
+
+    W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka benchmarków operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu standardowych mechanizmów Javy, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników. Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku i możliwości sprzętowych.
 
 \begin{itemize}
     \item \texttt{SummingIntegers} - obliczenie sumy liczb w kolumnie
@@ -214,7 +220,6 @@ public class SampleMicrobenchmark {
     \item \texttt{FilteringAndCountingIntegers} - wyszukanie dodatnich liczb oraz ich policzenie
     \item \texttt{HugeJoining} - iloczyn kartezjański dwóch kolumn
 \end{itemize}
-
 
 \subsection{Zbiór danych TPC-H}
 
@@ -227,8 +232,7 @@ public class SampleMicrobenchmark {
 \label{fig:tpcschema}
 \end{figure}
 
-    Dokumentacja TPC-H definiuje 22 zapytania, które można wykorzystać do badania wydajności bazy danych. Są to zapytania typowo statystyczne, pozwalające na ocenienie opłacalności pewnych biznesowych decyzji. Każde zapytanie określone jest przez problem biznesowy (kontekst), definicję zapytania SQL w standardzie SQL-92, parametry które należy podstawić oraz przewidywane wyniki.
-
+    Dokumentacja TPC-H definiuje 22 zapytania. Są to zapytania typowo statystyczne, pozwalające na ocenienie opłacalności pewnych biznesowych decyzji. Każde zapytanie określone jest przez problem biznesowy (kontekst), definicję zapytania SQL w standardzie SQL-92, parametry które należy podstawić oraz przewidywane wyniki.
 
 \section{Porównanie sposobu formułowania kodu}
 
