@@ -80,7 +80,7 @@
 
     Cechą szczególną strumieni jest możliwość ich łatwego zrównoleglania, udostępniona programistom w postaci metody \texttt{Stream.parallelStream}. Wielowątkowe przetwarzanie danych jest dość trudnym zagadnieniem w Javie, wymagana jest duża wiedza na temat działania maszyny wirtualnej i szczególna ostrożność. Jako iż strumienie definiowane są zwykle przez funkcje nie zmieniające stanu, dodanie równoległości jest znacznie prostsze. Jednym z celów niniejszej pracy jest zbadanie, jaki wpływ na wydajność mogą mieć równoległe strumienie.
 
-    Poniższy listing prezentuje przykładowe użycie strumieni. Dostępna jest kolekcja \texttt{Collection<Customer> customers}, która zawiera obiekty reprezentujące klientów. Każdy klient posiada pola danych informujące między innymi o kraju jego pochodzenia oraz stanie konta (jest to część modelu danych TPC, który zostanie omówiony szczegółowiej w rozdziale ...). Metoda \texttt{stream} tworzy strumień obiektów typu \texttt{Customer}, na którym dokonuje się operacji. Metoda \texttt{Stream.filter} przyjmuje obiekt funkcyjny typu \texttt{Predicate}, który określa, czy dany element powinien znaleźć się w wynikowym strumieniu. Warto zaznaczyć, że możliwe jest wykorzystanie dowolnego kodu języka Java - nie ma tutaj ograniczeń na konkretny zbiór funkcji, jak to jest w języku SQL. Metoda \texttt{sorted} zwraca nowy strumień, posortowany według podanego klucza - w domyślnej postaci porównywanie są bezpośrednio obiekty znajdujące się w strumieniu, tutaj wykorzystany został wariant metody sortującej z funkcją wyciągającą klucz sortowania z obiektu (tutaj - stan konta klienta). Na koniec wyniki zbierane są do listy typu \texttt{java.util.List}. 
+    Poniższy listing prezentuje przykładowe użycie strumieni. Dostępna jest kolekcja \newline \texttt{Collection<Customer> customers}, która zawiera obiekty reprezentujące klientów. Każdy klient posiada pola danych informujące między innymi o kraju jego pochodzenia oraz stanie konta (jest to część modelu danych TPC, który zostanie omówiony szczegółowiej w rozdziale ...). Metoda \texttt{stream} tworzy strumień obiektów typu \texttt{Customer}, na którym dokonuje się operacji. Metoda \texttt{Stream.filter} przyjmuje obiekt funkcyjny typu \texttt{Predicate}, który określa, czy dany element powinien znaleźć się w wynikowym strumieniu. Warto zaznaczyć, że możliwe jest wykorzystanie dowolnego kodu języka Java - nie ma tutaj ograniczeń na konkretny zbiór funkcji, jak to jest w języku SQL. Metoda \texttt{sorted} zwraca nowy strumień, posortowany według podanego klucza - w domyślnej postaci porównywanie są bezpośrednio obiekty znajdujące się w strumieniu, tutaj wykorzystany został wariant metody sortującej z funkcją wyciągającą klucz sortowania z obiektu (tutaj - stan konta klienta). Na koniec wyniki zbierane są do listy typu \texttt{java.util.List}. 
 
 \begin{lstlisting}[label=testclass, caption=Przykładowe wykorzystanie Stream API]
 
@@ -205,7 +205,7 @@ public class SampleMicrobenchmark {
     Każda zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z pliku w przypadku wykorzystania benchmarka TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Ważnym elementem jest zwrócenie wyniku z takiej metody, ponieważ w przeciwnym razie maszyna wirtualna Javy, widząc brak zwrócenia wyniku, może dokonać optymalizacji i usunąć kod testowy.
 
 \subsection{Dane testowe syntetyczne}
-    W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka benchmarków operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu standardowych mechanizmów Javy, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników.  Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku.
+    W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka benchmarków operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu standardowych mechanizmów Javy, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników. Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku.
 
 \begin{itemize}
     \item \texttt{SummingIntegers} - obliczenie sumy liczb w kolumnie
@@ -216,8 +216,19 @@ public class SampleMicrobenchmark {
 \end{itemize}
 
 
-\subsection{Zbiór danych TPC}
-TODO
+\subsection{Zbiór danych TPC-H}
+
+    TPC-H jest benchmarkiem wspierania decyzji, stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań. Generator danych testowych \texttt{dbgen} jest konsolowym programem, tworzącym zbiór danych TPC-H. Dane te opisują międzynarodową hurtownię produktów. Znajdują się w niej informacje o produktach, klientach, dostawcach i zamówieniach, zebrane w tabele, których model prezentuje \ref{fig:tpcschema}. Na potrzeby szybkich testów możliwe jest ustalenie procentowego rozmiaru wygenerowanych danych.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=11cm]{tpc-schema.png}
+\caption{Schemat bazy danych TPC-H}
+\label{fig:tpcschema}
+\end{figure}
+
+    Dokumentacja TPC-H definiuje 22 zapytania, które można wykorzystać do badania wydajności bazy danych. Są to zapytania typowo statystyczne, pozwalające na ocenienie opłacalności pewnych biznesowych decyzji. Każde zapytanie określone jest przez problem biznesowy (kontekst), definicję zapytania SQL w standardzie SQL-92, parametry które należy podstawić oraz przewidywane wyniki.
+
 
 \section{Porównanie sposobu formułowania kodu}
 
