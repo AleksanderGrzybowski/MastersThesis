@@ -8,3 +8,7 @@ dbgen/qgen
 dbgen/*.tbl
 
 text/*.pdf
+text/src/*.pdf
+*.aux
+*.log
+*.toc
