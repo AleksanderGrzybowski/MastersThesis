@@ -25,18 +25,27 @@ public class SummingIntegersH2 {
     @Setup
     public void setup() throws Exception {
         connection = newDatabase("h2");
-        connection.createStatement().execute("CREATE TABLE numbers (val INT)");
+        connection.createStatement().execute(
+                "CREATE TABLE numbers (val INT)"
+        );
         Random random = new Random(12345L);
         
         for (int i = 0; i < numberCount; ++i) {
             int randomNumber = random.nextInt(1000);
-            connection.createStatement().execute("insert into numbers values (" + randomNumber + ")");
+            connection.createStatement()
+                    .execute(
+                            "insert into numbers values ("
+                                    + randomNumber +
+                                    ")"
+                    );
         }
     }
     
     @Benchmark
     public int sql() throws Exception {
-        ResultSet resultSet = connection.createStatement().executeQuery("SELECT sum(val) FROM numbers");
+        ResultSet resultSet = connection
+                .createStatement()
+                .executeQuery("SELECT sum(val) FROM numbers");
         resultSet.next();
         
         return resultSet.getInt(1);
