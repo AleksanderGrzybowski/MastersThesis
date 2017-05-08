@@ -119,7 +119,7 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
 \end{lstlisting}
 
-    Jednym z ciekawszych zastosowań strumieni jest równoległe przetwarzanie danych. Równoległe strumienie wykorzystują \texttt{ForkJoinPool} wprowadzony w Java 7. Jest to wzorzec aplikacyjny, który wykorzystuje jako zasadę działania regułę dziel i rządź. Zastosowanie tego narzędzia jest poza zakresem niniejszej pracy, natomiast strumienie w pełni enkapsulują jego wykorzystanie tak, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na następującym przykładzie, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.
+    Jednym z ciekawszych zastosowań strumieni jest równoległe przetwarzanie danych. Równoległe strumienie wykorzystują \texttt{ForkJoinPool} wprowadzony w Java 7. Jest to wzorzec aplikacyjny, który wykorzystuje jako zasadę działania regułę "dziel i rządź". Zostanie on omówiony krótko w następnym rozdziale, natomiast strumienie w pełni enkapsulują jego wykorzystanie w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na następującym przykładzie, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.
 
 \begin{lstlisting}{label=parallelstreams, caption=Strumienie}
 
@@ -129,6 +129,58 @@ IntStream.range(1, 100).parallel()
 \end{lstlisting}
 
     Wynikiem wywołania tego programu jest przemieszana lista wątków, w której znajdują się wątek główny programu \texttt{main} oraz wątki znajdujące się w puli o nazwach podobnych do \texttt{ForkJoinPool.commonPool-worker-3} z numerami od 1 do 7 (test przeprowadzony na maszynie z 8 logicznymi procesorami).
+
+\subsection{Framework \texttt{ForkJoinPool}}
+
+    Język Java od samego początku istnienia wyróżniał się znakomitymi możliwościami programowania równoległego, wykorzystywanego głównie w aplikacjach internetowych, obsługujących wielu użytkowników jednocześnie. Świadczy o tym obecność metod związanych z wątkami już w klasie \texttt{Object}, która jest klasą bazową wszystkich klas języka Java. W wersji 5 języka wprowadzono dużo nowych klas, zawartych w pakiecie \texttt{java.util.concurrent}, mających na celu ułatwienie pracy z równoległym kodem. Wcześniej ręcznie tworzone rozwiązania i wzorce mogą być zastąpione przez wbudowane, wysokiej jakości implementacje pul wątków, kolejek blokujących, list typu copy-on-write, semaforów i barier cyklicznych.
+    
+    Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu FJP, umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę "dziel i rządź". Tworzona jest pula wątków (o dowolnej ich ilości), do której wysyła się zadanie, będące obiektem klasy \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. W kodzie programu należy sprawdzić, czy ten fakt występuje. Jeśli tak, zadanie należy podzielić, wysłać do puli wątków i zebrać wyniki po zakończeniu wykonywania się podzadań. W przeciwnym przypadku wystarczy zwrócić wynik. Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest poniżej. 
+
+\begin{lstlisting}[label=fjpexample, caption=Przykładowe wykorzystanie FJP]
+
+public class SummingTask extends RecursiveTask<Integer> {
+    
+    private List<Integer> source;
+    
+    SummingTask(List<Integer> source) {
+        this.source = source;
+    }
+    
+    @Override
+    protected Integer compute() {
+        if (source.size() > 1) {
+            List<SummingTask> tasks = splitTasks();
+            
+            invokeAll(tasks);
+            
+            int partialSum = 0;
+            for (SummingTask task : tasks) {
+                partialSum += task.join();
+            }
+            return partialSum;
+        } else {
+            return source.get(0);
+        }
+    }
+    
+    private List<SummingTask> splitTasks() {
+        return asList(
+                new SummingTask(source.subList(0, source.size() / 2)),
+                new SummingTask(source.subList(source.size() / 2, source.size()))
+        );
+    }
+    
+    public static void main(String[] args) throws Exception {
+        ForkJoinPool forkJoinPool = new ForkJoinPool(10);
+        SummingTask task = new SummingTask(asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        Integer sum = forkJoinPool.submit(task).get();
+        System.out.println(sum);
+    }
+}
+
+\end{lstlisting}
+
+    FJP wykorzystany został przy implementacji równoległych strumieni. Jego znajomość nie jest konieczna do ich używania, natomiast może być przydatna przy badaniu wydajności przetwarzania strumieniowego. Domyślnie, przy tworzeniu strumienia nie jest możliwe wybranie puli wątków, w której przetwarzanie będzie zachodzić - przy bezpośrednim użyciu FJP jest to możliwe, wraz z określeniem docelowej, maksymalnej liczby wątków.
 
 \subsection{Różnice pomiędzy metodami}
 
