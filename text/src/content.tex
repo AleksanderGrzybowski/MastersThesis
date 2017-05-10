@@ -273,6 +273,15 @@ public class SummingIntegersH2 {
     \item \texttt{HugeJoining} - iloczyn kartezjański dwóch kolumn
 \end{itemize}
 
+
+\subsection{Wyniki badań dla danych syntetycznych}
+
+    Już po pobieżnym spojrzeniu na wyniki testów rzuca się w oczy kilka wniosków. Najszybszą i zarazem najprostszą ciągła strukturą danych jest zwykła tablica typu prymitywnego. Ze względu na zachowanie ciągłości w pamięci (w typowych implementacjach) i najszybszym możliwym czasie dostępu do elementów z bardzo niskim poziomem abstrakcji, proste operacje wymagające sekwencyjnego odczytu są najszybsze spośród porównanych. Czasy sumowania liczb w tablicy, w porównaniu do czasów sumowania liczb w liście są średnio 3x mniejsze. Należy jednak zaznaczyć, że optymalizacje tego typu znacząco utrudniają pisanie kodu, ze względu na rezygnację z wygodnych metod interfejsu \texttt{List<T>}. W większości typowych, biznesowych zastosowań mikrooptymalizacje tego typu nie będą istotne z punku widzenia wydajności całych aplikacji, aczkolwiek w pewnych szczególnych zastosowaniach (np. dziedzina High Frequency Trading) mogą mieć pewne znaczenie.
+
+    W zbadanych przypadkach strumienie równoległe wykazują większą wydajność niż strumienie sekwencyjne od pewnego rozmiaru danych wejściowych. Utworzenie strumienia równoległego i jego skonsumowanie wymaga uruchomienie całego procesu podziału danych na wątki, wykonywania operacji i łączenia wyników z poszczególnych wątków. Daje to pewien narzut, który jest szczególnie widoczny przy małych listach, dla których operacje sekwencyjne wykonują się szybciej. Niestety, nie istnieje sposób pozwalający przewidzieć, który rodzaj strumienia (sekwencyjny czy równoległy) byłby lepszym wyborem dla danej sytuacji. Możliwe byłoby zaproponowanie heurystycznej metody, określającej rodzaj na podstawie wielkości danych wejściowych, ale nie byłby on niezawodny, więc dobór metody pozostawiony jest programiście.
+
+    Strumienie i bezpośrednie operacje na pamięciowych strukturach języka Java są w zdecydowanej większości przypadków szybsze niż ich odpowiedniki w języku SQL. Porównując zaś bazy H2 i MySQL, testy na bazie H2 wykonywane było średnio 1.5-20x razy szybciej niż w przypadku MySQL. Związane jest to z pewnością w pewnym stopniu z narzutami transmisji i konwersji danych pomiędzy procesami. Do połączenia się z bazą dyskową wykorzystany został, tak jak w przypadku bazy pamięciowej, standardowy interfejs JDBC, który wykorzystywał połączenie TCP. Przepustowość tego połączenia nie powinna mieć zbytniego znaczenia (prędkość połączenia typu loopback determinowana jest głównie przez moc procesora, a ilość danych przesyłanych jest znikoma), większy wpływ ma złożoność systemu bazodanowego i metody składowania danych. Należy zauważyć, że w przypadku największych zbiorów testowych różnice w wydajności nie przekraczają 2-3x. Jest to z pewnością związane z przystosowaniem i optymalizacjami baz dyskowych.
+
 \subsection{Zbiór danych TPC-H}
 
     TPC-H jest benchmarkiem wspierania decyzji, stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań. Generator danych testowych \texttt{dbgen} jest konsolowym programem, tworzącym zbiór danych TPC-H. Dane te opisują międzynarodową hurtownię produktów. Znajdują się w niej informacje o produktach, klientach, dostawcach i zamówieniach, zebrane w tabele, których model prezentuje \ref{fig:tpcschema}. Na potrzeby szybkich testów możliwe jest ustalenie procentowego rozmiaru wygenerowanych danych.
@@ -285,6 +294,7 @@ public class SummingIntegersH2 {
 \end{figure}
 
     Dokumentacja TPC-H definiuje 22 zapytania. Są to zapytania typowo statystyczne, pozwalające na ocenienie opłacalności pewnych biznesowych decyzji. Każde zapytanie określone jest przez problem biznesowy (kontekst), definicję zapytania SQL w standardzie SQL-92, parametry które należy podstawić oraz przewidywane wyniki.
+
 
 \section{Porównanie sposobu formułowania kodu}
 
