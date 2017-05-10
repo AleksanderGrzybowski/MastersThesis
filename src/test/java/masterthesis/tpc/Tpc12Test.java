@@ -23,11 +23,16 @@ public class Tpc12Test {
         Tpc12BenchmarkStreams streams = new Tpc12BenchmarkStreams();
         streams.setup();
         
+        Tpc12BenchmarkHashmaps hashmaps = new Tpc12BenchmarkHashmaps();
+        hashmaps.setup();
+        
         List<Tpc12ResultRow> resultH2 = h2.sql();
         List<Tpc12ResultRow> resultMysql = mysql.sql();
         List<Tpc12ResultRow> resultStreams = streams.parallelStreams();
+        List<Tpc12ResultRow> resultHashmaps = hashmaps.parallelStreams();
         
         assertEquals(resultH2, resultStreams);
         assertEquals(resultH2, resultMysql);
+        assertEquals(resultH2, resultHashmaps);
     }
 }
