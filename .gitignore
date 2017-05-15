@@ -12,3 +12,5 @@ text/src/*.pdf
 *.aux
 *.log
 *.toc
+
+plots/*.png
