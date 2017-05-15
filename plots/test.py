@@ -5,31 +5,49 @@ import matplotlib.pyplot as plt
 from itertools import groupby
 import pprint
 
-if (len(sys.argv) != 2):
-    print("Usage: %s <results file>" % (sys.argv[0]))
+
+def read_and_parse_file(filename):
+    with open(input_filename) as file:
+        next(file) 
+        split_lines = [x.split() for x in file.readlines()]
+        return [ [line[0], float(line[1]), float(line[4].replace(',', '.'))] for line in split_lines]
+
+if (len(sys.argv) != 3):
+    print("Usage: %s <results file> <lin|log>" % (sys.argv[0]))
     exit(1)
 
 input_filename = sys.argv[1]
 print("Opening file %s" % (input_filename))
 
-with open(input_filename) as file:
-    next(file)
-    data = [ [line[0], int(line[1]), float(line[4].replace(',', '.'))] for line in [x.split() for x in file.readlines()]]
+data = read_and_parse_file(input_filename)
 
-groups = []
-for k, g in groupby(data, itemgetter(0)):
-   groups.append(list(g))    # Store group iterator as a list
+groups = [list(g) for k, g in groupby(data, itemgetter(0))]
 
-groups_without_labels = []
+groups_transposed = []
+
 for group in groups:
-    groups_without_labels.append([[x[1], x[2]] for x in group])
+    print(group)
+    name = group[0][0]
+    array_x = []
+    array_y = []
+    for point in group:
+        array_x.append(point[1])
+        array_y.append(point[2])
+    groups_transposed.append([array_x, array_y, name])
 
 
-groups_transposed = [list(map(list, zip(*l))) for l in groups_without_labels]
 
-plt.yscale('log')
+
+print(groups_transposed)
+
+if (sys.argv[2] == 'log'):
+    plt.yscale('log')
+
 for series in groups_transposed:
-    plt.plot(series[0], series[1], linestyle='-', marker='o')
+    plt.plot(series[0], series[1], linestyle='-', marker='o', label=series[2])
+    plt.legend(prop={'size': 8})
 
-plt.ylabel('Results')
+plt.ylabel('ops/s')
+plt.xlabel('Dataset size')
+plt.title('Plot')
 plt.show()
