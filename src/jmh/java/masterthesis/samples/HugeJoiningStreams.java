@@ -16,7 +16,7 @@ public class HugeJoiningStreams {
     private List<Integer> firstList = new ArrayList<>();
     private List<Integer> secondList = new ArrayList<>();
     
-    @Param({"2000"})
+    @Param({"100", "200", "500", "1000", "2000"})
     public int numberCount;
     
     @Setup

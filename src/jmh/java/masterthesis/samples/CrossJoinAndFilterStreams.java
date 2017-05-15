@@ -22,7 +22,7 @@ public class CrossJoinAndFilterStreams {
     private List<Pair<Integer, Integer>> firstList = new ArrayList<>();
     private List<Pair<Integer, String>> secondList = new ArrayList<>();
     
-    @Param({"100", "1000", "10000"})
+    @Param({"100", "200", "500", "1000", "2000", "5000", "10000"})
     public int numberCount;
     
     @Setup

@@ -18,7 +18,7 @@ public class HugeJoiningMysql {
     
     private Connection connection;
     
-    @Param({"2000"})
+    @Param({"100", "200", "500", "1000", "2000"})
     public int numberCount;
     
     @Setup
