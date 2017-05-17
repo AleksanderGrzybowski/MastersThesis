@@ -310,11 +310,14 @@ public class SummingIntegersH2 {
 
 
 
-
-
 \subsection{Zbiór danych TPC-H}
 
-    TPC-H jest benchmarkiem wspierania decyzji, stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań. Generator danych testowych \texttt{dbgen} jest konsolowym programem, tworzącym zbiór danych TPC-H. Dane te opisują międzynarodową hurtownię produktów. Znajdują się w niej informacje o produktach, klientach, dostawcach i zamówieniach, zebrane w tabele, których model prezentuje \ref{fig:tpcschema}. Na potrzeby szybkich testów możliwe jest ustalenie procentowego rozmiaru wygenerowanych danych.
+    TPC-H jest benchmarkiem stworzonym przez organizację non-profit Transaction Processing Performance Council stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań.
+
+    Generator danych testowych \texttt{dbgen} jest konsolowym programem, służącym do generowania zbiorów danych testowych TPC-H. Schemat bazy danych zaprezentowany jest na \ref{fig:tpcschema}. Jest to typowa hurtownia danych, gromadząca informacje o produktach, klientach, dostawcach i zamówieniach. Dokładny sens biznesowy wygenerowanych danych nie jest specjalnie istotny w rozważaniach wydajnościowych, na potrzeby niniejszej pracy zakłada się ich poprawność w sensie zgodności referencyjnej i reprezentatywności sytuacji możliwej do zaistnienia w rzeczywistości. Program \texttt{dbgen} pozwala na zdefiniowanie wielkości wygenerowanego zbioru, procentowo względem zbioru referencyjnego o wielkości 1.0. Ze względu na praktyczne ograniczenia platformy testowej, konieczne było ograniczenie maksymalnej wielkości zbioru do ok. 30\%, zależnie od przypadku testowego. 
+
+    Drugą częścią TPC jest zbiór 22 zapytań testowych, które odpowiadają na pytania biznesowe i w rezultacje pomagają wspierać decyzje. Różnią się one znacznie stopniem skomplikowania (pod względem ogólnej złożoności kodu SQL) i średnim czasem wykonania. Prawidłowe wyniki wzorcowe są także udostępniane przez TPC, niestety jedynie dla zbioru danych o wielkości 1.0. Część zapytań można jednak zwalidować mimo tego, jeśli bazują one na typowych agregacjach typu suma, średnia czy ilość. Nie jest to oczywiście zbyt pewny sposób, tak więc do środowiska badawczego wprowadzono zbiór testów jednostkowych, które sprawdzają, czy wyniki uzyskane z wykonania zapytania na wszystkich systemach bazodanowych są identyczne.
+
 
 \begin{figure}[h]
 \centering
