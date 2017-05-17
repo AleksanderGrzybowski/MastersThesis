@@ -331,4 +331,37 @@ public class SummingIntegersH2 {
 
 \section{Porównanie sposobu formułowania kodu}
 
+\subsection{Kolejność wykonywania zapytania SQL}
+
+    Jedną z ważniejszych cech języka programowania jest sposób interpretacji kodu programu przez interpreter bądź kompilator. Język SQL jest dość ciekawym przypadkiem, ponieważ leksykalna kolejność operacji jest odmienna od logicznej kolejności. Wprowadza to wiele zamieszania, zwłaszcza pośród początkujących programistów. Poniżej zaprezentowane jest przykładowe zapytanie SQL, przeznaczone do wykonania na testowej bazie TPC:
+
+
+\begin{lstlisting}[label=sqlorder, caption=Przykład kolejności wykonywania zapytania SQL]
+select customers.name, sum(order.totalprice)
+from orders 
+    join customers on customers.custkey = orders.custkey
+where customer.acctbal > 1000
+group by customers.custkey, customers.name
+having count(*) > 10
+order by customers.name;
+\end{lstlisting}
+
+Pomijając bardzo prawdopodobne optymalizacje, powyższe zapytanie interpretowane jest w następujący sposób, w następującej kolejności:
+
+\begin{itemize}
+    \item \textbf{from orders join customer} - pierwszym krokiem jest wybranie tabeli (tabel), z których pobrane zostaną dane. Należy zauważyć, że klauzula \textbf{join} jest logicznie częścią klauzuli \textbf{where}, jedynie skrótowo zapisaną.
+    \item \textbf{where customer.acctbal > 1000} - następnie wiersze są filtrowane. W tym momencie następuje odrzucenie niechcianych danych. 
+    \item \textbf{group by customers.custkey, customers.name} - następuje tworzenie grup na podstawie podanej krotki. Podczas grupowania obliczane są wszystkie funkcje agregujące występujące w zapytaniu.
+    \item \textbf{having count(*) > 10} - na grupach wykonywane jest dalsze filtrowanie, na podstawie wyliczonych w poprzednim kroku funkcji, tutaj sprawdzana jest wielkość grup.
+    \item \textbf{select customers.name, sum(order.totalprice)} - z pośredniej tabeli, zawierającej jak dotąd wszystkie kolumny z obu tabel po połączeniu, wybierane są jedynie wymagane kolumny.
+    \item \textbf{order by customers.name} - na samym końcu wykonywane jest sortowanie.
+\end{itemize}
+
+Jak można zauważyć, logiczna kolejność wykonywania zapytania jest znacząco odmienna od faktycznej kolejności.
+
+\subsection{Kolejność wykonywania zapytania strumieniowego}
+
+de facto brak optymalizacji, poza równoległością
+każda metoda zwraca Stream, możliwe są też primitive streamy
+
 \end{document}
