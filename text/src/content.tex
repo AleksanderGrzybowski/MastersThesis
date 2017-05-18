@@ -50,7 +50,7 @@
         \textbf{Kierujący pracą:} dr inż. Ewa Płuciennik\\
     \endgroup
 
-    \vspace{1.0cm}
+    \vspace{3.0cm}
     \begingroup
         \fontsize{12pt}{14pt}\selectfont
         \begin{center}
@@ -331,7 +331,7 @@ public class SummingIntegersH2 {
 
 \section{Porównanie sposobu formułowania kodu}
 
-\subsection{Kolejność wykonywania zapytania SQL}
+\subsection{Proces wykonywania zapytania SQL}
 
     Jedną z ważniejszych cech języka programowania jest sposób interpretacji kodu programu przez interpreter bądź kompilator. Język SQL jest dość ciekawym przypadkiem, ponieważ leksykalna kolejność operacji jest odmienna od logicznej kolejności. Wprowadza to wiele zamieszania, zwłaszcza pośród początkujących programistów. Poniżej zaprezentowane jest przykładowe zapytanie SQL, przeznaczone do wykonania na testowej bazie TPC:
 
@@ -359,9 +359,10 @@ Pomijając bardzo prawdopodobne optymalizacje, powyższe zapytanie interpretowan
 
 Jak można zauważyć, logiczna kolejność wykonywania zapytania jest znacząco odmienna od faktycznej kolejności.
 
-\subsection{Kolejność wykonywania zapytania strumieniowego}
+\subsection{Proces wykonywania zapytania strumieniowego}
 
-de facto brak optymalizacji, poza równoległością
-każda metoda zwraca Stream, możliwe są też primitive streamy
+* różnice parallel i sequential
+* streamy są bardzo ograniczone
+* porównanie push-pull (Observable)
 
 \end{document}
