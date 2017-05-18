@@ -69,13 +69,13 @@
 
 \subsection{Bazy danych SQL w pamięci (in-memory)}
 
-    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania dla zarówno małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a wykorzystanie pamięci podręcznych nie spełnia wymagań biznesowych.
+    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, cache na poziomie aplikacji) nie spełniają wymagań biznesowych.
 
     Jako iż porównanie baz danych i strumieni w Java 8 powinno być rzetelne, konieczne jest wybranie do badań baz in-memory działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one wykorzystywane głównie w celach deweloperskich, jako tymczasowe środowiska do testowania programów wymagających bazy danych SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i in-memory obsługuje się praktycznie w ten sam sposób. Dzięki temu możliwe jest dokonanie łatwego i miarodajnego pomiaru wydajności.
 
 \subsection{Strumienie w Java 8}
 
-    Stream API jest wprowadzonym w wersji 8 Javy komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest abstrakcyjną reprezentacją ciągu obiektów, które pochodzą z jakiegoś źródła, na podstawie którego strumień został utworzony. Zazwyczaj strumienie tworzone są na podstawie kolekcji, ale możliwe jest także generowanie obiektów w locie. Strumienie obsługują wykonywanie prostych i złożonych operacji filtrowania, sortowania, mapowania i grupowania, przy czym możliwe jest też samodzielne tworzenie obiektów przetwarzających dane (interfejs \texttt{Collector}). Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są 'leniwie', to znaczy, żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej. Wystąpienie operacji terminalnej powoduje łańcuchowe wykonanie się wszystkich operacji pośrednich.
+    Stream API jest wprowadzonym w wersji 8 Javy komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest abstrakcyjną reprezentacją ciągu obiektów, które pochodzą z pewnego źródła. Zazwyczaj strumienie tworzone są na podstawie kolekcji, ale możliwe jest także generowanie obiektów w locie. Strumienie obsługują wykonywanie prostych i złożonych operacji filtrowania, sortowania, mapowania i grupowania, przy czym możliwe jest też samodzielne tworzenie obiektów przetwarzających dane (interfejs \texttt{Collector}). Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są 'leniwie', to znaczy, żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej. Wystąpienie operacji terminalnej powoduje łańcuchowe wykonanie się wszystkich operacji pośrednich.
 
     Cechą szczególną strumieni jest możliwość ich łatwego zrównoleglania, udostępniona programistom w postaci metody \texttt{Stream.parallelStream}. Wielowątkowe przetwarzanie danych jest dość złożonym zagadnieniem w Javie, wymagana jest duża wiedza na temat działania maszyny wirtualnej (Java Memory Model) i szczególna ostrożność przy blokowaniu zasobów. Jako iż strumienie definiowane są zwykle przez funkcje nie zmieniające stanu, dodanie równoległości jest znacznie prostsze. Jednym z celów niniejszej pracy jest zbadanie, jaki wpływ na wydajność mogą mieć równoległe strumienie.
 
@@ -84,14 +84,14 @@
 \begin{lstlisting}[label=streamexample, caption=Przykładowe wykorzystanie Stream API]
 
 List<Customer> canadiansSortedByBalance = customers.stream()
-        .filter(customer -> Objects.equals(
-                customer.nation.name,
-                "CANADA"
-        ))
-        .sorted(Comparator.comparing(
-                customer -> customer.acctbal
-        ))
-        .collect(toList());
+    .filter(customer -> Objects.equals(
+        customer.nation.name,
+        "CANADA"
+    ))
+    .sorted(Comparator.comparing(
+        customer -> customer.acctbal
+    ))
+    .collect(toList());
 
 \end{lstlisting}
 
@@ -108,14 +108,14 @@ List<Customer> canadiansSortedByBalance = customers.stream()
 
 List<String> high = asList("1-URGENT", "2-HIGH");
 Map<Customer, Long> orderCountsByCustomer = orders.stream()
-        .filter(o -> high.contains(o.orderPriority))
-        .collect(
-                Collectors.groupingBy(order -> order.customer,
-                        Collectors.counting()
-                )
-        );
-        
-        
+    .filter(o -> high.contains(o.orderPriority))
+    .collect(
+        Collectors.groupingBy(order -> order.customer,
+            Collectors.counting()
+        )
+    );
+    
+    
 
 \end{lstlisting}
 
@@ -124,7 +124,7 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 \begin{lstlisting}{label=parallelstreams, caption=Strumienie}
 
 IntStream.range(1, 100).parallel()
-        .forEach(e -> System.out.println(Thread.currentThread().getName()));
+  .forEach(e -> System.out.println(Thread.currentThread().getName()));
 
 \end{lstlisting}
 
@@ -139,43 +139,43 @@ IntStream.range(1, 100).parallel()
 \begin{lstlisting}[label=fjpexample, caption=Przykładowe wykorzystanie FJP]
 
 public class SummingTask extends RecursiveTask<Integer> {
-    
-    private List<Integer> source;
-    
-    SummingTask(List<Integer> source) {
-        this.source = source;
+  
+  private List<Integer> source;
+  
+  SummingTask(List<Integer> source) {
+    this.source = source;
+  }
+  
+  @Override
+  protected Integer compute() {
+    if (source.size() > 1) {
+      List<SummingTask> tasks = splitTasks();
+      
+      invokeAll(tasks);
+      
+      int partialSum = 0;
+      for (SummingTask task : tasks) {
+        partialSum += task.join();
+      }
+      return partialSum;
+    } else {
+      return source.get(0);
     }
-    
-    @Override
-    protected Integer compute() {
-        if (source.size() > 1) {
-            List<SummingTask> tasks = splitTasks();
-            
-            invokeAll(tasks);
-            
-            int partialSum = 0;
-            for (SummingTask task : tasks) {
-                partialSum += task.join();
-            }
-            return partialSum;
-        } else {
-            return source.get(0);
-        }
-    }
-    
-    private List<SummingTask> splitTasks() {
-        return asList(
-                new SummingTask(source.subList(0, source.size() / 2)),
-                new SummingTask(source.subList(source.size() / 2, source.size()))
-        );
-    }
-    
-    public static void main(String[] args) throws Exception {
-        ForkJoinPool forkJoinPool = new ForkJoinPool(10);
-        SummingTask task = new SummingTask(asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
-        Integer sum = forkJoinPool.submit(task).get();
-        System.out.println(sum);
-    }
+  }
+  
+  private List<SummingTask> splitTasks() {
+    return asList(
+        new SummingTask(source.subList(0, source.size() / 2)),
+        new SummingTask(source.subList(source.size() / 2, source.size()))
+    );
+  }
+  
+  public static void main(String[] args) throws Exception {
+    ForkJoinPool forkJoinPool = new ForkJoinPool(10);
+    SummingTask task = new SummingTask(asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+    Integer sum = forkJoinPool.submit(task).get();
+    System.out.println(sum);
+  }
 }
 
 \end{lstlisting}
@@ -195,15 +195,13 @@ public class SummingTask extends RecursiveTask<Integer> {
     Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedure składowane (stored procedures). Przy użyciu Stream możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna.
     
 
-\section{Badanie wydajności}
+\section{Środowisko badawcze}
 
 \subsection{Kryteria oceny}
 
     W niniejszej pracy pod pojęciem 'wydajność' rozumie się efektywny, uśredniony czas wykonania się danego zapytania i uzyskania wyników dostępnych w pamięci programu. Kryterium czasowe zostało przyjęte ze względu na łatwość jego pomiaru i bezpośrednie jego przełożenie na ogólną wydajność systemu wykorzystującego dane zapytanie. Niemniej jednak, w celach porównawczych, wykonane zostały również pomiary ilości zajętej pamięci, w celu zbadania wpływu struktur danych baz in-memory na zużycie pamięci. Jednym z problemów może być działanie odśmiecacza (garbage collector), który może być uruchamiany przez maszynę wirtualną Java w różnych fazach wykonywania badań, tak więc konieczna jest szczególna ostrożność przy interpretowaniu wyników.
     Jedną z trudności, które napotkano przy wykonywaniu eksperymentów, jest znaczny wpływ zastosowanej platformy sprzętowej na uzyskane wyniki. Oczywiście wydajność procesora będzie różnicowała ilość operacji na sekundę, natomiast konieczne jest sprawdzenie, czy relatywne porównanie wyników na różnych platformach jest jest takie same. Jeśli tak, to możliwe jest wyciągnięcie bardziej ogólnych wniosków z uzyskanych wyników, w przeciwnym przypadku możliwe jest, że dobór platformy sprzętowej jest istotny.
     Przy porównywaniu dwóch zupełnie różnych metod dostępu do danych, konieczne jest ustalenie postaci wynikowej pojedynczego eksperymentu. W przypadku języka SQL i metod JDBC wynik zapytania do bazy danych reprezentowany jest przez obiekt \texttt{ResultSet}, który udostępnia metody do poruszania się po wynikowych wierszach i wyciągania pojedynczych kolumn. W przypadku Stream API, rezultat zapytania dostępny jest od razu w formie obiektów standardowych kolekcji języka Java, takich jak \texttt{List<T>} czy \texttt{Map<K,V>}. W związku z tym, aby zapewnić sprawiedliwe porównanie obu metod, po wykonaniu zapytania SQL konieczne jest rozpakowanie obiektu \texttt{ResultSet} i przeniesienie danych do kolekcji Javy, aby uzyskać wynik w tej samej postaci.
-
-\section{Środowisko badawcze}
 
 \subsection{Budowa środowiska badawczego}
 
@@ -220,46 +218,48 @@ public class SummingTask extends RecursiveTask<Integer> {
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
 public class SummingIntegersH2 {
+  
+  private Connection connection;
+  
+  @Param({"100", "1000", "10000"})
+  public int numberCount;
+  
+  @Setup
+  public void setup() throws Exception {
+    connection = newDatabase("h2");
+    connection.createStatement().execute(
+        "CREATE TABLE numbers (val INT)"
+    );
+    Random random = new Random(12345L);
     
-    private Connection connection;
-    
-    @Param({"100", "1000", "10000"})
-    public int numberCount;
-    
-    @Setup
-    public void setup() throws Exception {
-        connection = newDatabase("h2");
-        connection.createStatement().execute(
-                "CREATE TABLE numbers (val INT)"
-        );
-        Random random = new Random(12345L);
-        
-        for (int i = 0; i < numberCount; ++i) {
-            int randomNumber = random.nextInt(1000);
-            connection.createStatement()
-                    .execute(
-                            "insert into numbers values ("
-                                    + randomNumber +
-                                    ")"
-                    );
-        }
+    for (int i = 0; i < numberCount; ++i) {
+      int randomNumber = random.nextInt(1000);
+      connection.createStatement()
+          .execute(
+              "insert into numbers values ("
+                  + randomNumber +
+                  ")"
+          );
     }
+  }
+  
+  @Benchmark
+  public int sql() throws Exception {
+    ResultSet resultSet = connection
+        .createStatement()
+        .executeQuery("SELECT sum(val) FROM numbers");
+    resultSet.next();
     
-    @Benchmark
-    public int sql() throws Exception {
-        ResultSet resultSet = connection
-                .createStatement()
-                .executeQuery("SELECT sum(val) FROM numbers");
-        resultSet.next();
-        
-        return resultSet.getInt(1);
-    }
+    return resultSet.getInt(1);
+  }
 }
 
 
 \end{lstlisting}
 
     Każda zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z pliku w przypadku wykorzystania benchmarka TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Biblioteka JMH zapewnia dokładny pomiar czasu wykonywania się fragmentów kodu, chroni przed zbyt agresywnymi optymalizacjami maszyny wirtualnej oraz udostępnia wygodny raport z przeprowadzonych testów, wraz z danymi statystycznymi typu wariancja.
+
+\section{Dane testowe i wyniki}
 
 \subsection{Dane testowe syntetyczne}
 
