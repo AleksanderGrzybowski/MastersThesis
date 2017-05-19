@@ -68,20 +68,19 @@
 \section{Wstęp}
 
 
-    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, cache na poziomie aplikacji) nie spełniają wymagań biznesowych.
+    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym w praktyce rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, cache na poziomie aplikacji) nie spełniają wymagań biznesowych.
 
-    TODO krótko o strumieniach
+    Stream API zostało wprowadzone do języka Java w wersji 8, która opublikowana została oficjalnie 18 marca 2014 roku. Wraz ze strumieniami do języka trafiły nowe funkcjonalności, z których najważniejsze okazały się wyrażenia lambda. Rosnąca popularność paradygmatu funkcyjnego i korzyści z nim związane zachęciły twórców języka do wprowadzenia elementów funkcyjnych do języka. 
 
 \section{Bazy SQL in-memory}
 
 \subsection{Zastosowanie}
 
-      Są one wykorzystywane głównie w celach deweloperskich, jako tymczasowe środowiska do testowania programów wymagających bazy danych SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i in-memory obsługuje się praktycznie w ten sam sposób. Dzięki temu możliwe jest dokonanie łatwego i miarodajnego pomiaru wydajności.
+      Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM (Object Relational Mapping) możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów (powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL). Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu.  Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i in-memory obsługuje się praktycznie w ten sam sposób. 
 
 \subsection{Wybór implementacji}
 
-    Jako iż porównanie baz danych i strumieni w Java 8 powinno być rzetelne, konieczne jest wybranie do badań baz in-memory działających w środowisku maszyny wirtualnej Javy.Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB.
-
+    Jako iż porównanie baz danych i strumieni w Java 8 powinno być rzetelne, konieczne jest wybranie do badań baz in-memory działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one powszechnie stosowane w profesjnonalnych frameworkach takich jak Spring czy Grails, wspomagając start nowego projektu bez ściśle określonego schematu bazy, która generowana jest przy każdym starcie aplikacji. Implementują one w zdecydowanej większości standard ANSI-SQL, jednakże pewne niewielkie braki nie powodują problemów w przypadku niniejszej pracy, ze względu na zastosowanie najbardziej podstawowych elementów języka SQL przy badaniu wydajności. 
 
 \section{Strumienie w Java 8}
 
@@ -89,11 +88,11 @@
 
     Stream API jest wprowadzonym w wersji 8 Javy komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest abstrakcyjną reprezentacją ciągu obiektów, które pochodzą z pewnego źródła. Zazwyczaj strumienie tworzone są na podstawie kolekcji, ale możliwe jest także generowanie obiektów w locie. Strumienie obsługują wykonywanie prostych i złożonych operacji filtrowania, sortowania, mapowania i grupowania, przy czym możliwe jest też samodzielne tworzenie obiektów przetwarzających dane (interfejs \texttt{Collector}). Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są 'leniwie', to znaczy, żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej. Wystąpienie operacji terminalnej powoduje łańcuchowe wykonanie się wszystkich operacji pośrednich.
 
-    Cechą szczególną strumieni jest możliwość ich łatwego zrównoleglania, udostępniona programistom w postaci metody \texttt{Stream.parallelStream}. Wielowątkowe przetwarzanie danych jest dość złożonym zagadnieniem w Javie, wymagana jest duża wiedza na temat działania maszyny wirtualnej (Java Memory Model) i szczególna ostrożność przy blokowaniu zasobów. Jako iż strumienie definiowane są zwykle przez funkcje nie zmieniające stanu, dodanie równoległości jest znacznie prostsze. Jednym z celów niniejszej pracy jest zbadanie, jaki wpływ na wydajność mogą mieć równoległe strumienie.
+    Cechą szczególną strumieni jest możliwość ich łatwego zrównoleglania, udostępniona programistom w postaci metody \texttt{Stream.parallelStream}. Wielowątkowe przetwarzanie danych jest dość złożonym zagadnieniem w Javie, wymagającym dużej wiedzy na temat działania maszyny wirtualnej (Java Memory Model) i szczególnej ostrożności przy blokowaniu zasobów. Jako iż strumienie definiowane są zwykle przez funkcje nie zmieniające stanu, dodanie elementu równoległości jest znacznie prostsze. Jednym z celów niniejszej pracy jest zbadanie, jaki wpływ na wydajność mogą mieć równoległe strumienie.
 
 \subsection{Przykład}
 
-    Poniższy listing prezentuje przykładowe użycie strumieni. Dostępna jest kolekcja \newline \texttt{Collection<Customer> customers}, która zawiera obiekty reprezentujące klientów. Każdy klient posiada pola danych, informujące między innymi o kraju jego pochodzenia oraz stanie konta (jest to część modelu danych TPC, który zostanie omówiony szczegółowiej w rozdziale 123). Metoda \texttt{stream} tworzy strumień obiektów typu \texttt{Customer}, na którym wywoływane są metody strumieniowe. Metoda \texttt{Stream.filter} przyjmuje obiekt funkcyjny typu \texttt{Predicate}, który określa, czy dany element powinien znaleźć się w wynikowym strumieniu. Warto zaznaczyć, że możliwe jest wykorzystanie dowolnego kodu języka Java - nie ma tutaj ograniczeń na konkretny zbiór funkcji, jak to jest w języku SQL. Metoda \texttt{sorted} zwraca nowy strumień, posortowany według podanego klucza - w domyślnej postaci porównywanie są bezpośrednio obiekty znajdujące się w strumieniu. W tym przypadku wykorzystany został wariant metody sortującej, wykorzystujący funkcję wyciągającą klucz sortowania z obiektu (tutaj - stan konta klienta). Na koniec wyniki zbierane są do listy typu \texttt{java.util.List}. 
+    Poniższy listing prezentuje przykładowe użycie strumieni. Dostępna jest kolekcja \newline \texttt{Collection<Customer> customers}, która zawiera obiekty reprezentujące klientów. Każdy klient posiada pola danych, informujące między innymi o kraju jego pochodzenia oraz stanie konta (jest to część modelu danych TPC, który zostanie omówiony szczegółowiej w rozdziale \ref{tpc}). Metoda \texttt{stream} tworzy strumień obiektów typu \texttt{Customer}, na którym wywoływane są metody strumieniowe. Metoda \texttt{Stream.filter} przyjmuje obiekt funkcyjny typu \texttt{Predicate}, który określa, czy dany element powinien znaleźć się w wynikowym strumieniu. Warto zaznaczyć, że możliwe jest wykorzystanie dowolnego kodu języka Java - nie ma tutaj ograniczeń na konkretny zbiór funkcji, jak w przypadku języka SQL. Metoda \texttt{sorted} zwraca nowy strumień, posortowany według podanego klucza - domyślnie porównywane są bezpośrednio obiekty znajdujące się w strumieniu. W tym przypadku wykorzystany został wariant metody sortującej, wykorzystujący funkcję wyciągającą klucz sortowania z obiektu (tutaj - stan konta klienta). Na koniec wyniki zbierane są do listy typu \texttt{java.util.List}. 
 
 \begin{lstlisting}[label=streamexample, caption=Przykładowe wykorzystanie Stream API]
 
@@ -111,7 +110,7 @@ List<Customer> canadiansSortedByBalance = customers.stream()
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=11cm]{flow.png}
+\includegraphics[width=14cm]{flow.png}
 \caption{Przepływ danych}
 \label{fig:flow}
 \end{figure}
@@ -135,7 +134,7 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
 \subsection{Przetwarzanie równoległe}
 
-    Jednym z ciekawszych zastosowań strumieni jest równoległe przetwarzanie danych. Równoległe strumienie wykorzystują \texttt{ForkJoinPool} wprowadzony w Java 7. Jest to wzorzec aplikacyjny, który wykorzystuje jako zasadę działania regułę "dziel i rządź". Zostanie on omówiony krótko w następnym rozdziale, natomiast strumienie w pełni enkapsulują jego wykorzystanie w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na następującym przykładzie, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.
+    Jednym z przydatnych zastosowań strumieni jest równoległe przetwarzanie danych. Równoległe strumienie wykorzystują \texttt{ForkJoinPool} wprowadzony w Java 7. Jest to wzorzec aplikacyjny, który wykorzystuje jako zasadę działania regułę "dziel i rządź". Zostanie on omówiony krótko w następnym rozdziale, natomiast strumienie w pełni enkapsulują jego wykorzystanie w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na następującym przykładzie, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.
 
 \begin{lstlisting}{label=parallelstreams, caption=Strumienie}
 
@@ -200,7 +199,7 @@ public class SummingTask extends RecursiveTask<Integer> {
 
 \section{Różnice pomiędzy metodami}
 
-    Pomiędzy przetwarzaniem strumieniowym, a bazami SQL działającymi w pamięci występuje bardzo dużo różnic, pomimo pozornie podobnej zasady działania. Celem obu podejść jest uzyskanie wygodnego i względnie szybkiego wykonywania zapytań, natomiast różnice w implementacji znacząco wpływają na ten cel.
+    Pomiędzy przetwarzaniem strumieniowym, a bazami SQL działającymi w pamięci występuje bardzo dużo różnic, pomimo pozornie podobnej zasady działania i efektu końcowego. Celem obu podejść jest uzyskanie wygodnego i względnie szybkiego wykonywania zapytań, natomiast różnice w implementacji znacząco wpływają na ten cel.
 
 \subsection{Struktury danych}
 
@@ -221,7 +220,7 @@ public class SummingTask extends RecursiveTask<Integer> {
 
 \subsection{Kryteria oceny}
 
-    W niniejszej pracy pod pojęciem 'wydajność' rozumie się efektywny, uśredniony czas wykonania się danego zapytania i uzyskania wyników dostępnych w pamięci programu. Kryterium czasowe zostało przyjęte ze względu na łatwość jego pomiaru i bezpośrednie jego przełożenie na ogólną wydajność systemu wykorzystującego dane zapytanie. Niemniej jednak, w celach porównawczych, wykonane zostały również pomiary ilości zajętej pamięci, w celu zbadania wpływu struktur danych baz in-memory na zużycie pamięci. Jednym z problemów może być działanie odśmiecacza (garbage collector), który może być uruchamiany przez maszynę wirtualną Java w różnych fazach wykonywania badań, tak więc konieczna jest szczególna ostrożność przy interpretowaniu wyników.
+    W niniejszej pracy pod pojęciem 'wydajność' rozumie się efektywny, uśredniony czas wykonania się danego zapytania i uzyskania wyników dostępnych w pamięci programu. Kryterium czasowe zostało przyjęte ze względu na łatwość jego pomiaru i bezpośrednie jego przełożenie na ogólną wydajność systemu wykorzystującego dany system bazodanowy. Niemniej jednak, w celach porównawczych, wykonane zostały również pomiary ilości zajętej pamięci, w celu zbadania wpływu struktur danych baz in-memory na zużycie pamięci. Jednym z problemów może być działanie odśmiecacza (garbage collector), który może być uruchamiany przez maszynę wirtualną Java w różnych fazach wykonywania badań, tak więc konieczna jest szczególna ostrożność przy interpretowaniu wyników.
     Jedną z trudności, które napotkano przy wykonywaniu eksperymentów, jest znaczny wpływ zastosowanej platformy sprzętowej na uzyskane wyniki. Oczywiście wydajność procesora będzie różnicowała ilość operacji na sekundę, natomiast konieczne jest sprawdzenie, czy relatywne porównanie wyników na różnych platformach jest jest takie same. Jeśli tak, to możliwe jest wyciągnięcie bardziej ogólnych wniosków z uzyskanych wyników, w przeciwnym przypadku możliwe jest, że dobór platformy sprzętowej jest istotny.
     Przy porównywaniu dwóch zupełnie różnych metod dostępu do danych, konieczne jest ustalenie postaci wynikowej pojedynczego eksperymentu. W przypadku języka SQL i metod JDBC wynik zapytania do bazy danych reprezentowany jest przez obiekt \texttt{ResultSet}, który udostępnia metody do poruszania się po wynikowych wierszach i wyciągania pojedynczych kolumn. W przypadku Stream API, rezultat zapytania dostępny jest od razu w formie obiektów standardowych kolekcji języka Java, takich jak \texttt{List<T>} czy \texttt{Map<K,V>}. W związku z tym, aby zapewnić sprawiedliwe porównanie obu metod, po wykonaniu zapytania SQL konieczne jest rozpakowanie obiektu \texttt{ResultSet} i przeniesienie danych do kolekcji Javy, aby uzyskać wynik w tej samej postaci.
 
@@ -332,7 +331,7 @@ public class SummingIntegersH2 {
 
 
 
-\subsection{Zbiór danych TPC-H}
+\subsection{Zbiór danych TPC-H} \label{tpc}
 
     TPC-H jest benchmarkiem stworzonym przez organizację non-profit Transaction Processing Performance Council stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań.
 
