@@ -132,19 +132,6 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
 \end{lstlisting}
 
-\subsection{Przetwarzanie równoległe}
-
-    Jednym z przydatnych zastosowań strumieni jest równoległe przetwarzanie danych. Równoległe strumienie wykorzystują \texttt{ForkJoinPool} wprowadzony w Java 7. Jest to wzorzec aplikacyjny, który wykorzystuje jako zasadę działania regułę "dziel i rządź". Zostanie on omówiony krótko w następnym rozdziale, natomiast strumienie w pełni enkapsulują jego wykorzystanie w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na następującym przykładzie, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.
-
-\begin{lstlisting}{label=parallelstreams, caption=Strumienie}
-
-IntStream.range(1, 100).parallel()
-  .forEach(e -> System.out.println(Thread.currentThread().getName()));
-
-\end{lstlisting}
-
-    Wynikiem wywołania tego programu jest przemieszana lista wątków, w której znajdują się wątek główny programu \texttt{main} oraz wątki znajdujące się w puli o nazwach podobnych do \texttt{ForkJoinPool.commonPool-worker-3} z numerami od 1 do 7 (test przeprowadzony na maszynie z 8 logicznymi procesorami).
-
 \subsection{Framework \texttt{ForkJoinPool}}
 
     Język Java od samego początku istnienia wyróżniał się znakomitymi możliwościami programowania równoległego, wykorzystywanego głównie w aplikacjach internetowych, obsługujących wielu użytkowników jednocześnie. Świadczy o tym obecność metod związanych z wątkami już w klasie \texttt{Object}, która jest klasą bazową wszystkich klas języka Java. W wersji 5 języka wprowadzono dużo nowych klas, zawartych w pakiecie \texttt{java.util.concurrent}, mających na celu ułatwienie pracy z równoległym kodem. Wcześniej ręcznie tworzone rozwiązania i wzorce mogą być zastąpione przez wbudowane, wysokiej jakości implementacje pul wątków, kolejek blokujących, list typu copy-on-write, semaforów i barier cyklicznych.
@@ -196,6 +183,112 @@ public class SummingTask extends RecursiveTask<Integer> {
 \end{lstlisting}
 
     FJP wykorzystany został przy implementacji równoległych strumieni. Jego znajomość nie jest konieczna do ich używania, natomiast może być przydatna przy badaniu wydajności przetwarzania strumieniowego. Domyślnie, przy tworzeniu strumienia nie jest możliwe wybranie puli wątków, w której przetwarzanie będzie zachodzić - przy bezpośrednim użyciu FJP jest to możliwe, wraz z określeniem docelowej, maksymalnej liczby wątków.
+
+\subsection{Przetwarzanie równoległe i interfejs \texttt{Collector}}
+
+    Jednym z najczęstszych zastosowań strumieni jest równoległe przetwarzanie danych. Strumienie równoległe wykorzystują FJP, natomiast w pełni enkapsulują jego wykorzystanie w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na następującym przykładzie, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.  Wynikiem wywołania tego programu jest przemieszana lista wątków, w której znajdują się wątek główny programu \texttt{main} oraz wątki znajdujące się w puli o nazwach podobnych do \texttt{ForkJoinPool.commonPool-worker-3} z numerami od 1 do 7 (test przeprowadzony na maszynie z 8 logicznymi procesorami).
+
+\begin{lstlisting}{label=parallelstreams, caption=Strumienie}
+
+IntStream.range(1, 100).parallel()
+  .forEach(e -> System.out.println(Thread.currentThread().getName()));
+
+\end{lstlisting}
+
+    Interfejs \texttt{Collector} jest ważną częścią Stream API. Pozwala on na definiowanie tzw. operacji terminalnych, czyli takich, które mogą występować jedynie na samym końcu potoku przetwarzania strumieniowego. Jest to dość niskopoziomowy mechanizm, który jednak nie jest zbyt skomplikowany, a wymusza na programiście zwrócenie uwagi na przetwarzanie równoległe. Parametrem wejściowym obiektu kolektora jest strumień obiektów, przy czym nie jest on przekazywany jawnie, a poszczególne obiekty dostarczane są do odpowienich funkcji definujących kolektor. Wynikiem działania kolektora jest dowolny obiekt bądź kolekcja, ale w założeniu jest to wynik operacji redukującej strumień danych. Instancja kolektora nie posiada stanu - cały stan jest kontrolowany przez wewnętrzne struktury Stream API, co jest bardzo pożądane zwłaszcza w przypadku strumieni równoległych, w przypadku których zachowanie bezpieczeństwa wątkowego byłoby utrudnione
+
+    Do utworzenia obiektu \texttt{Collector} wymagane są trzy (w szczególnym przypadku cztery) funkcje.
+
+\begin{itemize}
+    \item \texttt{Supplier<T> supplier} - funkcja tworząca pośredni kontener danych
+    \item \texttt{BiConsumer<R, T> accumulator} - funkcja dodająca nowy element do pośredniego kontenera
+    \item \texttt{BinaryOperator<R> combiner} - funkcja scalająca dwa pośrednie kontenery w jeden
+    \item \texttt{Function<A, R> finisher} (opcjonalnie) - funkcja przekształcająca pośredni kontener danych w obiekt wynikowy
+\end{itemize}
+
+    Konieczność istnienia pośrednich kontenerów i możliwości ich scalania związana jest bezpośrednio z równoległą naturą strumieni. Jako iż kolektory powinny działać w identyczny sposób ze strumieniami sekwencyjnymi, jak i równoległymi, narzucony został wzorzec uwzględniający przetwarzanie równoległe w każdym przypadku.
+
+    Poniższy przykład prezentuje ręcznie zaimplementowany kolektor \texttt{toList}, który dostępny jest domyślnie w bibliotece standardowej języka Java. 
+
+\begin{lstlisting}[label=toList, caption=Ręczna implementacja \texttt{toList}]
+
+Collector<Integer, List<Integer>, List<Integer>> toList = Collector.of(
+    () -> {
+      ArrayList<Integer> list = new ArrayList<>();
+      out.println("New mutable container " + id(list));
+      return list;
+    },
+    (acc, val) -> {
+      out.println("Adding " + val + " to " + id(acc));
+      acc.add(val);
+    },
+    (acc1, acc2) -> {
+      out.println("Combining " + id(acc1) + " with " + id(acc2));
+      acc1.addAll(acc2);
+      return acc1;
+    }
+);
+
+List<Integer> numbers = asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+out.println(numbers.stream().collect(toList));
+
+\end{lstlisting}
+
+Wynik wykonania tego programu zaprezentowany jest na poniższym listingu. Warto zauważyć, że funkcja łącząca pośrednie kontenery nie została w ogóle wywołana. 
+    
+\begin{verbatim}
+
+New mutable container #6b7
+Adding 1 to #6b7
+Adding 2 to #6b7
+Adding 3 to #6b7
+Adding 4 to #6b7
+Adding 5 to #6b7
+Adding 6 to #6b7
+Adding 7 to #6b7
+Adding 8 to #6b7
+Adding 9 to #6b7
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+\end{verbatim}
+
+Przy wykorzystaniu strumieni równoległych, wynik prezentuje się zupełnie inaczej. Tworzona jest duża ilość kontenerów pośrednich, a wszystkie operacje dodawania i łączenia wykonywane są równolegle w osobnych wątkach.
+
+\begin{verbatim}
+
+Connected to the target VM, address: '127.0.0.1:39537', transport: 'socket'
+New mutable container #42c
+New mutable container #678
+Adding 1 to #42c
+New mutable container #2d8
+New mutable container #1e6
+New mutable container #1df
+New mutable container #37c
+New mutable container #585
+New mutable container #51f
+Adding 2 to #585
+Adding 7 to #37c
+Adding 3 to #1df
+Adding 6 to #1e6
+New mutable container #46f
+Adding 4 to #2d8
+Combining #1df with #2d8
+Adding 5 to #46f
+Adding 9 to #678
+Combining #46f with #1e6
+Combining #42c with #585
+Adding 8 to #51f
+Combining #42c with #1df
+Combining #51f with #678
+Combining #37c with #51f
+Combining #46f with #37c
+Combining #42c with #46f
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+\end{verbatim}
+
+    Automatyczny podział pierwotnego zadania na zadania mniejsze, wykonanie ich, oraz ich późniejsze scalenie odbywa się w całości w wewnętrznym kodzie Stream API. Podany przykład jest przykładem znacznie uproszczonym. Możliwe jest wykonywanie bardzo złożonych operacji na danych (np. zbieranie statystyk), o ile możliwy jest podział i scalenie zadań.
 
 \section{Różnice pomiędzy metodami}
 
