@@ -444,7 +444,13 @@ public class SummingIntegersH2 {
 
 \subsection{Odwzorowanie modelu TPC w języku Java}
 
-* klasy i referencje, przybliżony model domenowy
+    Aby umożliwić badanie działania strumieni na danych benchmarka TPC, konieczne jest przekształcenie relacyjnego modelu danych w model, który jest możliwy do zareprezentowania w języku Java. Typowe odwzorowanie stosowane w systemach obiektowo-relacyjnych wykorzystuje pola obiektów do reprezentacji kolumn oraz referencje do obiektów do reprezentacji powiązań (kluczy obcych) pomiędzy tabelami. Zastosowano więc powyższy sposób do odwzorowania oryginalnej struktury. W rezultacje wynikowy model obiektowy jest bardzo podobny do modelu relacyjnego. Jedyną różnicą jest powiązanie kolekcji \texttt{Partsupp} z kolekcją \texttt{Lineitem} - zbiory te posiadają klucz główny będący kombinacją dwóch pól. Ze względu na dość powolny proces importu danych i budowania kolekcji, konieczne stało się dodanie do klasy \texttt{Partsupp} nowego pola, będącego złączeniem powyższych dwóch pól. Poza procesem wczytywania danych, złączony klucz główny nie jest wykorzystywany.
+
+    Cała hutrownia danych reprezentowana jest przez obiekt klasy \texttt{Store}, który przechowuje wszystkie kolekcje danych TPC. Przy implementacji importu danych okazało się, że nie ma praktycznej możliwości wykorzystania zwykłych list jako kontenerów danych. Odczyt był bardzo powolny, w związku z tym zdecydowano się w większości miejsc na wykorzystanie kolekcji haszującej \texttt{HashMap}, w której jako klucze wykorzystano klucze główne obiektów, ze względu na ich unikalność. Z drugiej strony, nie wykorzystuje się właściwości haszujących przy badaniu wydajności strumieni, ponieważ założeniem jest, by właściwości strumieni były badane w izolacji, bez wpływu wykorzystanych struktur danych.
+
+    * UML :)
+* zajętość pamięci przy Store i H2 dla różnych wielkości
+
 
 
 \subsection{Wyniki badań dla danych TPC}
