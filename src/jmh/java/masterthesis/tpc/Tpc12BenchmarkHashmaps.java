@@ -5,16 +5,13 @@ import mastersthesis.Store;
 import mastersthesis.Tpc12ResultRow;
 import mastersthesis.model.LineItem;
 import mastersthesis.model.Order;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.openjdk.jmh.annotations.*;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -28,27 +25,6 @@ public class Tpc12BenchmarkHashmaps {
     @Param({"0.01"})
     public String scaleFactor;
     
-    public static Stream<ImmutablePair<Order, LineItem>> innerJoinHashmaps(
-            Collection<Order> first,
-            Collection<LineItem> second
-    ) {
-        HashMap<Long, Order> ordersMap = new HashMap<>();
-        for (Order order : first) {
-            ordersMap.put(order.orderkey, order);
-        }
-        
-        List<ImmutablePair<Order, LineItem>> result = new ArrayList<>();
-        
-        for (LineItem lineItem : second) {
-            Order order = ordersMap.get(lineItem.order.orderkey);
-            if (order != null) {
-                result.add(new ImmutablePair<>(order, lineItem));
-            }
-        }
-        
-        return result.stream();
-    }
-    
     @Setup
     public void setup() throws Exception {
         store = new Store("dbgen");
@@ -56,8 +32,12 @@ public class Tpc12BenchmarkHashmaps {
     
     @Benchmark
     public List<Tpc12ResultRow> parallelStreams() throws Exception {
-        AtomicInteger i = new AtomicInteger(0);
-        Map<String, List<IntSummaryStatistics>> collect = innerJoinHashmaps(store.getOrders(), store.getLineItems()).parallel()
+        Map<String, List<IntSummaryStatistics>> collect = StreamUtils.innerJoinHashmaps(
+                store.getOrders(),
+                (Order o) -> o.orderkey,
+                store.getLineItems(),
+                (LineItem l) -> l.order.orderkey
+        ).parallel()
                 .filter(pair -> (Objects.equals(pair.right.shipMode, "MAIL") || Objects.equals(pair.right.shipMode, "SHIP"))
                         &&
                         pair.right.commitDate.compareTo(pair.right.receiptDate) < 0
@@ -91,7 +71,6 @@ public class Tpc12BenchmarkHashmaps {
                         ))
                 );
         
-        System.out.println(1);
         List<Tpc12ResultRow> xx = collect.entrySet().stream()
                 .map(entry -> new Tpc12ResultRow(
                         entry.getKey(),
