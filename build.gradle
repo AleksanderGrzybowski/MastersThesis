@@ -67,3 +67,10 @@ test {
         showStandardStreams = true
     }
 }
+
+task memoryUsage(type: JavaExec, dependsOn: 'compileJava') {
+    main = 'mastersthesis.MemoryUsageTpc'
+    classpath = sourceSets.main.runtimeClasspath
+    jvmArgs = ['-Xms8192m', '-Xmx8192m']
+    args size, type
+}
