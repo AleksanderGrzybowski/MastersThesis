@@ -2,6 +2,7 @@ package masterthesis.tpc;
 
 import mastersthesis.Store;
 import mastersthesis.Tpc4ResultRow;
+import mastersthesis.Utils;
 import mastersthesis.model.Order;
 import org.openjdk.jmh.annotations.*;
 
@@ -27,6 +28,7 @@ public class Tpc4BenchmarkStreams {
     
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         store = new Store("dbgen");
     }
     

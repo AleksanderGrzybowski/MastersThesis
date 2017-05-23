@@ -1,6 +1,7 @@
 package masterthesis.tpc;
 
 import mastersthesis.Store;
+import mastersthesis.Utils;
 import mastersthesis.model.LineItem;
 import org.openjdk.jmh.annotations.*;
 
@@ -22,6 +23,7 @@ public class Tpc6BenchmarkStreams {
     
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         store = new Store("dbgen");
     }
     

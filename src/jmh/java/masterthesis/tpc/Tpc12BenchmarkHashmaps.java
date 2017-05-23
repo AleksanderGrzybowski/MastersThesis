@@ -3,13 +3,17 @@ package masterthesis.tpc;
 
 import mastersthesis.Store;
 import mastersthesis.Tpc12ResultRow;
+import mastersthesis.Utils;
 import mastersthesis.model.LineItem;
 import mastersthesis.model.Order;
 import org.apache.commons.lang3.tuple.Pair;
 import org.openjdk.jmh.annotations.*;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.IntSummaryStatistics;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -27,6 +31,7 @@ public class Tpc12BenchmarkHashmaps {
     
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         store = new Store("dbgen");
     }
     

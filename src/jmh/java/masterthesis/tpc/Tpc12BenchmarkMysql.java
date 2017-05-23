@@ -22,6 +22,7 @@ public class Tpc12BenchmarkMysql {
     
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         connection = Utils.newDatabase("mysql");
         createSchemaMysql(connection);
     }

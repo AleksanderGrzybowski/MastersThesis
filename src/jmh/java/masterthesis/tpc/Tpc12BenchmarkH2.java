@@ -22,6 +22,7 @@ public class Tpc12BenchmarkH2 {
     
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         connection = Utils.newDatabase("h2");
         createSchemaH2(connection);
     }

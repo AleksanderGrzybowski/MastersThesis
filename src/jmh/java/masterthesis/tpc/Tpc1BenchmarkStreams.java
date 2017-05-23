@@ -3,6 +3,7 @@ package masterthesis.tpc;
 import mastersthesis.BigDecimalSummaryStatistics;
 import mastersthesis.Store;
 import mastersthesis.Tpc1ResultRow;
+import mastersthesis.Utils;
 import mastersthesis.model.LineItem;
 import org.apache.commons.lang3.tuple.Pair;
 import org.openjdk.jmh.annotations.*;
@@ -29,6 +30,7 @@ public class Tpc1BenchmarkStreams {
     
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         store = new Store("dbgen");
     }
     

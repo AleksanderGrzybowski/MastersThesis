@@ -2,6 +2,7 @@ package masterthesis.tpc;
 
 import mastersthesis.BigDecimalSummaryStatistics;
 import mastersthesis.Store;
+import mastersthesis.Utils;
 import mastersthesis.model.LineItem;
 import mastersthesis.model.Part;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -30,6 +31,7 @@ public class Tpc14BenchmarkStreams {
     
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         store = new Store("dbgen");
     }
     
