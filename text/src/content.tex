@@ -30,6 +30,8 @@
 	keywordstyle=\color{blue}
 }
 
+\newtheorem{theorem}{Problem}
+
 \begin{document}
 \begin{titlepage}
     \begin{center}
@@ -511,5 +513,96 @@ Jak można zauważyć, logiczna kolejność wykonywania zapytania jest znacząco
 * różnice parallel i sequential
 * streamy są bardzo ograniczone
 * porównanie push-pull (Observable)
+
+\section{Propozycje rozwiązań problemów}
+
+\subsection{Strumieniowy operator złączenia}
+
+    Jedną z najczęściej wykonywanych operacji na relacyjnej bazie danych jest łączenie tabel. W języku SQL dostępne są różne typy złączeń (\texttt{JOIN}, \texttt{INNER JOIN}, \texttt{LEFT/RIGHT JOIN} i inne), które wykorzystywane są w różnych sytuacjach. Relacyjne bazy danych posiadają z reguły znaczne optymalizacje w zakresie wykonywania takich operacji, ponieważ wykorzystywane są one bardzo często - ważną zaletą modelu relacyjnego jest podział na tabele połączone ze sobą kluczami i więzami referencyjnymi. Aby osiągnąć wymaganą wydajność, w większości rozwiązań kolumny będące kluczami głównymi otrzymują automatycznie, przy ich tworzeniu, indeks.
+    TODO coś o indeksach
+
+    Ze względu na porównawczy charakter niniejszej pracy, zdecydowano się na opracowanie podobnego rozwiązania, działającego w oparciu o Stream API. Problem zdefiniowany został następująco
+
+\begin{theorem}
+    Dane są dwie kolekcje typów \texttt{T} i \texttt{U} o rozmiarach $ n $ i $ m $. Należy zaproponować rozwiązanie, pozwalające na złączenie tych kolekcji na podstawie warunku równości dowolnych kluczy, będących właściwościami obiektów, bądź funkcjami właściwości obiektów. Wynik powinien dany być listą par \texttt{(T, U)}.
+\end{theorem}
+
+    Pierwsze rozwiązanie, najbardziej intuicyjne, polega utworzeniu wszystkich możliwych par \texttt{(T, U)} i odfiltrowaniu pasujących. Do tego celu wykorzystano metodę \texttt{Stream.flatMap}, która dla każdego obiektu strumienia tworzy nowy strumień nań bazujący, a następnie łączy wszystkie pośrednie strumienie w jeden.
+
+\begin{lstlisting}[label=join1, caption=Rozwiązanie nr 1]
+
+public static <T, U> Stream<ImmutablePair<T, U>>
+innerJoin(
+    Collection<T> first,
+    Collection<U> second,
+    Predicate<ImmutablePair<T, U>> condition
+) {
+  return first.stream().flatMap(firstItem ->
+      second.stream().map(secondItem ->
+          new ImmutablePair<>(firstItem, secondItem)
+      )
+  ).filter(condition);
+}
+
+\end{lstlisting}
+
+    Rozwiązanie to, mimo iż krótkie i czytelne, wykazuje się bardzo niekorzystną złożonością obliczeniową, i w konsekwencji, bardzo słabą wydajnością. Ze względu na konieczność utworzenia $ mn $ par niezależnie od przypadku, aktywność GC jest znaczna, ponieważ mnóstwo obiektów tworzonych jest tylko w celu ich odśmiecenia.
+
+    Rozwiązanie drugie polega na przepisaniu strumieniowej części w postaci zwykłej pętli. Strumienie mają nieznaczny narzut czasowy i pamięciowy, więc warto sprawdzić, czy możliwe jest jego uniknięcie.
+
+\begin{lstlisting}[label=join2, caption=Rozwiązanie nr 2]
+
+public static <T, U> Stream<ImmutablePair<T, U>>
+innerJoinForLoop(
+    Collection<T> first,
+    Collection<U> second,
+    BiPredicate<T, U> condition
+) {
+  List<ImmutablePair<T, U>> result = new ArrayList<>();
+  for (T t : first) {
+    for (U u : second) {
+      if (condition.test(t, u)) {
+        result.add(new ImmutablePair<>(t, u));
+      }
+    }
+  }
+  return result.stream();
+    
+
+\end{lstlisting}
+
+    To rozwiązanie jest nieco lepsze, natomiast nie jest znacząco lepsze od poprzedniego. Problemem jest konieczność przejścia przez wewnętrzną pętlę nadal $ mn $ razy.
+
+    W rozwiązaniu trzecim postanowiono wykorzystać kolekcje haszujące, które spełniają w nim rolę podobną do indeksów. Przy założeniu, że kolekcje łączone są warunkiem równości właściwości, z których co najmniej jedna spełnia właściwości klucza głównego (unikalność i brak występowania wartości pustej \texttt{NULL}), możliwe jest umieszczenie elementów tej kolekcji w strukturze mapy haszującej, w której za klucz przyjmuje się wymieniony klucz główny, a za wartość - obiekt przez ten klucz reprezentowany. Dzięki temu, nie jest wymagane przeglądanie całej kolekcji elementów \texttt{T}, a jedynie sprawdzenie, czy obiekt identyfikowany przez kolejne obiekty kolekcji \texttt{U} istnieje bądź nie.
+
+\begin{lstlisting}[label=join3, caption=Rozwiązanie nr 3]
+
+public static <T, U> Stream<ImmutablePair<T, U>> innerJoinHashmaps(
+    Collection<T> left,
+    Function<T, Object> leftKeyExtractor,
+    Collection<U> right,
+    Function<U, Object> rightKeyExtractor
+) {
+  HashMap<Object, T> leftMap = new HashMap<>();
+  for (T leftElement : left) {
+    leftMap.put(leftKeyExtractor.apply(leftElement), leftElement);
+  }
+  
+  List<ImmutablePair<T, U>> result = new ArrayList<>();
+  
+  for (U rightElement : right) {
+    T leftElement = leftMap.get(rightKeyExtractor.apply(rightElement));
+    if (leftElement != null) {
+      result.add(new ImmutablePair<>(leftElement, rightElement));
+    }
+  }
+  
+  return result.stream();
+}
+\end{lstlisting}
+
+Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości klucza w jednej z kolekcji. Porównanie szybkości wykonywania się operacji złączenia na zbiorze danych TPC jest poniżej.
+
+TODO odpalić naturaljoin i wykres
 
 \end{document}
