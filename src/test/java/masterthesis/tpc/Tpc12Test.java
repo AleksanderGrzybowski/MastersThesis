@@ -1,7 +1,6 @@
 package masterthesis.tpc;
 
 import mastersthesis.Tpc12ResultRow;
-import mastersthesis.Utils;
 import org.junit.Test;
 
 import java.util.List;
@@ -12,18 +11,20 @@ public class Tpc12Test {
     
     @Test
     public void test() throws Exception {
-        Utils.recreateData("0.01");
-        
         Tpc12BenchmarkH2 h2 = new Tpc12BenchmarkH2();
+        h2.scaleFactor = "0.01";
         h2.setup();
         
         Tpc12BenchmarkMysql mysql = new Tpc12BenchmarkMysql();
+        mysql.scaleFactor = "0.01";
         mysql.setup();
         
         Tpc12BenchmarkStreams streams = new Tpc12BenchmarkStreams();
+        streams.scaleFactor = "0.01";
         streams.setup();
         
         Tpc12BenchmarkHashmaps hashmaps = new Tpc12BenchmarkHashmaps();
+        hashmaps.scaleFactor = "0.01";
         hashmaps.setup();
         
         List<Tpc12ResultRow> resultH2 = h2.sql();
