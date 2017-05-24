@@ -1,6 +1,7 @@
 package masterthesis.samples.naturaljoin;
 
 import mastersthesis.Store;
+import mastersthesis.Utils;
 import masterthesis.tpc.StreamUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openjdk.jmh.annotations.Param;
@@ -17,18 +18,17 @@ public class NaturalJoinStreamsNaive {
     
     Store store;
     
-    
     @Param({"0.01"})
     public String scaleFactor;
     
     @Setup
     public void setup() throws Exception {
+        Utils.recreateData(scaleFactor);
         store = new Store("dbgen");
     }
     
-//    @Benchmark // too slow
+//    @Benchmark // very slow
     public List<ImmutablePair<Long, Long>> sql() throws Exception {
-        
         List<ImmutablePair<Long, Long>> result = StreamUtils.innerJoin(
                 store.getOrders(),
                 store.getLineItems(),

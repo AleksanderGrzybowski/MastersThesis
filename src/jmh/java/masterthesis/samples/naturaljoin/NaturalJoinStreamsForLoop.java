@@ -4,18 +4,21 @@ import mastersthesis.Store;
 import mastersthesis.Utils;
 import masterthesis.tpc.StreamUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("SqlResolve")
 @State(Scope.Thread)
-public class NaturalJoinStreamsHashmaps {
+public class NaturalJoinStreamsForLoop {
     
     Store store;
     
-    @Param({"0.01", "0.02", "0.05", "0.1", "0.2"})
+    @Param({"0.01"})
     public String scaleFactor;
     
     @Setup
@@ -24,19 +27,18 @@ public class NaturalJoinStreamsHashmaps {
         store = new Store("dbgen");
     }
     
-    @Benchmark
+//    @Benchmark // also very slow
     public List<ImmutablePair<Long, Long>> sql() throws Exception {
         
-        List<ImmutablePair<Long, Long>> result = StreamUtils.innerJoinHashmaps(
+        List<ImmutablePair<Long, Long>> result = StreamUtils.innerJoinForLoop(
                 store.getOrders(),
-                o -> o.orderkey,
                 store.getLineItems(),
-                l -> l.order.orderkey
-        )
-                .map(pair -> new ImmutablePair<>(pair.left.orderkey, pair.right.order.orderkey))
+                (left, right) -> left.equals(right.order)
+        ).map(pair -> new ImmutablePair<>(pair.left.orderkey, pair.right.order.orderkey))
                 .collect(Collectors.toList());
         
-        System.out.println("Hashmaps streams count(*) : " + result.size());
+        
+        System.out.println("ForLoop streams count(*) : " + result.size());
         return result;
     }
 }
