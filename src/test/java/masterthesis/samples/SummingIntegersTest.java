@@ -1,5 +1,8 @@
 package masterthesis.samples;
 
+import masterthesis.samples.summingintegers.SummingIntegersH2;
+import masterthesis.samples.summingintegers.SummingIntegersMysql;
+import masterthesis.samples.summingintegers.SummingIntegersStreams;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

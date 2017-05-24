@@ -1,5 +1,8 @@
 package masterthesis.tpc;
 
+import masterthesis.tpc.tpc6.Tpc6BenchmarkH2;
+import masterthesis.tpc.tpc6.Tpc6BenchmarkMysql;
+import masterthesis.tpc.tpc6.Tpc6BenchmarkStreams;
 import org.junit.Test;
 
 import java.math.BigDecimal;

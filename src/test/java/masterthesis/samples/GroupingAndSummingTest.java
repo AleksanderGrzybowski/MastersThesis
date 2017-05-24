@@ -1,5 +1,8 @@
 package masterthesis.samples;
 
+import masterthesis.samples.groupingandsumming.GroupingAndSummingH2;
+import masterthesis.samples.groupingandsumming.GroupingAndSummingMysql;
+import masterthesis.samples.groupingandsumming.GroupingAndSummingStreams;
 import org.junit.Test;
 
 import java.util.Map;

@@ -1,5 +1,8 @@
 package masterthesis.samples;
 
+import masterthesis.samples.filteringandcountingintegers.FilteringAndCountingIntegersH2;
+import masterthesis.samples.filteringandcountingintegers.FilteringAndCountingIntegersMysql;
+import masterthesis.samples.filteringandcountingintegers.FilteringAndCountingIntegersStreams;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

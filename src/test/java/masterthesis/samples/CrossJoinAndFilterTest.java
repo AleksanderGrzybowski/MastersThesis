@@ -1,5 +1,8 @@
 package masterthesis.samples;
 
+import masterthesis.samples.crossjoinandfilter.CrossJoinAndFilterH2;
+import masterthesis.samples.crossjoinandfilter.CrossJoinAndFilterMysql;
+import masterthesis.samples.crossjoinandfilter.CrossJoinAndFilterStreams;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 

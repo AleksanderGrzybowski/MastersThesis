@@ -1,5 +1,8 @@
 package masterthesis.samples;
 
+import masterthesis.samples.hugejoining.HugeJoiningH2;
+import masterthesis.samples.hugejoining.HugeJoiningMysql;
+import masterthesis.samples.hugejoining.HugeJoiningStreams;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 

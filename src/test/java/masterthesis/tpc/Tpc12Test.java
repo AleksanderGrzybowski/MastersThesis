@@ -1,6 +1,10 @@
 package masterthesis.tpc;
 
 import mastersthesis.Tpc12ResultRow;
+import masterthesis.tpc.tpc12.Tpc12BenchmarkH2;
+import masterthesis.tpc.tpc12.Tpc12BenchmarkHashmaps;
+import masterthesis.tpc.tpc12.Tpc12BenchmarkMysql;
+import masterthesis.tpc.tpc12.Tpc12BenchmarkStreams;
 import org.junit.Test;
 
 import java.util.List;

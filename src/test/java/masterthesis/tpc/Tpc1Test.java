@@ -1,6 +1,9 @@
 package masterthesis.tpc;
 
 import mastersthesis.Tpc1ResultRow;
+import masterthesis.tpc.tpc1.Tpc1BenchmarkH2;
+import masterthesis.tpc.tpc1.Tpc1BenchmarkMysql;
+import masterthesis.tpc.tpc1.Tpc1BenchmarkStreams;
 import org.junit.Test;
 
 import java.util.List;
