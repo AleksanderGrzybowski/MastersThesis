@@ -518,9 +518,84 @@ Jak można zauważyć, logiczna kolejność wykonywania zapytania jest znacząco
 
 \subsection{Proces wykonywania zapytania strumieniowego}
 
+    Podobnie jak w przypadku języka SQL, zapytanie strumieniowe wykonuje się w kilku etapach. Ważną różnicą jest to, że nie występuje tutaj żaden mechanizm parsowania i tłumaczenia kodu, ponieważ zwykły kod języka Java jest już skompilowany do kodu bajtowego i wykonywany na maszynie wirtualnej Java. Maszyna wirtualna Javy po uruchomieniu programu realizuje dużą liczbę optymalizacji kodu, więc możliwe jest uzyskanie wzrostu wydajności jedynie dzięki tym optymalizacjom.
+    Strumień, będąc abstrakcyjną formą reprezentacji źródła danych, tworzony może być na kilka różnych sposobów, ale sposoby te nie wpływają semantycznie na proces przetwarzania danych. Zwykle strumień tworzony jest na podstawie kolekcji - przy konsumowaniu elementów, kolekcja dostarcza elementy wykonując wewnętrzną iterację (internal iteration), która jest procesem ukrytym przed programistą. Inne sposoby tworzenia strumieni, takie jak generowanie ich w locie, wczytywanie z dysku bądź z sieci nie są zbyt przydatne z powodu ich konstrukcji pull-based. Decyzją implementacyjną projektantów Stream API było wykorzystanie modelu przetwarzania ciągłego, w którym to strumień wykonuje akcję pobrania następnego elementu. W związku z tym, nie jest możliwe (przynajmniej w domyślnej formie) efektywne asynchroniczne dostarczanie nowych elementów, ponieważ każda operacja pobrania elementu jest operacją blokującą, wywoływaną po zakończeniu przetwarzania poprzedniego elementu. Model odwrotny (push-based), wykorzystywany np. w bibliotekach RxJava bazujących na wzorcu Observable, ma lepsze zastosowanie w takich przypadkach.
+    Po utworzeniu strumienia możliwe jest wykonanie dostępnych na nim operacji pośrednich, udostępnionych przez metody instancyjne klasy \texttt{Stream<T>}. Każda taka operacja zwraca zawsze strumień, ewentualnie innego typu (\texttt{Stream<...>}, \texttt{IntStream}). Należy zwrócić szczególną uwagę na różnice pomiędzy dwoma typami operacji pośrednich, ponieważ owe typy determinują faktyczną, wewnętrzną kolejność operacji, która mimo iż ukryta przed programistą, może mieć wpływ na złożoność czasową jak i pamięciową. Operacje pośrednie bezstanowe (takie jak \texttt{filter} i \texttt{map}) zapisane tuż obok siebie, łączone są w jedną, większą operację, wykorzystując właściwości kompozycji funkcji bezstanowych. Drugi typ operacji pośrednich, operacje pośrednie stanowe, nie gwarantują fuzji i mogą wprowadzać ukryty stan. Najlepszym przykładem operacji pośredniej stanowej jest sortowanie, które wymaga, aby dokładnie wszystkie elementy strumienia zbuforowane zostały przed sortowaniem. Jest to logiczne, ponieważ nie jest możliwe ustalenie posortowanej kolejności zbioru elementów o nieznanej wielkości. Przykład fuzji operacji zaprezentowany jest we fragmencie kodu \ref{streamstateful1}.
+
+\begin{lstlisting}[label=streamstateful1, caption=Fuzja operacji bezstanowych]
+
+        Stream.of(1, 2, 3, 4, 5)
+                .map(e -> {
+                    out.println("Mapping: " + e);
+                    return e;
+                })
+                .filter(e -> {
+                    out.println("Filtering: " + e);
+                    return true;
+                })
+                .sorted()
+                .collect(toList());
+\end{lstlisting}
+
+
+\begin{verbatim}
+
+Mapping: 1
+Filtering: 1
+Mapping: 2
+Filtering: 2
+Mapping: 3
+Filtering: 3
+Mapping: 4
+Filtering: 4
+Mapping: 5
+Filtering: 5
+
+\end{verbatim}
+
+    Na podstawie wyjścia programu można stwierdzić, że operacja \texttt{map} wykonywała się wraz z operacją \texttt{filter}. Jako iż sortowanie zostało umieszczone na końcu, nie przeszkadzało ono w żaden sposób. Z drugiej strony, jeśli sortowanie zostanie przeniesione pomiędzy, można zaobserwować buforowanie się elementów tuż przed stanową operacją sortowania (fragment \ref{streamstateful2}).
+
+\begin{lstlisting}[label=streamstateful2, caption=Brak fuzji operacji stanowych]
+        Stream.of(1, 2, 3, 4, 5)
+                .map(e -> {
+                    out.println("Mapping: " + e);
+                    return e;
+                })
+                .sorted()
+                .filter(e -> {
+                    out.println("Filtering: " + e);
+                    return true;
+                })
+                .collect(toList());
+\end{lstlisting}
+
+\begin{verbatim}
+
+Mapping: 1
+Mapping: 2
+Mapping: 3
+Mapping: 4
+Mapping: 5
+Filtering: 1
+Filtering: 2
+Filtering: 3
+Filtering: 4
+Filtering: 5
+
+\end{verbatim}
+
+    Ostatnim krokiem wykonywania się zapytania strumieniowego jest wykonanie operacji terminalnej, która wyznacza ostateczny wynik zapytania. Wystąpienie takiej operacji powoduje wykonanie wszystkich operacji pośrednich. 
+
 * różnice parallel i sequential
-* streamy są bardzo ograniczone
-* porównanie push-pull (Observable)
+* operacje terminalne i nieterminalne (typ zwracany), streams cannot be reused
+* streamy są bardzo ograniczone, ale istnieją lepsze jooq streamex
+* porównanie push-pull (Observable), streamy nie są async mimo parallell
+
+\subsection{Ocena i krytyka}
+* fjp sucks
+* mało operacji (takewhile, java 9, inne libki)
+* nie async mimo parallel
+* czemu iterable nie stream
 
 \section{Propozycje rozwiązań problemów}
 
