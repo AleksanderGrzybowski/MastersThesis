@@ -1,9 +1,24 @@
 #! /bin/bash
 set -e
 
-rm -rf /tmp/memoryUsage
+sudo rm -rf /tmp/memoryUsage
 
 cd ..
+
+for scaleFactor in 0.05 0.10 0.15 0.20 0.25; do 
+
+    sudo rm -rf /tmp/mss
+    sudo docker kill tmp-mysql-diskusage || true
+    sudo docker rm tmp-mysql-diskusage || true
+    sudo docker run -d --name tmp-mysql-diskusage -v /tmp/mss:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=password -p 127.0.0.1:7777:3306 -ti mysql --max_allowed_packet=320M --secure-file-priv= --log-warnings=100
+    sleep 10
+    echo -n "$scaleFactor mysql xxx " >> /tmp/memoryUsage
+    ./gradlew  -Psize="$scaleFactor" diskUsage 
+    sudo du -sb /tmp/mss | awk '{print $1;}' >> /tmp/memoryUsage
+    tail -1 /tmp/memoryUsage
+
+done
+
 
 echo -n "0.05 store " >> /tmp/memoryUsage
 ./gradlew  -Psize="0.05" -Ptype="store" memoryUsage   | grep Usage: >> /tmp/memoryUsage

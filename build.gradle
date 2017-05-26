@@ -77,3 +77,12 @@ task memoryUsage(type: JavaExec, dependsOn: 'compileJava') {
             project.hasProperty('type') ? project.getProperty('type') : ''
     )
 }
+
+task diskUsage(type: JavaExec, dependsOn: 'compileJava') {
+    main = 'mastersthesis.DiskUsageTpc'
+    classpath = sourceSets.main.runtimeClasspath
+    jvmArgs = ['-Xms8192m', '-Xmx8192m']
+    args (
+            project.hasProperty('size') ? project.getProperty('size') : '',
+    )
+}
