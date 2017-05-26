@@ -82,7 +82,7 @@
 
 \subsection{Wybór implementacji}
 
-    Jako iż porównanie baz danych i strumieni w Java 8 powinno być rzetelne, konieczne jest wybranie do badań baz in-memory działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one powszechnie stosowane w profesjnonalnych frameworkach takich jak Spring czy Grails, wspomagając start nowego projektu bez ściśle określonego schematu bazy, która generowana jest przy każdym starcie aplikacji. Implementują one w zdecydowanej większości standard ANSI-SQL, jednakże pewne niewielkie braki nie powodują problemów w przypadku niniejszej pracy, ze względu na zastosowanie najbardziej podstawowych elementów języka SQL przy badaniu wydajności. 
+    Jako iż porównanie baz danych i strumieni w Java 8 powinno być rzetelne, konieczne jest wybranie do badań baz in-memory działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one powszechnie stosowane w szkieletach aplikacji, takich jak Spring czy Grails, wspomagając start nowego projektu bez ściśle określonego schematu bazy, która generowana jest przy każdym starcie aplikacji. Implementują one w zdecydowanej większości standard ANSI-SQL, jednakże pewne niewielkie braki nie powodują problemów w przypadku niniejszej pracy, ze względu na zastosowanie najbardziej podstawowych elementów języka SQL przy badaniu wydajności. 
 
 \section{Strumienie w Java 8}
 
@@ -94,7 +94,7 @@
 
 \subsection{Przykład}
 
-    Listing \ref{streamexample} prezentuje przykładowe użycie strumieni. Dostępna jest kolekcja \newline \texttt{Collection<Customer> customers}, która zawiera obiekty reprezentujące klientów. Każdy klient posiada pola danych, informujące między innymi o kraju jego pochodzenia oraz stanie konta (jest to część modelu danych TPC, który zostanie omówiony szczegółowiej w rozdziale \ref{tpc}). Metoda \texttt{stream} tworzy strumień obiektów typu \texttt{Customer}, na którym wywoływane są metody strumieniowe. Metoda \texttt{Stream.filter} przyjmuje obiekt funkcyjny typu \texttt{Predicate}, który określa, czy dany element powinien znaleźć się w wynikowym strumieniu. Warto zaznaczyć, że możliwe jest wykorzystanie dowolnego kodu języka Java - nie ma tutaj ograniczeń na konkretny zbiór funkcji, jak w przypadku języka SQL. Metoda \texttt{sorted} zwraca nowy strumień, posortowany według podanego klucza - domyślnie porównywane są bezpośrednio obiekty znajdujące się w strumieniu. W tym przypadku wykorzystany został wariant metody sortującej, wykorzystujący funkcję wyciągającą klucz sortowania z obiektu (tutaj - stan konta klienta). Na koniec wyniki zbierane są do listy typu \texttt{java.util.List}. 
+    Fragment \ref{streamexample} prezentuje przykładowe użycie strumieni. Dostępna jest kolekcja \newline \texttt{Collection<Customer> customers}, która zawiera obiekty reprezentujące klientów. Każdy klient posiada pola danych, informujące między innymi o kraju jego pochodzenia oraz stanie konta (jest to część modelu danych TPC, który zostanie omówiony szczegółowiej w rozdziale \ref{tpc}). Metoda \texttt{stream} tworzy strumień obiektów typu \texttt{Customer}, na którym wywoływane są metody strumieniowe. Metoda \texttt{Stream.filter} przyjmuje obiekt funkcyjny typu \texttt{Predicate}, który określa, czy dany element powinien znaleźć się w wynikowym strumieniu. Warto zaznaczyć, że możliwe jest wykorzystanie dowolnego kodu języka Java - nie ma tutaj ograniczeń na konkretny zbiór funkcji, jak w przypadku języka SQL. Metoda \texttt{sorted} zwraca nowy strumień, posortowany według podanego klucza - domyślnie porównywane są bezpośrednio obiekty znajdujące się w strumieniu. W tym przypadku wykorzystany został wariant metody sortującej, wykorzystujący funkcję wyciągającą klucz sortowania z obiektu (tutaj - stan konta klienta). Na koniec wyniki zbierane są do listy typu \texttt{java.util.List}. 
 
 \begin{lstlisting}[label=streamexample, caption=Przykładowe wykorzystanie Stream API]
 
@@ -117,7 +117,7 @@ List<Customer> canadiansSortedByBalance = customers.stream()
 \label{fig:flow}
 \end{figure}
 
-    Bardziej złożony przykład zaprezentowany jest na listingu \ref{advanced}. Kolekcja zamówień, na której opiera się zapytanie, składa się z obiektów typu \texttt{Order} posiadająch status oraz przyporządkowanego do zamówienia klienta. Podobnie jak w poprzednim przykładzie, w pierwszym kroku przeprowadza się filtrowanie jedynie zamówień o wyższym priorytecie. Następnie wykorzystana jest metoda \texttt{collect}, której zadaniem jest zebranie i przetworzenie wyników w ostateczną postać wynikową. Wykorzystano tutaj dwa zagnieżdżone kolektory, z których pierwszy dokonuje grupowania zamówień na podstawie przypisanego klienta, a drugi kolektor przejmuje pogrupowane zamówienia i dla każdej grupy określa ich wielkość, zliczając wszystkie obiekty w grupie. W ten sposób wyznaczone zostają liczby ważnych zamówień dla poszczególnych klientów.
+    Bardziej złożony przykład zaprezentowany jest na fragmencie \ref{advanced}. Kolekcja zamówień, na której opiera się zapytanie, składa się z obiektów typu \texttt{Order} posiadająch status oraz przyporządkowanego do zamówienia klienta. Podobnie jak w poprzednim przykładzie, w pierwszym kroku przeprowadza się filtrowanie jedynie zamówień o wyższym priorytecie. Następnie wykorzystana jest metoda \texttt{collect}, której zadaniem jest zebranie i przetworzenie wyników w ostateczną postać wynikową. Wykorzystano tutaj dwa zagnieżdżone kolektory, z których pierwszy dokonuje grupowania zamówień na podstawie przypisanego klienta, a drugi kolektor przejmuje pogrupowane zamówienia i dla każdej grupy określa ich wielkość, zliczając wszystkie obiekty w grupie. W ten sposób wyznaczone zostają liczby ważnych zamówień dla poszczególnych klientów.
 
 \begin{lstlisting}[label=advanced, caption=Zaawansowane wykorzystanie Stream API]
 
@@ -134,11 +134,11 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
 \end{lstlisting}
 
-\subsection{Framework \texttt{ForkJoinPool}}
+\subsection{Biblioteka \texttt{ForkJoinPool}}
 
     Język Java od samego początku istnienia wyróżniał się znakomitymi możliwościami programowania równoległego, wykorzystywanego głównie w aplikacjach internetowych, obsługujących wielu użytkowników jednocześnie. Świadczy o tym obecność metod związanych z wątkami już w klasie \texttt{Object}, która jest klasą bazową wszystkich klas języka Java. W wersji 5 języka wprowadzono dużo nowych klas, zawartych w pakiecie \texttt{java.util.concurrent}, mających na celu ułatwienie pracy z równoległym kodem. Wcześniej ręcznie tworzone rozwiązania i wzorce mogą być zastąpione przez wbudowane, wysokiej jakości implementacje pul wątków, kolejek blokujących, list typu copy-on-write, semaforów i barier cyklicznych.
     
-    Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu FJP, umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę "dziel i rządź". Tworzona jest pula wątków (o dowolnej ich ilości), do której wysyła się zadanie, będące obiektem klasy \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. W kodzie programu należy sprawdzić, czy ten fakt występuje. Jeśli tak, zadanie należy podzielić, wysłać do puli wątków i zebrać wyniki po zakończeniu wykonywania się podzadań. W przeciwnym przypadku wystarczy zwrócić wynik. Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest na listingu \ref{fjpexample}.
+    Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu FJP, umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę "dziel i rządź". Tworzona jest pula wątków (o dowolnej ich ilości), do której wysyła się zadanie, będące obiektem klasy \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. W kodzie programu należy sprawdzić, czy ten fakt występuje. Jeśli tak, zadanie należy podzielić, wysłać do puli wątków i zebrać wyniki po zakończeniu wykonywania się podzadań. W przeciwnym przypadku wystarczy zwrócić wynik. Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest na fragmencie \ref{fjpexample}.
 
 \begin{lstlisting}[label=fjpexample, caption=Przykładowe wykorzystanie FJP]
 
@@ -188,7 +188,7 @@ public class SummingTask extends RecursiveTask<Integer> {
 
 \subsection{Przetwarzanie równoległe i interfejs \texttt{Collector}}
 
-    Jednym z najczęstszych zastosowań strumieni jest równoległe przetwarzanie danych. Strumienie równoległe wykorzystują FJP, natomiast w pełni enkapsulują jego wykorzystanie w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na listingu \ref{streamsthreads}, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.  Wynikiem wywołania tego programu jest przemieszana lista wątków, w której znajdują się wątek główny programu \texttt{main} oraz wątki znajdujące się w puli o nazwach podobnych do \texttt{ForkJoinPool.commonPool-worker-3} z numerami od 1 do 7 (test przeprowadzony na maszynie z 8 logicznymi procesorami).
+    Jednym z najczęstszych zastosowań strumieni jest równoległe przetwarzanie danych. Strumienie równoległe wykorzystują FJP, natomiast w pełni enkapsulują jego wykorzystanie w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, mapowanie itd.) wykonują się w tworzonej na starcie puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to na fragmencie \ref{streamsthreads}, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod domknięcia jest wykonywany.  Wynikiem wywołania tego programu jest przemieszana lista wątków, w której znajdują się wątek główny programu \texttt{main} oraz wątki znajdujące się w puli o nazwach podobnych do \texttt{ForkJoinPool.commonPool-worker-3} z numerami od 1 do 7 (test przeprowadzony na maszynie z 8 logicznymi procesorami).
 
 \begin{lstlisting}[label=streamsthreads, caption=Struktura puli wątków FJP]
 
@@ -210,7 +210,7 @@ IntStream.range(1, 100).parallel()
 
     Konieczność istnienia pośrednich kontenerów i możliwości ich scalania związana jest bezpośrednio z równoległą naturą strumieni. Jako iż kolektory powinny działać w identyczny sposób ze strumieniami sekwencyjnymi, jak i równoległymi, narzucony został wzorzec uwzględniający przetwarzanie równoległe w każdym przypadku.
 
-    Listing \ref{toList} prezentuje przykład ręcznie zaimplementowanego kolektoa \texttt{toList}, który dostępny jest domyślnie w bibliotece standardowej języka Java. 
+    Fragment \ref{toList} prezentuje przykład ręcznie zaimplementowanego kolektoa \texttt{toList}, który dostępny jest domyślnie w bibliotece standardowej języka Java. 
 
 \begin{lstlisting}[label=toList, caption=Ręczna implementacja \texttt{toList}]
 
@@ -237,7 +237,7 @@ out.println(numbers.stream().collect(toList));
 
 \end{lstlisting}
 
-Wynik wykonania tego programu zaprezentowany jest na poniższym listingu. Warto zauważyć, że funkcja łącząca pośrednie kontenery nie została w ogóle wywołana. 
+Wynik wykonania tego programu zaprezentowany jest na poniższym wyjściu programu. Warto zauważyć, że funkcja łącząca pośrednie kontenery nie została w ogóle wywołana. 
     
 \begin{verbatim}
 
@@ -303,7 +303,7 @@ Combining #42c with #46f
 
 \subsection{Weryfikacja poprawności składni}
 
-    Przy wykonywaniu zapytania SQL z poziomu API JDBC nie istnieje żadne sprawdzanie poprawniości zapytania oraz jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie i przystępuje do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu mapowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator. Przykładowo, wynikiem grupowania zbioru obiektów typu \texttt{T} na podstawie ich pola o typie \texttt{U} będzie zawsze \texttt{Map<T, List<U>}\texttt{>}. Dzięki temu typowe błędy przy odczytywaniu wyników z zapytania SQL przy użyciu obiektu \texttt{ResultSet} (niewłaściwy typ kolumny, niestniejące pole) nie występują.
+    Przy wykonywaniu zapytania SQL z poziomu API JDBC nie istnieje żadne sprawdzanie poprawniości zapytania oraz jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie i przystępuje do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu odwzorowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator. Przykładowo, wynikiem grupowania zbioru obiektów typu \texttt{T} na podstawie ich pola o typie \texttt{U} będzie zawsze \texttt{Map<T, List<U>}\texttt{>}. Dzięki temu typowe błędy przy odczytywaniu wyników z zapytania SQL przy użyciu obiektu \texttt{ResultSet} (niewłaściwy typ kolumny, niestniejące pole) nie występują.
 
 \subsection{Język domenowy (DSL) a język ogólnego przeznaczenia}
 
@@ -326,7 +326,7 @@ Combining #42c with #46f
 
     Do budowania projektu wykorzystano Gradle, które jest popularnym i używanym w zastosowaniach produkcyjnych narzędziem budowania projektów w Javie. Służy ono do uruchamiania kompilacji, uruchamiania testów jednostkowych, jak i wykonywania testów wydajnościowych dzięki integracji z JMH, które dostępne jest w ekosystemie Gradle jako gotowy plugin z możliwością dowolnej konfiguracji.
 
-\subsection{Schemat klasy testowej (microbenchmark)}
+\subsection{Schemat klasy testu referencyjnego (microbenchmark)}
 
 \begin{lstlisting}[label=testclass, caption=Przykładowa klasa JMH]
 
@@ -372,13 +372,13 @@ public class SummingIntegersH2 {
 
 \end{lstlisting}
 
-    Każdy zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej, której przykład zaprezentowany jest na listingu \ref{testclass}. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z plików w przypadku wykorzystania benchmarka TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Biblioteka JMH zapewnia dokładny pomiar czasu wykonywania się fragmentów kodu, chroni przed zbyt agresywnymi optymalizacjami maszyny wirtualnej oraz udostępnia wygodny raport z przeprowadzonych testów, wraz z danymi statystycznymi typu wariancja.
+    Każdy zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej, której przykład zaprezentowany jest na fragmencie \ref{testclass}. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytuje z plików w przypadku wykorzystania testu TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Biblioteka JMH zapewnia dokładny pomiar czasu wykonywania się fragmentów kodu, chroni przed zbyt agresywnymi optymalizacjami maszyny wirtualnej oraz udostępnia wygodny raport z przeprowadzonych testów, wraz z danymi statystycznymi typu wariancja.
 
 \section{Dane testowe i wyniki}
 
 \subsection{Dane testowe syntetyczne}
 
-    W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka benchmarków operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu standardowych mechanizmów Javy, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników. Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku i możliwości sprzętowych.
+    W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka przypadków testowych operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu standardowych mechanizmów Javy, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników. Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku i możliwości sprzętowych.
 
 \begin{itemize}
     \item \texttt{SummingIntegers} - obliczenie sumy liczb w kolumnie
@@ -432,7 +432,7 @@ public class SummingIntegersH2 {
 
 \subsection{Zbiór danych TPC-H} \label{tpc}
 
-    TPC-H jest benchmarkiem stworzonym przez organizację non-profit Transaction Processing Performance Council stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań.
+    TPC-H jest testem referencyjnym stworzonym przez organizację non-profit Transaction Processing Performance Council stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań.
 
     Generator danych testowych \texttt{dbgen} jest konsolowym programem, służącym do generowania zbiorów danych testowych TPC-H. Schemat bazy danych zaprezentowany jest na rysunku \ref{fig:tpcschema}. Jest to typowa hurtownia danych, gromadząca informacje o produktach, klientach, dostawcach i zamówieniach. Dokładny sens biznesowy wygenerowanych danych nie jest specjalnie istotny w rozważaniach wydajnościowych, na potrzeby niniejszej pracy zakłada się ich poprawność w sensie zgodności referencyjnej i reprezentatywności sytuacji możliwej do zaistnienia w rzeczywistości. Program \texttt{dbgen} pozwala na zdefiniowanie wielkości wygenerowanego zbioru, procentowo względem zbioru referencyjnego o wielkości 1.0. Ze względu na praktyczne ograniczenia platformy testowej, konieczne było ograniczenie maksymalnej wielkości zbioru do ok. 30\%, zależnie od przypadku testowego. 
 
@@ -450,7 +450,7 @@ public class SummingIntegersH2 {
 
 \subsection{Odwzorowanie modelu TPC w języku Java}
 
-    Aby umożliwić badanie działania strumieni na danych benchmarka TPC, konieczne jest przekształcenie relacyjnego modelu danych w model, który jest możliwy do zareprezentowania w języku Java. Typowe odwzorowanie stosowane w systemach obiektowo-relacyjnych wykorzystuje pola obiektów do reprezentacji kolumn oraz referencje do obiektów do reprezentacji powiązań (kluczy obcych) pomiędzy tabelami. Zastosowano więc powyższy sposób do odwzorowania oryginalnej struktury. W rezultacje wynikowy model obiektowy jest bardzo podobny do modelu relacyjnego. Jedyną różnicą jest powiązanie kolekcji \texttt{Partsupp} z kolekcją \texttt{Lineitem} - zbiory te posiadają klucz główny będący kombinacją dwóch pól. Ze względu na dość powolny proces importu danych i budowania kolekcji, konieczne stało się dodanie do klasy \texttt{Partsupp} nowego pola, będącego złączeniem powyższych dwóch pól. Poza procesem wczytywania danych, złączony klucz główny nie jest wykorzystywany.
+    Aby umożliwić badanie działania strumieni na danych testu TPC, konieczne jest przekształcenie relacyjnego modelu danych w model, który jest możliwy do zareprezentowania w języku Java. Typowe odwzorowanie stosowane w systemach obiektowo-relacyjnych wykorzystuje pola obiektów do reprezentacji kolumn oraz referencje do obiektów do reprezentacji powiązań (kluczy obcych) pomiędzy tabelami. Zastosowano więc powyższy sposób do odwzorowania oryginalnej struktury. W rezultacje wynikowy model obiektowy jest bardzo podobny do modelu relacyjnego. Jedyną różnicą jest powiązanie kolekcji \texttt{Partsupp} z kolekcją \texttt{Lineitem} - zbiory te posiadają klucz główny będący kombinacją dwóch pól. Ze względu na dość powolny proces importu danych i budowania kolekcji, konieczne stało się dodanie do klasy \texttt{Partsupp} nowego pola, będącego złączeniem powyższych dwóch pól. Poza procesem wczytywania danych, złączony klucz główny nie jest wykorzystywany.
 
     Cała hutrownia danych reprezentowana jest przez obiekt klasy \texttt{Store}, który przechowuje wszystkie kolekcje danych TPC. Przy implementacji importu danych okazało się, że nie ma praktycznej możliwości wykorzystania zwykłych list jako kontenerów danych. Odczyt był bardzo powolny, w związku z tym zdecydowano się w większości miejsc na wykorzystanie kolekcji haszującej \texttt{HashMap}, w której jako klucze wykorzystano klucze główne obiektów, ze względu na ich unikalność. Z drugiej strony, nie wykorzystuje się właściwości haszujących przy badaniu wydajności strumieni, ponieważ założeniem jest, by właściwości strumieni były badane w izolacji, bez wpływu wykorzystanych struktur danych.
 
@@ -490,7 +490,7 @@ public class SummingIntegersH2 {
 
 \subsection{Proces wykonywania zapytania SQL}
 
-    Jedną z ważniejszych cech języka programowania jest sposób interpretacji kodu programu przez interpreter bądź kompilator. Język SQL jest dość ciekawym przypadkiem, ponieważ leksykalna kolejność operacji jest odmienna od logicznej kolejności. Wprowadza to wiele zamieszania, zwłaszcza pośród początkujących programistów. Listing \ref{sqlorder} prezentuje jprzykładowe zapytanie SQL, przeznaczone do wykonania na testowej bazie TPC:
+    Jedną z ważniejszych cech języka programowania jest sposób interpretacji kodu programu przez interpreter bądź kompilator. Język SQL jest dość ciekawym przypadkiem, ponieważ leksykalna kolejność operacji jest odmienna od logicznej kolejności. Wprowadza to wiele zamieszania, zwłaszcza pośród początkujących programistów. Fragment \ref{sqlorder} prezentuje jprzykładowe zapytanie SQL, przeznaczone do wykonania na testowej bazie TPC:
 
 
 \begin{lstlisting}[label=sqlorder, caption=Przykład kolejności wykonywania zapytania SQL]
