@@ -455,7 +455,6 @@ public class SummingIntegersH2 {
     Cała hutrownia danych reprezentowana jest przez obiekt klasy \texttt{Store}, który przechowuje wszystkie kolekcje danych TPC. Przy implementacji importu danych okazało się, że nie ma praktycznej możliwości wykorzystania zwykłych list jako kontenerów danych. Odczyt był bardzo powolny, w związku z tym zdecydowano się w większości miejsc na wykorzystanie kolekcji haszującej \texttt{HashMap}, w której jako klucze wykorzystano klucze główne obiektów, ze względu na ich unikalność. Z drugiej strony, nie wykorzystuje się właściwości haszujących przy badaniu wydajności strumieni, ponieważ założeniem jest, by właściwości strumieni były badane w izolacji, bez wpływu wykorzystanych struktur danych.
 
     * UML :)
-* zajętość pamięci przy Store i H2 dla różnych wielkości
 
 
 
@@ -484,6 +483,17 @@ public class SummingIntegersH2 {
 \includegraphics[width=13cm]{plots/Tpc14Benchmark}
 \caption{Tpc14Benchmark}
 \end{figure}
+
+\subsection{Dodatek: Porównanie zajętości pamięci}
+
+    W ramach badania wydajności metod dostępu do danych postanowiono dodatkowo sprawdzić ilość pamięci, wykorzystywanej przez bazy danych do ich przechowywania. Jak przewidywano, baza dyskowa MySQL przechowuje dane na dysku w najbardziej bardziej kompaktowej postaci. Schemat TPC w postaci obiektów znajdujących się w pamięci maszyny wirtualnej zajmuje więcej miejsca, natomiast w przypadku bazy pamięciowej H2 zaobserwować można pewien narzut wewnętrznych struktur danych.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=13cm]{plots/memory}
+\caption{Tpc14Benchmark}
+\end{figure}
+    
 
 
 \section{Porównanie sposobu formułowania kodu}
