@@ -52,7 +52,7 @@
         \textbf{Kierujący pracą:} dr inż. Ewa Płuciennik\\
     \endgroup
 
-    \vspace{3.0cm}
+    \vspace{2.0cm}
     \begingroup
         \fontsize{12pt}{14pt}\selectfont
         \begin{center}
@@ -69,14 +69,13 @@
 
 \section{Wstęp}
 
-
-    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym w praktyce rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, cache na poziomie aplikacji) nie spełniają wymagań biznesowych.
-
-    Stream API zostało wprowadzone do języka Java w wersji 8, która opublikowana została oficjalnie 18 marca 2014 roku. Wraz ze strumieniami do języka trafiły nowe funkcjonalności, z których najważniejsze okazały się wyrażenia lambda. Rosnąca popularność paradygmatu funkcyjnego i korzyści z nim związane zachęciły twórców języka do wprowadzenia elementów funkcyjnych do języka. 
+    TBD
 
 \section{Bazy SQL in-memory}
 
 \subsection{Zastosowanie}
+
+    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym w praktyce rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, cache na poziomie aplikacji) nie spełniają wymagań biznesowych.
 
       Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM (Object Relational Mapping) możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów (powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL). Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu.  Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i in-memory obsługuje się praktycznie w ten sam sposób. 
 
@@ -169,14 +168,21 @@ public class SummingTask extends RecursiveTask<Integer> {
   
   private List<SummingTask> splitTasks() {
     return asList(
-        new SummingTask(source.subList(0, source.size() / 2)),
-        new SummingTask(source.subList(source.size() / 2, source.size()))
+        new SummingTask(source.subList(
+          0, source.size() / 2)
+        ),
+        new SummingTask(source.subList(
+          source.size() / 2, source.size()
+        )
+      )
     );
   }
   
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     ForkJoinPool forkJoinPool = new ForkJoinPool(10);
-    SummingTask task = new SummingTask(asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+    SummingTask task = new SummingTask(
+      asList(1, 2, 3, 4, 5, 6, 7, 8, 9)
+    );
     Integer sum = forkJoinPool.submit(task).get();
     System.out.println(sum);
   }
@@ -193,7 +199,10 @@ public class SummingTask extends RecursiveTask<Integer> {
 \begin{lstlisting}[label=streamsthreads, caption=Struktura puli wątków FJP]
 
 IntStream.range(1, 100).parallel()
-  .forEach(e -> System.out.println(Thread.currentThread().getName()));
+  .forEach(e -> out.println(
+    Thread.currentThread().getName()
+  )
+);
 
 \end{lstlisting}
 
@@ -214,7 +223,8 @@ IntStream.range(1, 100).parallel()
 
 \begin{lstlisting}[label=toList, caption=Ręczna implementacja \texttt{toList}]
 
-Collector<Integer, List<Integer>, List<Integer>> toList = Collector.of(
+Collector<Integer, List<Integer>, List<Integer>> toList =
+Collector.of(
     () -> {
       ArrayList<Integer> list = new ArrayList<>();
       out.println("New mutable container " + id(list));
@@ -225,7 +235,10 @@ Collector<Integer, List<Integer>, List<Integer>> toList = Collector.of(
       acc.add(val);
     },
     (acc1, acc2) -> {
-      out.println("Combining " + id(acc1) + " with " + id(acc2));
+      out.println(
+        "Combining " + id(acc1)
+        + " with " + id(acc2)
+      );
       acc1.addAll(acc2);
       return acc1;
     }
@@ -533,18 +546,18 @@ Jak można zauważyć, logiczna kolejność wykonywania zapytania jest znacząco
     Po utworzeniu strumienia możliwe jest wykonanie dostępnych na nim operacji pośrednich, udostępnionych przez metody instancyjne klasy \texttt{Stream<T>}. Każda taka operacja zwraca zawsze strumień, ewentualnie innego typu (\texttt{Stream<...>}, \texttt{IntStream}). Należy zwrócić szczególną uwagę na różnice pomiędzy dwoma typami operacji pośrednich, ponieważ owe typy determinują faktyczną, wewnętrzną kolejność operacji, która mimo iż ukryta przed programistą, może mieć wpływ na złożoność czasową jak i pamięciową. Operacje pośrednie bezstanowe (takie jak \texttt{filter} i \texttt{map}) zapisane tuż obok siebie, łączone są w jedną, większą operację, wykorzystując właściwości kompozycji funkcji bezstanowych. Drugi typ operacji pośrednich, operacje pośrednie stanowe, nie gwarantują fuzji i mogą wprowadzać ukryty stan. Najlepszym przykładem operacji pośredniej stanowej jest sortowanie, które wymaga, aby dokładnie wszystkie elementy strumienia zbuforowane zostały przed sortowaniem. Jest to logiczne, ponieważ nie jest możliwe ustalenie posortowanej kolejności zbioru elementów o nieznanej wielkości. Przykład fuzji operacji zaprezentowany jest we fragmencie kodu \ref{streamstateful1}.
 
 \begin{lstlisting}[label=streamstateful1, caption=Fuzja operacji bezstanowych]
+Stream.of(1, 2, 3, 4, 5)
+    .map(e -> {
+      out.println("Mapping: " + e);
+      return e;
+    })
+    .filter(e -> {
+      out.println("Filtering: " + e);
+      return true;
+    })
+    .sorted()
+    .collect(toList());
 
-        Stream.of(1, 2, 3, 4, 5)
-                .map(e -> {
-                    out.println("Mapping: " + e);
-                    return e;
-                })
-                .filter(e -> {
-                    out.println("Filtering: " + e);
-                    return true;
-                })
-                .sorted()
-                .collect(toList());
 \end{lstlisting}
 
 
@@ -566,17 +579,17 @@ Filtering: 5
     Na podstawie wyjścia programu można stwierdzić, że operacja \texttt{map} wykonywała się wraz z operacją \texttt{filter}. Jako iż sortowanie zostało umieszczone na końcu, nie przeszkadzało ono w żaden sposób. Z drugiej strony, jeśli sortowanie zostanie przeniesione pomiędzy, można zaobserwować buforowanie się elementów tuż przed stanową operacją sortowania (fragment \ref{streamstateful2}).
 
 \begin{lstlisting}[label=streamstateful2, caption=Brak fuzji operacji stanowych]
-        Stream.of(1, 2, 3, 4, 5)
-                .map(e -> {
-                    out.println("Mapping: " + e);
-                    return e;
-                })
-                .sorted()
-                .filter(e -> {
-                    out.println("Filtering: " + e);
-                    return true;
-                })
-                .collect(toList());
+Stream.of(1, 2, 3, 4, 5)
+    .map(e -> {
+      out.println("Mapping: " + e);
+      return e;
+    })
+    .sorted()
+    .filter(e -> {
+      out.println("Filtering: " + e);
+      return true;
+    })
+    .collect(toList());
 \end{lstlisting}
 
 \begin{verbatim}
@@ -681,15 +694,22 @@ public static <T, U> Stream<ImmutablePair<T, U>> innerJoinHashmaps(
 ) {
   HashMap<Object, T> leftMap = new HashMap<>();
   for (T leftElement : left) {
-    leftMap.put(leftKeyExtractor.apply(leftElement), leftElement);
+    leftMap.put(
+      leftKeyExtractor.apply(leftElement),
+      leftElement
+    );
   }
   
   List<ImmutablePair<T, U>> result = new ArrayList<>();
   
   for (U rightElement : right) {
-    T leftElement = leftMap.get(rightKeyExtractor.apply(rightElement));
+    T leftElement = leftMap.get(
+      rightKeyExtractor.apply(rightElement)
+    );
     if (leftElement != null) {
-      result.add(new ImmutablePair<>(leftElement, rightElement));
+      result.add(new ImmutablePair<>(
+        leftElement, rightElement
+      ));
     }
   }
   
