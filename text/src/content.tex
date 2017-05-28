@@ -420,35 +420,35 @@ public class SummingIntegersH2 {
 
     W zbadanych przypadkach strumienie równoległe wykazują większą wydajność niż strumienie sekwencyjne od pewnego rozmiaru danych wejściowych. Utworzenie strumienia równoległego i jego skonsumowanie wymaga uruchomienie całego procesu podziału danych na wątki, wykonywania operacji i łączenia wyników z poszczególnych wątków. Daje to pewien narzut, który jest szczególnie widoczny przy małych listach, dla których operacje sekwencyjne wykonują się szybciej. Niestety, nie istnieje sposób pozwalający przewidzieć, który rodzaj strumienia (sekwencyjny czy równoległy) byłby lepszym wyborem dla danej sytuacji. Możliwe byłoby zaproponowanie heurystycznej metody, określającej rodzaj na podstawie wielkości danych wejściowych, ale nie byłby on niezawodny, więc dobór metody pozostawiony jest programiście.
 
-    Strumienie i bezpośrednie operacje na pamięciowych strukturach języka Java są w zdecydowanej większości przypadków szybsze niż ich odpowiedniki w języku SQL. Porównując zaś bazy H2 i MySQL, testy na bazie H2 wykonywane było średnio 1.5-20x razy szybciej niż w przypadku MySQL. Związane jest to z pewnością w pewnym stopniu z narzutami transmisji i konwersji danych pomiędzy procesami. Do połączenia się z bazą dyskową wykorzystany został, tak jak w przypadku bazy pamięciowej, standardowy interfejs JDBC, który wykorzystywał połączenie TCP. Przepustowość tego połączenia nie powinna mieć zbytniego znaczenia (prędkość połączenia typu loopback determinowana jest głównie przez moc procesora, a ilość danych przesyłanych jest znikoma), większy wpływ ma złożoność systemu bazodanowego i metody składowania danych. Należy zauważyć, że w przypadku największych zbiorów testowych różnice w wydajności nie przekraczają 2-3x. Jest to z pewnością związane z przystosowaniem i optymalizacjami baz dyskowych.
+    Strumienie i bezpośrednie operacje na pamięciowych strukturach języka Java są w zdecydowanej większości przypadków szybsze niż ich odpowiedniki w języku SQL. Porównując zaś bazy H2 i MySQL, testy na bazie H2 wykonywane było średnio 1.5-20x razy szybciej niż w przypadku MySQL. Związane jest to w pewnym stopniu z narzutami transmisji i konwersji danych pomiędzy procesami. Do połączenia się z bazą dyskową wykorzystany został, tak jak w przypadku bazy pamięciowej, standardowy interfejs JDBC, który wykorzystywał połączenie TCP. Przepustowość tego połączenia nie powinna mieć zbytniego znaczenia (prędkość połączenia typu loopback determinowana jest głównie przez moc procesora, a ilość danych przesyłanych jest znikoma), większy wpływ ma złożoność systemu bazodanowego i metody składowania danych. Należy zauważyć, że w przypadku największych zbiorów testowych różnice w wydajności nie przekraczają 2-3x. Jest to z związane z przystosowaniem i optymalizacjami baz dyskowych.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/SummingIntegers}
+\includegraphics[width=15cm]{plots/SummingIntegers}
 \caption{SummingIntegers}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/GroupingAndSumming}
+\includegraphics[width=15cm]{plots/GroupingAndSumming}
 \caption{GroupingAndSumming}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/CrossJoinAndFilter}
+\includegraphics[width=15cm]{plots/CrossJoinAndFilter}
 \caption{CrossJoinAndFilter}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/FilteringAndCountingIntegers}
+\includegraphics[width=15cm]{plots/FilteringAndCountingIntegers}
 \caption{FilteringAndCountingIntegers}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/HugeJoining}
+\includegraphics[width=15cm]{plots/HugeJoining}
 \caption{HugeJoining}
 \end{figure}
 
@@ -487,25 +487,25 @@ public class SummingIntegersH2 {
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/Tpc1Benchmark}
+\includegraphics[width=15cm]{plots/Tpc1Benchmark}
 \caption{Tpc1Benchmark}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/Tpc4Benchmark}
+\includegraphics[width=15cm]{plots/Tpc4Benchmark}
 \caption{Tpc4Benchmark}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/Tpc6Benchmark}
+\includegraphics[width=15cm]{plots/Tpc6Benchmark}
 \caption{Tpc6Benchmark}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=13cm]{plots/Tpc14Benchmark}
+\includegraphics[width=15cm]{plots/Tpc14Benchmark}
 \caption{Tpc14Benchmark}
 \end{figure}
 
