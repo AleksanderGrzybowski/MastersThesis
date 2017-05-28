@@ -190,7 +190,19 @@ public class SummingTask extends RecursiveTask<Integer> {
 
 \end{lstlisting}
 
-    FJP wykorzystany został przy implementacji równoległych strumieni. Jego znajomość nie jest konieczna do ich używania, natomiast może być przydatna przy badaniu wydajności przetwarzania strumieniowego. Domyślnie, przy tworzeniu strumienia nie jest możliwe wybranie puli wątków, w której przetwarzanie będzie zachodzić - przy bezpośrednim użyciu FJP jest to możliwe, wraz z określeniem docelowej, maksymalnej liczby wątków.
+    FJP wykorzystany został przy implementacji równoległych strumieni. Jego znajomość nie jest konieczna do ich używania, natomiast może być przydatna przy badaniu wydajności przetwarzania strumieniowego. Domyślnie, przy tworzeniu strumienia nie jest możliwe wybranie puli wątków, w której przetwarzanie będzie zachodzić - przy bezpośrednim użyciu FJP jest to możliwe, wraz z określeniem docelowej, maksymalnej liczby wątków. Przeprowadzono dodatkowy eksperyment, w którym zbadano wydajność (liczbę operacji na sekundę) sortowania 1000000 liczb całkowitych, przy wykorzystaniu równoległych strumieni i zadania wykonywanego bezpośrednio w puli FJP, w zależności od liczby wątków puli. Kod źródłowy znajduje się w pliku \texttt{FJPSorting.java}, a rysunek \ref{fig:fjpsorting} prezentuje wyniki eksperymentu.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=13cm]{plots/FJPSorting}
+\caption{Sortowanie 1000000 liczb w puli wątków FJP}
+\label{fig:fjpsorting}
+\end{figure}
+
+    Jak można zauważyć, ilość operacji na sekundę rośnie przy wzroście wielkości puli do pewnego momentu, w którym narzut wielowątkowości staje się zbyt duży. Przyjęło się za ogólnie dobrą praktykę, aby liczba wątków była w przybliżeniu równa liczbie logicznych rdzeni procesora. Test przeprowadzono na maszynie z 4 rdzeniami Hyper Threading (logiczne 8 rdzeni), w związku z tym można się spodziewać optymalnego działania procesu dla takiej liczby wątków.
+
+
+
 
 \subsection{Przetwarzanie równoległe i interfejs \texttt{Collector}}
 
@@ -219,7 +231,7 @@ IntStream.range(1, 100).parallel()
 
     Konieczność istnienia pośrednich kontenerów i możliwości ich scalania związana jest bezpośrednio z równoległą naturą strumieni. Jako iż kolektory powinny działać w identyczny sposób ze strumieniami sekwencyjnymi, jak i równoległymi, narzucony został wzorzec uwzględniający przetwarzanie równoległe w każdym przypadku.
 
-    Fragment \ref{toList} prezentuje przykład ręcznie zaimplementowanego kolektoa \texttt{toList}, który dostępny jest domyślnie w bibliotece standardowej języka Java. 
+    Fragment \ref{toList} prezentuje przykład ręcznie zaimplementowanego kolektora \texttt{toList}, który dostępny jest domyślnie w bibliotece standardowej języka Java. 
 
 \begin{lstlisting}[label=toList, caption=Ręczna implementacja \texttt{toList}]
 
