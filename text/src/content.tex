@@ -678,7 +678,8 @@ Filtering: 5
 \subsection{Strumieniowy operator złączenia}
 
     Jedną z najczęściej wykonywanych operacji na relacyjnej bazie danych jest łączenie tabel. W języku SQL dostępne są różne typy złączeń (\texttt{JOIN}, \texttt{INNER JOIN}, \texttt{LEFT/RIGHT JOIN} i inne), które wykorzystywane są w różnych sytuacjach. Relacyjne bazy danych posiadają z reguły znaczne optymalizacje w zakresie wykonywania takich operacji, ponieważ wykorzystywane są one bardzo często - ważną zaletą modelu relacyjnego jest podział na tabele połączone ze sobą kluczami i więzami referencyjnymi. Aby osiągnąć wymaganą wydajność, w większości rozwiązań kolumny będące kluczami głównymi otrzymują automatycznie, przy ich tworzeniu, indeks.
-    TODO coś o indeksach
+
+    Indeks jest strukturą danych, zbudowaną na podstawie wartości danych określonej kolumny (kolumn) danej tabeli. Bazuje on zwykle na drzewiastej strukturze danych, gromadzącej wszystkie pary klucz-wartość z indeksowanej kolumny, gdzie kluczem jest zawartość kolumny, a wartością wskaźnik do wiersza, zawierającego daną wartość. Dzięki ustanowionemu porządkowi (drzewo jest posortowane) i korzystnych złożonościach wyszukiwania (rzędu $ \mathcal{O}(1)) $ możliwe jest zastąpienie liniowego wyszukiwania szybkim wyszukiwaniem w drzewie. Bazy danych SQL bardzo często wykorzystują indeksy, większość z nich tworzy domyślnie indeks na kolumnach będących kluczami głównymi nowo dodawanej tabeli. Wydaje się więc wskazane, aby wypróbować podobne rozwiązanie w przypadku łączenia strumieni. Jako kontener danych wykorzystano implementację zbioru mieszającego z biblioteki standardowej języka Java, \texttt{java.util.HashSet}, ze względu na jego wydajność. Istnieje też alternatywne rozwiązanie w postaci kontenera \texttt{java.util.TreeSet} wykorzystującego zmodyfikowane drzewo czerwono-czarne, natomiast jest ono mniej wydajne niż rozwiązanie z kolekcją mieszającą.
 
     Ze względu na porównawczy charakter niniejszej pracy, zdecydowano się na opracowanie podobnego rozwiązania, działającego w oparciu o Stream API. Problem zdefiniowany został następująco
 
@@ -732,7 +733,7 @@ innerJoinForLoop(
 
     To rozwiązanie jest nieco lepsze, natomiast nie jest znacząco lepsze od poprzedniego. Problemem jest konieczność przejścia przez wewnętrzną pętlę nadal $ mn $ razy.
 
-    W rozwiązaniu trzecim postanowiono wykorzystać kolekcje haszujące, które spełniają w nim rolę podobną do indeksów. Przy założeniu, że kolekcje łączone są warunkiem równości właściwości, z których co najmniej jedna spełnia właściwości klucza głównego (unikalność i brak występowania wartości pustej \texttt{NULL}), możliwe jest umieszczenie elementów tej kolekcji w strukturze mapy haszującej, w której za klucz przyjmuje się wymieniony klucz główny, a za wartość - obiekt przez ten klucz reprezentowany. Dzięki temu, nie jest wymagane przeglądanie całej kolekcji elementów \texttt{T}, a jedynie sprawdzenie, czy obiekt identyfikowany przez kolejne obiekty kolekcji \texttt{U} istnieje bądź nie.
+    W rozwiązaniu trzecim postanowiono wykorzystać kolekcje mieszające, które spełniają w nim rolę podobną do indeksów. Przy założeniu, że kolekcje łączone są warunkiem równości właściwości, z których co najmniej jedna spełnia właściwości klucza głównego (unikalność i brak występowania wartości pustej \texttt{NULL}), możliwe jest umieszczenie elementów tej kolekcji w strukturze mapy mieszającej, w której za klucz przyjmuje się wymieniony klucz główny, a za wartość - obiekt przez ten klucz reprezentowany. Dzięki temu, nie jest wymagane przeglądanie całej kolekcji elementów \texttt{T}, a jedynie sprawdzenie, czy obiekt identyfikowany przez kolejne obiekty kolekcji \texttt{U} istnieje bądź nie.
 
 \begin{lstlisting}[label=join3, caption=Rozwiązanie nr 3]
 
