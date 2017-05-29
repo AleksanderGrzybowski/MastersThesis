@@ -81,7 +81,14 @@
 
 \subsection{Zastosowanie}
 
-    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym w praktyce rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, cache na poziomie aplikacji) nie spełniają wymagań biznesowych.
+    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej \ref{fig:dbstats} stosowanym w praktyce rozwiązaniem. Bazy danych działające całkowicie w pamięci RAM wykorzystywane są w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, cache na poziomie aplikacji) nie spełniają wymagań biznesowych.
+
+\begin{figure}
+\centering
+\includegraphics{dbstats.png}
+\caption{Popularność rozwiązań DMBS, źródło: Stack Overflow Developer Survey 2017}
+\label{fig:dbstats}
+\end{figure}
 
       Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM (Object Relational Mapping) możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów (powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL). Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu.  Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i in-memory obsługuje się praktycznie w ten sam sposób. 
 
@@ -143,6 +150,13 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
     Język Java od samego początku istnienia wyróżniał się znakomitymi możliwościami programowania równoległego, wykorzystywanego głównie w aplikacjach internetowych, obsługujących wielu użytkowników jednocześnie. Świadczy o tym obecność metod związanych z wątkami już w klasie \texttt{Object}, która jest klasą bazową wszystkich klas języka Java. W wersji 5 języka wprowadzono dużo nowych klas, zawartych w pakiecie \texttt{java.util.concurrent}, mających na celu ułatwienie pracy z równoległym kodem. Wcześniej ręcznie tworzone rozwiązania i wzorce mogą być zastąpione przez wbudowane, wysokiej jakości implementacje pul wątków, kolejek blokujących, list typu copy-on-write, semaforów i barier cyklicznych.
     
+\begin{figure}[h]
+\centering
+\includegraphics{forkjoin.png}
+\caption{Wizualizacja działania mechanizmu Fork-Join (źródło: http://www.developer.com/imagesvr\_ce/3378/join-fork-image001.png)}
+\label{fig:forkjoin}
+\end{figure}
+
     Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu FJP, umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę "dziel i rządź". Tworzona jest pula wątków (o dowolnej ich ilości), do której wysyła się zadanie, będące obiektem klasy \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. W kodzie programu należy sprawdzić, czy ten fakt występuje. Jeśli tak, zadanie należy podzielić, wysłać do puli wątków i zebrać wyniki po zakończeniu wykonywania się podzadań. W przeciwnym przypadku wystarczy zwrócić wynik. Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest na fragmencie \ref{fjpexample}.
 
 \begin{lstlisting}[label=fjpexample, caption=Przykładowe wykorzystanie FJP]
@@ -198,7 +212,7 @@ public class SummingTask extends RecursiveTask<Integer> {
 
     FJP wykorzystany został przy implementacji równoległych strumieni. Jego znajomość nie jest konieczna do ich używania, natomiast może być przydatna przy badaniu wydajności przetwarzania strumieniowego. Domyślnie, przy tworzeniu strumienia nie jest możliwe wybranie puli wątków, w której przetwarzanie będzie zachodzić - przy bezpośrednim użyciu FJP jest to możliwe, wraz z określeniem docelowej, maksymalnej liczby wątków. Przeprowadzono dodatkowy eksperyment, w którym zbadano wydajność (liczbę operacji na sekundę) sortowania 1000000 liczb całkowitych, przy wykorzystaniu równoległych strumieni i zadania wykonywanego bezpośrednio w puli FJP, w zależności od liczby wątków puli. Kod źródłowy znajduje się w pliku \texttt{FJPSorting.java}, a rysunek \ref{fig:fjpsorting} prezentuje wyniki eksperymentu.
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
 \includegraphics[width=13cm]{plots/FJPSorting}
 \caption{Sortowanie 1000000 liczb w puli wątków FJP}
@@ -330,7 +344,14 @@ Combining #42c with #46f
 
     Głównym blokiem budującym w modelu relacyjnej bazy danych jest relacja (tabela) posiadająca kolumny i rekordy, a integralność danych zapewniona jest w pewnym stopniu przez ograniczenia, klucze i więzy referencyjne. Język SQL pozwala dzięki mechanizmowi JOIN na łatwe łączenie powiązanych ze sobą tabel i uzyskiwanie połączonych wyników. Jeśli baza danych została odpowienio zaprojektowana, uwzględniając wymaganą normalizację danych, to łączenie tabel na podstawie kluczy obcych jest naturalne dla programisty i proste w zrozumieniu. W przetwarzaniu strumieniowym pojęcie tabeli nie istnieje, ponieważ kontenerami danych są zwykłe kolekcje języka Java (listy, zbiory i mapy). O ile istnieją biblioteki bazodanowe typu jOOQ, które pozwalają na konwersję wyniku zapytania JDBC na strumień, to tak naprawdę operacje strumieniowe wykonują się zawsze na kolekcji w pamięci maszyny wirtualnej. W związku, aby operacje strumieniowe były wygodne dla programisty, model danych powinien uwzględniać powiązania między poszczególnymi obiektami w typowy dla języka Java sposób, poprzez referencje do innych obiektów (kompozycja). Łączenie kolekcji, choć możliwe, komplikuje znacznie zapytania i zmniejsza ich ogólną szybkość.
 
-    Bazy in-memory wykorzystują wewnątrz struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i ukrytym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty klas \texttt{org.h2.mvstore.Page} i \texttt{org.h2.value.*}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
+\begin{figure}[H]
+\centering
+\includegraphics[width=12cm]{jvmmemory}
+\caption{Migawka statystyk wykorzystania pamięci maszyny wirtualnej (narzędzie VisualVM)}
+\label{fig:jvmmemory}
+\end{figure}
+
+    Bazy in-memory wykorzystują wewnątrz struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i ukrytym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty klas \texttt{org.h2.mvstore.Page} i \texttt{org.h2.value.*} - rysunek \ref{fig:jvmmemory}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
 
 \subsection{Weryfikacja poprawności składni}
 
@@ -779,17 +800,21 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
 
 \begin{thebibliography}{9}
 
+\bibitem{streamsjavadoc} 
+    Oracle Corporation
+\textit{java.util.stream Javadoc documentation}. 
+http://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html\#MutableReduction, czas dostępu 29.05.2017
+
 \bibitem{latexcompanion} 
 Raoul-Gabriel Urma
 \textit{Processing Data with Java SE 8 Streams, Part 1}. 
 http://www.oracle.com/technetwork/articles/java/ma14-java-se-8-streams-2177646.html, czas dostępu 26.05.2017
 
-
 \bibitem{joolambda} 
-    \textit{Biblioteka JOO$\lambda$}, https://www.jooq.org/products/, czas dostępu 28.05.2017
+\textit{Biblioteka JOO$\lambda$}, https://www.jooq.org/products/, czas dostępu 28.05.2017
 
 \bibitem{streamex} 
-    \textit{Biblioteka StreamEx} https://github.com/amaembo/streamex, czas dostępu 28.05.2017
+\textit{Biblioteka StreamEx} https://github.com/amaembo/streamex, czas dostępu 28.05.2017
 
 
 
