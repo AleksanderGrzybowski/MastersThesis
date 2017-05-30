@@ -246,7 +246,7 @@ IntStream.range(1, 100).parallel()
 
 \subsection{Interfejs \texttt{Collector}}
 
-    Klasa \texttt{Collector} jest ważną częścią Stream API. Pozwala on na definiowanie tzw. operacji terminalnych, czyli takich, które mogą występować jedynie na samym końcu potoku przetwarzania strumieniowego. Jest to dość niskopoziomowy mechanizm, który jednak nie jest zbyt skomplikowany, a wymusza na programiście zwrócenie uwagi na przetwarzanie równoległe. Parametrem wejściowym obiektu kolektora jest strumień obiektów, przy czym nie jest on przekazywany jawnie, a poszczególne obiekty dostarczane są do odpowienich funkcji definujących kolektor. Wynikiem działania kolektora jest dowolny obiekt bądź kolekcja, ale w założeniu jest to wynik operacji redukującej strumień danych. Instancja kolektora nie posiada stanu - cały stan jest kontrolowany przez wewnętrzne struktury Stream API, co jest bardzo pożądane zwłaszcza w przypadku strumieni równoległych, w przypadku których zachowanie bezpieczeństwa wątkowego byłoby utrudnione
+    Typ \texttt{Collector} jest ważną częścią Stream API. Pozwala on na definiowanie tzw. operacji terminalnych, czyli takich, które mogą występować jedynie na samym końcu potoku przetwarzania strumieniowego. Jest to dość niskopoziomowy mechanizm, który jednak nie jest zbyt skomplikowany, a wymusza na programiście zwrócenie uwagi na przetwarzanie równoległe. Parametrem wejściowym obiektu kolektora jest strumień obiektów, przy czym nie jest on przekazywany jawnie, a poszczególne obiekty dostarczane są do odpowienich funkcji definujących kolektor. Wynikiem działania kolektora jest dowolny obiekt bądź kolekcja, ale w założeniu jest to wynik operacji redukującej strumień danych. Instancja kolektora nie posiada stanu - cały stan jest kontrolowany przez wewnętrzne struktury Stream API, co jest bardzo pożądane zwłaszcza w przypadku strumieni równoległych, w przypadku których zachowanie bezpieczeństwa wątkowego byłoby utrudnione
 
     Do utworzenia obiektu \texttt{Collector} wymagane są trzy (w szczególnym przypadku cztery) funkcje:
 
@@ -578,7 +578,18 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 
 \subsection{Wnioski}
 
-TODO
+    Wyniki testów referencyjnych nie wskazują jednoznacznie na najlepsze rozwiązanie do użycia w każdym przypadku. Praktycznie każdy test prezentuje cechy wydajnościowe metod dostępu do danych w innym kontekście.
+
+    Zapytanie nr 1 obejmowało filtrowanie i wielokrotne wykorzystanie funkcji agregujących \texttt{sum}, \texttt{avg} i \texttt{count}. Bazy SQL prezentują w tym przypadku większą wydajność, przy czym dla każdej wielkości zbioru testowego baza pamięciowa jest lepsza od bazy dyskowej. Przy większych rozmiarach zbioru danych strumienie wykazują większą liczbę operacji na sekundę, a związane to jest z bardzo łatwym zrównoleglaniem operacji agregujących, w których łączenie pośrednich kontenerów danych w implementacji interfejsu \texttt{Collector} jest bardzo szybkie.
+
+    TODO 4
+
+    Zapytanie nr 6 jest bardzo podobne do zapytania nr 1, ponieważ także obejmuje jedną tabelę, ale tylko jedną funkcję agregującą. Dla małych zbiorów danych narzut strumieni okazuje się na tyle duży, że bazy SQL wykazują większą wydajność, natomiast im większy zbiór, tym lepszym rozwiązaniem są strumienie. Warto zauważyć ponad dwukrotną przewagę strumieni równoległych nad sekwencyjnymi. Taka przewaga jest zawsze widoczna przy operacjach łatwych do podzielenia i zrównoleglenia wzorcem FJP.
+
+    Test nr 12 pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających.
+
+    Ostatni test nr 14 potwierdza znakomitą wydajność bazy MySQL w zakresie operacji łączenia tabel, przy czym baza H2 jest jedynie kilka razy wolniejsza. Funkcje agregujące mogą być bardzo efektywnie wykonywane w przypadku jednoczesnego złączenia tabel.
+
 
 \subsection{Dodatek: Porównanie zajętości pamięci}
 
@@ -834,6 +845,12 @@ public static <T, U> Stream<ImmutablePair<T, U>> innerJoinHashmaps(
 
 Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości klucza w jednej z kolekcji. Porównanie szybkości wykonywania się operacji złączenia na zbiorze danych TPC jest poniżej.
 
+
+\section{Podsumowanie}
+
+\subsection{Wnioski}
+\subsection{Napotkane problemy}
+\subsection{Dalsze badania}
 
 \begin{figure}[H]
     \centering
