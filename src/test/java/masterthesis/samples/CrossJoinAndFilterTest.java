@@ -15,16 +15,16 @@ public class CrossJoinAndFilterTest {
     @Test
     public void test() throws Exception {
         CrossJoinAndFilterStreams streams = new CrossJoinAndFilterStreams();
-        streams.setup();
         streams.numberCount = 100;
+        streams.setup();
     
         CrossJoinAndFilterMysql mysql = new CrossJoinAndFilterMysql();
-        mysql.setup();
         mysql.numberCount = 100;
+        mysql.setup();
         
         CrossJoinAndFilterH2 h2 = new CrossJoinAndFilterH2();
-        h2.setup();
         h2.numberCount = 100;
+        h2.setup();
     
         List<Pair<Pair<Integer, Integer>, Pair<Integer, String>>> resultMysql = mysql.sql();
         List<Pair<Pair<Integer, Integer>, Pair<Integer, String>>> resultH2 = h2.sql();

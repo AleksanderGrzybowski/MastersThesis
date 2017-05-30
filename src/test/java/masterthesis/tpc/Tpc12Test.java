@@ -34,7 +34,7 @@ public class Tpc12Test {
         List<Tpc12ResultRow> resultH2 = h2.sql();
         List<Tpc12ResultRow> resultMysql = mysql.sql();
         List<Tpc12ResultRow> resultStreams = streams.parallelStreams();
-        List<Tpc12ResultRow> resultHashmaps = hashmaps.parallelStreams();
+        List<Tpc12ResultRow> resultHashmaps = hashmaps.hashMaps();
         
         assertEquals(resultH2, resultStreams);
         assertEquals(resultH2, resultMysql);

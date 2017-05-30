@@ -25,7 +25,7 @@ public class NaturalJoinStreamsHashmaps {
     }
     
     @Benchmark
-    public List<ImmutablePair<Long, Long>> sql() throws Exception {
+    public List<ImmutablePair<Long, Long>> hashMaps() throws Exception {
         
         List<ImmutablePair<Long, Long>> result = StreamUtils.innerJoinHashmaps(
                 store.getOrders(),

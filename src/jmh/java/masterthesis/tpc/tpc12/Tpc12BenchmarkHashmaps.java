@@ -37,7 +37,7 @@ public class Tpc12BenchmarkHashmaps {
     }
     
     @Benchmark
-    public List<Tpc12ResultRow> parallelStreams() throws Exception {
+    public List<Tpc12ResultRow> hashMaps() throws Exception {
         Map<String, List<IntSummaryStatistics>> collect = StreamUtils.innerJoinHashmaps(
                 store.getOrders(),
                 (Order o) -> o.orderkey,

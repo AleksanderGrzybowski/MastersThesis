@@ -33,7 +33,7 @@ public class NaturalJoinTest {
         
         Object resultStreamsNative = new HashSet<>(streamsNaive.sql());
         Object resultStreamsForLoop = new HashSet<>(streamsForLoop.sql());
-        Object resultStreamsHashmaps = new HashSet<>(streamsHashmaps.sql());
+        Object resultStreamsHashmaps = new HashSet<>(streamsHashmaps.hashMaps());
         Object resultsH2 = new HashSet<>(h2.sql());
         Object resultsMysql = new HashSet<>(mysql.sql());
         
