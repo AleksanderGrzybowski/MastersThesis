@@ -27,7 +27,7 @@ public class Tpc12BenchmarkHashmaps {
     
     Store store;
     
-    @Param({"0.01"})
+    @Param({"0.01", "0.02", "0.05", "0.1", "0.2"})
     public String scaleFactor;
     
     @Setup
