@@ -23,7 +23,7 @@ dependencies {
 
     compile group: 'mysql', name: 'mysql-connector-java', version: '6.0.6'
     compile group: 'org.hsqldb', name: 'hsqldb', version: '2.3.4'
-
+    compile 'org.jooq:jool:0.9.12'
 }
 
 
