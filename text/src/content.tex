@@ -12,6 +12,8 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{indentfirst}
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+
 \setlength\parindent{1cm}
 
 \usepackage{listings}
@@ -30,6 +32,8 @@
 	keywordstyle=\color{blue}
 }
 
+\usepackage[hidelinks]{hyperref}
+ 
 \newtheorem{theorem}{Problem}
 
 \begin{document}
@@ -360,15 +364,16 @@ Combining #42c with #46f
 \subsection{Weryfikacja poprawności składni i format wynikowy}
 
     Przy wykonywaniu zapytania SQL z poziomu API JDBC nie istnieje żadne sprawdzanie poprawniości zapytania oraz jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie i przystępuje do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu odwzorowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator.
-
-    https://docs.oracle.com/javase/tutorial/java/generics/types.html
-
-    public static <T, K> Collector<T, ?, Map<K, List<T>>>
-    groupingBy(Function<? super T, ? extends K> classifier) {
-        return groupingBy(classifier, toList());
-    }
     
-    Przykładowo, wynikiem grupowania zbioru obiektów typu \texttt{T} na podstawie ich pola o typie \texttt{U} będzie zawsze \texttt{Map<T, List<U>}\texttt{>}. Dzięki temu typowe błędy przy odczytywaniu wyników z zapytania SQL przy użyciu obiektu \texttt{ResultSet} (niewłaściwy typ kolumny, niestniejące pole) nie występują.
+    Jako przykład przedstawiona zostanie sygnatura statycznej metody \texttt{Collectors.groupingBy}, we fragmencie \ref{genericsexample}. Dzięki zastosowaniu typów ogólnych \cite{generics} (generycznych), możliwe jest zagwarantowanie zgodności typów, o ile nie zostanie zastosowanie niebezpieczne rzutowanie.
+
+\begin{lstlisting}[label=genericsexample, caption=Sygnatura metody grupującej]
+  public static <T, K> Collector<T, ?, Map<K, List<T>>>
+  groupingBy(Function<? super T, ? extends K> classifier) 
+  { ...  }
+\end{lstlisting}
+
+    Przykładowo, wynikiem grupowania zbioru obiektów typu \texttt{T} (bądź jego typu pochodnego) na podstawie ich pola o typie \texttt{K} (bądź pola typu dziedziczonego) będzie zawsze \texttt{Map<T, List<K>}\texttt{>}. Dzięki temu typowe błędy przy odczytywaniu wyników z zapytania SQL przy użyciu obiektu \texttt{ResultSet} (niewłaściwy typ kolumny, niestniejące pole) nie występują.
 
     Wynikiem poprawnego zapytania SQL jest zawsze lista krotek, zawierająca wszystkie wiersze pasujące do zapytania i wszystkie kolumny wymienione w klauzuli \texttt{SELECT}. Przy wykonywaniu zapytania z poziomu silnie typowanego języka programowania obiekt reprezentujący wynik zapytania nie posiada informacji o typach danych kolumn. Przykładowo, w języku Java, do wyciągania danych służą obiekty klasy \texttt{ResultSet} udostępniające metody typu \texttt{getInt()} czy \texttt{getString()}. Błąd programisty polegający na użyciu niewłaściwej metody zakończy się wyjątkiem w czasie działania programu, i nie jest możliwy do automatycznego wykrycia przed próbą uruchomienia programu. W przypadku Stream API, wynikiem zapytania jest zawsze typ języka Java, a poprawność syntaktyczna gwarantowana jest przez kompilator i złożony system typów języka. Próba odwołania się do nieistniejącego pola bądź próba wykonania niewłaściwej operacji na określonym typie danych nie skompiluje się. 
 
@@ -446,9 +451,9 @@ public class SummingIntegersH2 {
 Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobistym ASUS PU551-JA, z czterordzeniowym procesorem Intel(R) Core(TM) i7-4712MQ CPU @ 2.30GHz i pamięcią RAM o pojemności 16 GiB. Wydajność rozwiązań pamięciowych zależy w zdecydowanej mierze od powyższych komponentów. Dodatkowe testy przeprowadzone na bazie MySQL wykorzystywały wewnętrzny dysk SSD  do przechowywania danych, natomiast badania bazy dyskowej przeprowadzone zostały jedynie w celach poglądowych, oraz dla sprawdzenia, czy nie zostały popełnione błędy przy implementacji zapytań. Kody testów referencyjnych wykonywane były na serwerowej maszynie wirtualnej Javy w wersji 1.8.0\_131-b11 oraz systemie operacyjnym Debian 9.0 x64 z jądrem 4.9.0-3-amd64.
 
 
-\section{Dane testowe i wyniki}
+\section{Badania na danych syntetycznych}
 
-\subsection{Dane testowe syntetyczne}
+\subsection{Dane testowe}
 
     W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka przypadków testowych operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu standardowych mechanizmów Javy, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników. Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku i możliwości sprzętowych.
 
@@ -461,13 +466,8 @@ Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobist
 \end{itemize}
 
 
-\subsection{Wyniki badań dla danych syntetycznych}
+\subsection{Wyniki badań}
 
-    Już po pobieżnym spojrzeniu na wyniki testów rzuca się w oczy kilka wniosków. Najszybszą i zarazem najprostszą ciągła strukturą danych jest zwykła tablica typu prymitywnego. Ze względu na zachowanie ciągłości w pamięci (w typowych implementacjach) i najszybszym możliwym czasie dostępu do elementów z bardzo niskim poziomem abstrakcji, proste operacje wymagające sekwencyjnego odczytu są najszybsze spośród porównanych. Czasy sumowania liczb w tablicy, w porównaniu do czasów sumowania liczb w liście są średnio 3 razy mniejsze. Należy jednak zaznaczyć, że optymalizacje tego typu znacząco utrudniają pisanie kodu, ze względu na rezygnację z wygodnych metod interfejsu \texttt{List<T>}. W większości typowych, biznesowych zastosowań mikrooptymalizacje tego typu nie będą istotne z punku widzenia wydajności całych aplikacji, aczkolwiek w pewnych szczególnych zastosowaniach (np. dziedzina High Frequency Trading) mogą mieć pewne znaczenie.
-
-    W zbadanych przypadkach strumienie równoległe wykazują większą wydajność niż strumienie sekwencyjne od pewnego rozmiaru danych wejściowych. Utworzenie strumienia równoległego i jego skonsumowanie wymaga uruchomienie całego procesu podziału danych na wątki, wykonywania operacji i łączenia wyników z poszczególnych wątków. Daje to pewien narzut, który jest szczególnie widoczny przy małych listach, dla których operacje sekwencyjne wykonują się szybciej. Niestety, nie istnieje sposób pozwalający przewidzieć, który rodzaj strumienia (sekwencyjny czy równoległy) byłby lepszym wyborem dla danej sytuacji. Możliwe byłoby zaproponowanie heurystycznej metody, określającej rodzaj na podstawie wielkości danych wejściowych, ale nie byłby on niezawodny, więc dobór metody pozostawiony jest programiście.
-
-    Strumienie i bezpośrednie operacje na pamięciowych strukturach języka Java są w zdecydowanej większości przypadków szybsze niż ich odpowiedniki w języku SQL. Porównując zaś bazy H2 i MySQL, testy na bazie H2 wykonywane było średnio 1.5-20 razy szybciej niż w przypadku MySQL. Związane jest to w pewnym stopniu z narzutami transmisji i konwersji danych pomiędzy procesami. Do połączenia się z bazą dyskową wykorzystany został, tak jak w przypadku bazy pamięciowej, standardowy interfejs JDBC, który wykorzystywał połączenie TCP. Przepustowość tego połączenia nie powinna mieć zbytniego znaczenia (prędkość połączenia typu loopback determinowana jest głównie przez moc procesora, a ilość danych przesyłanych jest znikoma), większy wpływ ma złożoność systemu bazodanowego i metody składowania danych. Należy zauważyć, że w przypadku największych zbiorów testowych różnice w wydajności nie przekraczają 2-3x. Jest to z związane z przystosowaniem i optymalizacjami baz dyskowych.
 
 \begin{figure}[H]
 \centering
@@ -500,9 +500,18 @@ Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobist
 \end{figure}
 
 
+\subsection{Wnioski}
+
+    Już po pobieżnym spojrzeniu na wyniki testów rzuca się w oczy kilka wniosków. Najszybszą i zarazem najprostszą ciągła strukturą danych jest zwykła tablica typu prymitywnego. Ze względu na zachowanie ciągłości w pamięci (w typowych implementacjach) i najszybszym możliwym czasie dostępu do elementów z bardzo niskim poziomem abstrakcji, proste operacje wymagające sekwencyjnego odczytu są najszybsze spośród porównanych. Czasy sumowania liczb w tablicy, w porównaniu do czasów sumowania liczb w liście są średnio 3 razy mniejsze. Należy jednak zaznaczyć, że optymalizacje tego typu znacząco utrudniają pisanie kodu, ze względu na rezygnację z wygodnych metod interfejsu \texttt{List<T>}. W większości typowych, biznesowych zastosowań mikrooptymalizacje tego typu nie będą istotne z punku widzenia wydajności całych aplikacji, aczkolwiek w pewnych szczególnych zastosowaniach (np. dziedzina High Frequency Trading) mogą mieć pewne znaczenie.
+
+    W zbadanych przypadkach strumienie równoległe wykazują większą wydajność niż strumienie sekwencyjne od pewnego rozmiaru danych wejściowych. Utworzenie strumienia równoległego i jego skonsumowanie wymaga uruchomienie całego procesu podziału danych na wątki, wykonywania operacji i łączenia wyników z poszczególnych wątków. Daje to pewien narzut, który jest szczególnie widoczny przy małych listach, dla których operacje sekwencyjne wykonują się szybciej. Niestety, nie istnieje sposób pozwalający przewidzieć, który rodzaj strumienia (sekwencyjny czy równoległy) byłby lepszym wyborem dla danej sytuacji. Możliwe byłoby zaproponowanie heurystycznej metody, określającej rodzaj na podstawie wielkości danych wejściowych, ale nie byłby on niezawodny, więc dobór metody pozostawiony jest programiście.
+
+    Strumienie i bezpośrednie operacje na pamięciowych strukturach języka Java są w zdecydowanej większości przypadków szybsze niż ich odpowiedniki w języku SQL. Porównując zaś bazy H2 i MySQL, testy na bazie H2 wykonywane było średnio 1.5-20 razy szybciej niż w przypadku MySQL. Związane jest to w pewnym stopniu z narzutami transmisji i konwersji danych pomiędzy procesami. Do połączenia się z bazą dyskową wykorzystany został, tak jak w przypadku bazy pamięciowej, standardowy interfejs JDBC, który wykorzystywał połączenie TCP. Przepustowość tego połączenia nie powinna mieć zbytniego znaczenia (prędkość połączenia typu loopback determinowana jest głównie przez moc procesora, a ilość danych przesyłanych jest znikoma), większy wpływ ma złożoność systemu bazodanowego i metody składowania danych. Należy zauważyć, że w przypadku największych zbiorów testowych różnice w wydajności nie przekraczają 2-3x. Jest to z związane z przystosowaniem i optymalizacjami baz dyskowych.
 
 
-\subsection{Zbiór danych TPC-H} \label{tpc}
+\section{Badania na zbiorze danych TPC-H} \label{tpc}
+
+\subsection{Charakterystyka testu referencyjnego TPC-H}
 
     TPC-H jest testem referencyjnym stworzonym przez organizację non-profit Transaction Processing Performance Council stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań.
 
@@ -534,7 +543,7 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
     Dodatkowo, wprowadzono zbiór testów jednostkowych, weryfikujących zgodność wyników zapytań dla wszystkich metod dostępu do danych. Referencyjne wyniki \cite{tpcresults} udostępniane przez konsorcjum TPC mają zastosowanie jedynie dla zbioru danych generowanego z współczynnikiem 1.0, więc konieczne jest wprowadzenie innej metody weryfikacji poprawności wyników. Jako iż postać wyniku zapytania w przypadku wszystkich metod jest identyczna, nie było problemem zaimplementowanie kilku prostych testów dla każdej metody przetwarzania danych.
 
 
-\subsection{Wyniki badań dla danych TPC}
+\subsection{Wyniki}
 
 \begin{figure}[H]
 \centering
@@ -556,9 +565,20 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 
 \begin{figure}[H]
 \centering
+\includegraphics[width=15cm]{plots/Tpc12Benchmark}
+\caption{Tpc6Benchmark}
+\end{figure}
+
+\begin{figure}[H]
+\centering
 \includegraphics[width=15cm]{plots/Tpc14Benchmark}
 \caption{Tpc14Benchmark}
 \end{figure}
+
+
+\subsection{Wnioski}
+
+TODO
 
 \subsection{Dodatek: Porównanie zajętości pamięci}
 
@@ -832,6 +852,11 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
         Oracle Corporation
         \textit{java.util.stream Javadoc documentation}. 
         http://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html\#MutableReduction, czas dostępu 29.05.2017
+
+    \bibitem{generics} 
+        Oracle Corporation
+        \textit{The Java Tutorials: Generics}. 
+        https://docs.oracle.com/javase/tutorial/java/generics/types.html
 
     \bibitem{tpcresults} 
         TPC Council,

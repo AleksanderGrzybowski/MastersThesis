@@ -9,8 +9,10 @@ dbgen/*.tbl
 
 text/*.pdf
 text/src/*.pdf
+text/src/*.out
 *.aux
 *.log
 *.toc
+
 
 plots/*.png
