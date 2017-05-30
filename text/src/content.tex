@@ -843,8 +843,14 @@ public static <T, U> Stream<ImmutablePair<T, U>> innerJoinHashmaps(
 }
 \end{lstlisting}
 
-Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości klucza w jednej z kolekcji. Porównanie szybkości wykonywania się operacji złączenia na zbiorze danych TPC jest poniżej.
+Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości klucza w jednej z kolekcji. Porównanie szybkości wykonywania się operacji złączenia na zbiorze danych TPC zaprezentowane jest na rysunku \ref{fig:naturaljoin}.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{plots/NaturalJoin}
+    \caption{Porównanie wydajności złączenia naturalnego}
+    \label{fig:naturaljoin}
+\end{figure}
 
 \section{Podsumowanie}
 
@@ -852,11 +858,6 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
 \subsection{Napotkane problemy}
 \subsection{Dalsze badania}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=13cm]{plots/NaturalJoin}
-    \caption{Porównanie wydajności złączenia naturalnego}
-\end{figure}
 
 \begin{thebibliography}{9}
 
