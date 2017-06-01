@@ -81,7 +81,7 @@
 
     Rozdział x zawiera/obejmuje ... W rozdziale znajduje się/zawarto ... Rozdziały x/y objmują ... X zawarty/opisany jest w rozdziale
 
-\section{Bazy SQL in-memory}
+\section{Bazy SQL działające w pamięci RAM}
 
 \subsection{Zastosowanie}
 
@@ -98,11 +98,15 @@
 
 \subsection{Wybór implementacji}
 
-    Jako iż porównanie baz danych i strumieni w Java 8 powinno być rzetelne, konieczne jest wybranie do badań baz in-memory działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB. Są one powszechnie stosowane w szkieletach aplikacji, takich jak Spring czy Grails, wspomagając start nowego projektu bez ściśle określonego schematu bazy, która generowana jest przy każdym starcie aplikacji. Implementują one w zdecydowanej większości standard ANSI-SQL, jednakże pewne niewielkie braki nie powodują problemów w przypadku niniejszej pracy, ze względu na zastosowanie najbardziej podstawowych elementów języka SQL przy badaniu wydajności. 
+    Jako iż porównanie baz danych i strumieni w Java 8 powinno być miarodajne, konieczne jest wybranie do badań baz in-memory działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB (HyperSQL). Są one powszechnie stosowane w szkieletach nowo tworzonych aplikacji Java, pozwalając na sprawne rozpoczęcie pierwszego etapu wytwarzania oprogramowania. Jeśli wykorzystywane jest narzędzie typu ORM, pozwalające na generowanie schematu bazy danych na podstawie klas domenowych aplikacji, możliwe jest tworzenie pustej bazy danych o określonym schemacie przy każdym restarcie aplikacji. 
+    
+    Zdecydowano się na wybór bazy H2 jako obiektu badań wydajnościowych. Jest ona wykorzystywana jako domyślne źródło danych w sprawdzonych, powszechnie wykorzystywanych szkieletach aplikacji, takich jak Spring Boot czy Grails. Autorzy H2 na bieżąco poprawiają błędy i tworzą nowe wersje, z których ostatnia została wydana w kwietniu 2017 \cite{h2maven}. Rozwiązanie to implementuje w zdecydowanej większości standard ANSI-SQL wraz z dodatkowymi rozszerzeniami, jednakże pewne niewielkie braki nie powodują problemów w przypadku niniejszej pracy, ze względu na zastosowanie najbardziej podstawowych elementów języka SQL przy badaniu wydajności.
 
 \section{Strumienie w Java 8}
 
 \subsection{Wstęp}
+
+    Pojawienie się nowej wersji 8 platformy Java przyniosło dużo nowych zmian w języku. Wprowadzenie wyrażeń lambda jako zwięzłej alternatywy wobec anonimowych klas wewnętrznych, dodanie referencji do metod oraz wprowadzenie interfejsów domyślnych przełamało w pewien sposób popularną opinię, że język Java jest językiem jedynie obiektowym. Funkcyjne paradygmaty, coraz częściej analizowane i opisywane, okazują się dobrym sposobem na tworzenie bezpiecznych i łatwych w analizie aplikacji.
 
     Stream API jest wprowadzonym w wersji 8 Javy komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest abstrakcyjną reprezentacją ciągu obiektów, które pochodzą z pewnego źródła. Zazwyczaj strumienie tworzone są na podstawie kolekcji, ale możliwe jest także generowanie obiektów w locie. Strumienie obsługują wykonywanie prostych i złożonych operacji filtrowania, sortowania, mapowania i grupowania, przy czym możliwe jest też samodzielne tworzenie obiektów przetwarzających dane (interfejs \texttt{Collector}). Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są 'leniwie', to znaczy, żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej. Wystąpienie operacji terminalnej powoduje łańcuchowe wykonanie się wszystkich operacji pośrednich.
 
@@ -448,7 +452,9 @@ public class SummingIntegersH2 {
 
 \subsection{Platforma sprzętowa i programowa}
 
-Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobistym ASUS PU551-JA, z czterordzeniowym procesorem Intel(R) Core(TM) i7-4712MQ CPU @ 2.30GHz i pamięcią RAM o pojemności 16 GiB. Wydajność rozwiązań pamięciowych zależy w zdecydowanej mierze od powyższych komponentów. Dodatkowe testy przeprowadzone na bazie MySQL wykorzystywały wewnętrzny dysk SSD  do przechowywania danych, natomiast badania bazy dyskowej przeprowadzone zostały jedynie w celach poglądowych, oraz dla sprawdzenia, czy nie zostały popełnione błędy przy implementacji zapytań. Kody testów referencyjnych wykonywane były na serwerowej maszynie wirtualnej Javy w wersji 1.8.0\_131-b11 oraz systemie operacyjnym Debian 9.0 x64 z jądrem 4.9.0-3-amd64.
+    Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobistym ASUS PU551-JA, z czterordzeniowym procesorem Intel(R) Core(TM) i7-4712MQ CPU @ 2.30GHz i pamięcią RAM o pojemności 16 GiB. Wydajność rozwiązań pamięciowych zależy w zdecydowanej mierze od powyższych komponentów. Dodatkowe testy przeprowadzone na bazie MySQL wykorzystywały wewnętrzny dysk SSD  do przechowywania danych, natomiast badania bazy dyskowej przeprowadzone zostały jedynie w celach poglądowych, oraz dla sprawdzenia, czy nie zostały popełnione błędy przy implementacji zapytań. Kody testów referencyjnych wykonywane były na serwerowej maszynie wirtualnej Javy w wersji 1.8.0\_131-b11 oraz systemie operacyjnym Debian 9.0 x64 z jądrem 4.9.0-3-amd64.
+
+    Środowisko badawcze zostało wyposażone w odpowiedni zestaw skryptów, pozwalających na automatyczne uruchomienie wszystkich zdefiniowanych testów referencyjnych i uzyskanie wyników, a następnie wygenerowanie wykresów. Testy wykonujące się w pamięci nie wymagają żadnych zewnętrznych zależności, natomiast testy wykorzystujące bazę MySQL i generator TPC wymagają uruchomionej bazy MySQL na odpowiednim porcie z dodanym odpowiednim użytkownikiem oraz skompilowanych plików binarnych generatora (program \texttt{dbgen}).
 
 
 \section{Badania na danych syntetycznych}
@@ -892,7 +898,8 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
     \bibitem{streamex} 
         \textit{Biblioteka StreamEx} https://github.com/amaembo/streamex, czas dostępu 28.05.2017
 
-
+    \bibitem{h2maven} 
+        \textit{Informacje o pakietach bazy H2 na portalu Maven Central} https://mvnrepository.com/artifact/com.h2database/h2
 
 \end{thebibliography}
 
