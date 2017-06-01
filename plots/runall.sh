@@ -1,7 +1,7 @@
 #! /bin/bash
 set -e
 
-for name in CrossJoinAndFilter FilteringAndCountingIntegers GroupingAndSumming HugeJoining SummingIntegers; do
+for name in CrossJoinAndFilter FilteringAndCountingIntegers GroupingAndSumming HugeJoining SummingIntegers SortingStrings; do
 
 cd ..
 ./gradlew clean jmh -Pinclude="${name}.*"
