@@ -20,7 +20,7 @@ public class GroupingAndSummingStreams {
     
     private List<Pair<Integer, Integer>> pairs = new ArrayList<>();
     
-    @Param({"100", "200", "500", "1000", "2000", "5000", "10000"})
+    @Param({"100", "200", "500", "1000", "1500", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000", "10000"})
     public int numberCount;
     
     @Setup

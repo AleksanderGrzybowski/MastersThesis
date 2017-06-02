@@ -38,7 +38,7 @@ def plot(data, title):
         plt.legend(prop={'size': 8})
 
     plt.ylabel('ops/s')
-    plt.xlabel('Dataset size')
+    plt.xlabel('Wielkość zbioru danych')
     plt.title(title)
 
 
@@ -57,6 +57,8 @@ data = read_and_parse_file(input_filename)
 groups = [list(g) for k, g in groupby(data, itemgetter(0))]
 
 groups_transposed = to_transposed(groups)
+
+#plt.figure(figsize = (8, 8)) # if needed
 
 plot(groups_transposed, sys.argv[3])
 

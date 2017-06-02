@@ -390,21 +390,6 @@ Combining #42c with #46f
 
     Bazy in-memory wykorzystują wewnątrz struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i ukrytym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty klas \texttt{org.h2.mvstore.Page} i \texttt{org.h2.value.*} - rysunek \ref{fig:jvmmemory}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
 
-\subsection{Weryfikacja poprawności składni i format wynikowy}
-
-    Przy wykonywaniu zapytania SQL z poziomu API JDBC nie istnieje żadne sprawdzanie poprawniości zapytania oraz jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie i przystępuje do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu odwzorowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator.
-    
-    Jako przykład przedstawiona zostanie sygnatura statycznej metody \texttt{Collectors.groupingBy}, we fragmencie \ref{genericsexample}. Dzięki zastosowaniu typów ogólnych \cite{generics} (generycznych), możliwe jest zagwarantowanie zgodności typów, o ile nie zostanie zastosowanie niebezpieczne rzutowanie.
-
-\begin{lstlisting}[label=genericsexample, caption=Sygnatura metody grupującej]
-  public static <T, K> Collector<T, ?, Map<K, List<T>>>
-  groupingBy(Function<? super T, ? extends K> classifier) 
-  { ...  }
-\end{lstlisting}
-
-    Przykładowo, wynikiem grupowania zbioru obiektów typu \texttt{T} (bądź jego typu pochodnego) na podstawie ich pola o typie \texttt{K} (bądź pola typu dziedziczonego) będzie zawsze \texttt{Map<T, List<K>}\texttt{>}. Dzięki temu typowe błędy przy odczytywaniu wyników z zapytania SQL przy użyciu obiektu \texttt{ResultSet} (niewłaściwy typ kolumny, niestniejące pole) nie występują.
-
-    Wynikiem poprawnego zapytania SQL jest zawsze lista krotek, zawierająca wszystkie wiersze pasujące do zapytania i wszystkie kolumny wymienione w klauzuli \texttt{SELECT}. Przy wykonywaniu zapytania z poziomu silnie typowanego języka programowania obiekt reprezentujący wynik zapytania nie posiada informacji o typach danych kolumn. Przykładowo, w języku Java, do wyciągania danych służą obiekty klasy \texttt{ResultSet} udostępniające metody typu \texttt{getInt()} czy \texttt{getString()}. Błąd programisty polegający na użyciu niewłaściwej metody zakończy się wyjątkiem w czasie działania programu, i nie jest możliwy do automatycznego wykrycia przed próbą uruchomienia programu. W przypadku Stream API, wynikiem zapytania jest zawsze typ języka Java, a poprawność syntaktyczna gwarantowana jest przez kompilator i złożony system typów języka. Próba odwołania się do nieistniejącego pola bądź próba wykonania niewłaściwej operacji na określonym typie danych nie skompiluje się. 
 
 \subsection{Język domenowy (DSL) a język ogólnego przeznaczenia}
 
@@ -702,9 +687,9 @@ List<Pair<String, Double>> result = StreamUtils.innerJoin(
     Strumień, będąc abstrakcyjną formą reprezentacji źródła danych, tworzony może być na kilka różnych sposobów, ale sposoby te nie wpływają semantycznie na proces przetwarzania danych. Zwykle strumień tworzony jest na podstawie kolekcji - przy konsumowaniu elementów, kolekcja dostarcza elementy wykonując wewnętrzną iterację (\textit{internal iteration}), która jest procesem ukrytym przed programistą. Inne sposoby tworzenia strumieni, takie jak generowanie ich w locie, wczytywanie z dysku bądź z sieci, nie są zbyt praktyczne. Związane jest to z konstrukcją wewnętrzną strumieni, które działają na zasadzie "pytania o kolejny element" (\textit{pull-based}). Decyzją implementacyjną projektantów Stream API było wykorzystanie modelu przetwarzania ciągłego, w którym to strumień wykonuje akcję pobrania następnego elementu. W związku z tym, nie jest możliwe (przynajmniej w domyślnej formie) efektywne asynchroniczne dostarczanie nowych elementów, ponieważ każda operacja pobrania elementu jest operacją blokującą, wywoływaną po zakończeniu przetwarzania poprzedniego elementu. Model odwrotny do powyższego, tzw. model \textit{push-based}, wykorzystywany np. w bibliotekach RxJava bazujących na wzorcu Observable, ma lepsze zastosowanie w takich przypadkach. Brian Goetz, zapytany o możliwości przetwarzania asynchronicznego w domyślnych strumieniach Java 8 stwierdził \cite{goetz}:
 
 \begin{quote}
-The design center for Streams is mostly about data that can be accessed with no latency (either from data structures or generating functions); the design center for Rx is about infinite streams of events which may arrive asynchronously.
+    (...) The design center for Streams is mostly about data that can be accessed with no latency (either from data structures or generating functions); the design center for Rx is about infinite streams of events which may arrive asynchronously.
 
-    Zamiarem architektonicznym Stream API było przetwarzanie danych, które są dostępne bez żadnych opóźnień (pochodzących ze struktur danych bądź funkcji generujących), celem Rx jest obsługa nieskończonych strumieni zdarzeń, które mogą pojawiać się asynchronicznie (\textit{tłum. aut.}).
+    (...) Zamiarem architektonicznym Stream API było przetwarzanie danych, które są dostępne bez żadnych opóźnień (pochodzących ze struktur danych bądź funkcji generujących), celem Rx jest obsługa nieskończonych strumieni zdarzeń, które mogą pojawiać się asynchronicznie (\textit{tłum. aut.}).
 
 \end{quote}
 
@@ -780,6 +765,21 @@ Filtering: 5
 * streamy są bardzo ograniczone, ale istnieją lepsze jooq streamex
 * porównanie push-pull (Observable), streamy nie są async mimo parallell
 
+\subsection{Weryfikacja poprawności składni i format wynikowy}
+
+    Przy wykonywaniu zapytania SQL z poziomu API JDBC nie istnieje żadne sprawdzanie poprawniości zapytania oraz jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie i przystępuje do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu odwzorowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator.
+    
+    Jako przykład przedstawiona zostanie sygnatura statycznej metody \texttt{Collectors.groupingBy}, we fragmencie \ref{genericsexample}. Dzięki zastosowaniu typów ogólnych \cite{generics} (generycznych), możliwe jest zagwarantowanie zgodności typów, o ile nie zostanie zastosowanie niebezpieczne rzutowanie.
+
+\begin{lstlisting}[label=genericsexample, caption=Sygnatura metody grupującej]
+  public static <T, K> Collector<T, ?, Map<K, List<T>>>
+  groupingBy(Function<? super T, ? extends K> classifier) 
+  { ...  }
+\end{lstlisting}
+
+    Przykładowo, wynikiem grupowania zbioru obiektów typu \texttt{T} (bądź jego typu pochodnego) na podstawie ich pola o typie \texttt{K} (bądź pola typu dziedziczonego) będzie zawsze \texttt{Map<T, List<K>}\texttt{>}. Dzięki temu typowe błędy przy odczytywaniu wyników z zapytania SQL przy użyciu obiektu \texttt{ResultSet} (niewłaściwy typ kolumny, niestniejące pole) nie występują.
+
+    Wynikiem poprawnego zapytania SQL jest zawsze lista krotek, zawierająca wszystkie wiersze pasujące do zapytania i wszystkie kolumny wymienione w klauzuli \texttt{SELECT}. Przy wykonywaniu zapytania z poziomu silnie typowanego języka programowania obiekt reprezentujący wynik zapytania nie posiada informacji o typach danych kolumn. Przykładowo, w języku Java, do wyciągania danych służą obiekty klasy \texttt{ResultSet} udostępniające metody typu \texttt{getInt()} czy \texttt{getString()}. Błąd programisty polegający na użyciu niewłaściwej metody zakończy się wyjątkiem w czasie działania programu, i nie jest możliwy do automatycznego wykrycia przed próbą uruchomienia programu. W przypadku Stream API, wynikiem zapytania jest zawsze typ języka Java, a poprawność syntaktyczna gwarantowana jest przez kompilator i złożony system typów języka. Próba odwołania się do nieistniejącego pola bądź próba wykonania niewłaściwej operacji na określonym typie danych nie skompiluje się. 
 \subsection{Ocena i krytyka}
 
     Wprowadzenie do języka Java mechanizmów programowania funkcyjnego zostało bardzo pozytywnie ocenione przez programistów, mimo iż mechanizmy te obecne były w innych językach programowania ogólnego przeznaczenia znacznie wcześniej. Duży nacisk projektantów platformy na wsteczną kompatybilność i obawy przed wprowadzeniem zmian, które nie okażą się korzystne, a konieczne będzie ich utrzymywanie, powodują, że język ten nie rozwija się w takim tempie, jak inne języki. Przykładowo, postanowiono nie wprowadzać metody \texttt{Iterable.stream} konwertującej obiekt wspierający protokół iteracji Java na strumień, mimo iż nie można wskazać żadnych przeciwwskazań do jej istnienia, a i można wskazać zastępcze rozwiązania, które mogłyby być wprowadzone bez większych zmian do API.
@@ -895,9 +895,29 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
 \section{Podsumowanie}
 
 \subsection{Wnioski}
-\subsection{Napotkane problemy}
-\subsection{Dalsze badania}
 
+strumienie i FP wygodne
+strumienie do przetwarzania w pamięci zrównoleglalnch rzeczy - super
+parallel ma narzut
+sql do pamięci - może być, ale potrzebne np. pamięci z podtrzymaniem, jeśli dane są ważne to słabo (bakcupy)
+strumienie nie nadają się do skomplikowanych operacji bez dużej ilości kodu, statyczne typowanie wchodzi w drogę, 
+raczej ciągi pojedynczych obiektów, nie osobne kolekcje
+nie chodzi tu tylko o szybkość, ale np. backupy i wsparcie vendorów
+
+
+\subsection{Napotkane problemy}
+
+    Jednym z największych wyzwań było zaproponowanie i zaimplementowanie rozwiązania, pozwalającego na import danych bazy testowej TPC zarówno do środowiska bazy SQL, jak i do modelu danych w pamięci wykorzystywanego przez Stream API. Różnice w sposobie dodawania danych, jak i w sposobie ich odczytu wymagały przemyślenia struktury rozwiązania, a następnie napisania dużej ilości pomocniczego kodu pośredniczącego. Pojawiły się poważne problemy wydajnościowe, związane z prędkością importowania danych do bazy MySQL przez dużą liczbę kwerend \texttt{SELECT}. Konieczne okazało się opakowanie narzędzia importującego \texttt{mysqlimport} i zintegrowanie go z istniejącym kodem Java.
+
+    Technicznym problemem, który pojawił się na samym początku budowy środowiska testowego, było umożliwienie wykonywania metod przeznaczonych do badania zarówno poprzez narzędzie JMH, jak i w testach jednostkowych JUnit. Specificzna budowa klasy testu referencyjnego (m. in. automatyczna, zewnętrzna parametryzacja), wspierająca łatwe wykonywanie prostych badań, okazała się bardzo problematyczna w zakresie możliwości jej użycia poza kontekstem JMH. Konieczne było znalezienie sposobu, w którym kolejne wywołania metod z klasy testu referencyjnego nie naruszają logicznej struktury kodu i umożliwiają wyciągnięcie, a następnie porównanie wyników wszystkich typów testów.
+
+    Generowanie danych pseudolosowych było konieczne do implementacji testów operujących na danych syntetycznych. Okazało się, że testowanie poprawności wyników zapytań dla wszystkich metod dostępu do danych jest niemożliwe, jeśli generator dostarcza różne dane przy kolejnych jego uruchomieniach. Ze względu na chęć uzyskania jak największej powtarzalności, wykorzystano stałe ziarno generatora losowego \texttt{java.util.Random}.
+
+\subsection{Możliwości dalszych badań}
+
+    W dalszych pracach nad porównaniem możliwości przetwarzania pamięciowego jednym z pomysłów jest zbadanie baz NoSQL działających w pamięci. Rozwiązania nierelacyjne posiadają wiele cech niespotykanych w tradycyjnych bazach SQL, takich jak brak ściśle zdefiniowanego schematu czy praca w modelu rozproszonym (\textit{sharding}). Być może cechy te przekładają się na wydajność czy sposób formułowania kodu aplikacji w taki sposób, że NoSQL będzie miał przewagę nad analizowanymi w niniejszej pracy rozwiązaniami.
+
+    Stream API jest bardzo wygodnym interfejsem programistycznym, którego zakres widoczny przez końcowego użytkownika jest niewielki. Szczegóły implementacyjne, takie jak interfejs \texttt{Spliterator} pozwalający na dokładne zdefiniowanie sposobu podziału zadań na wątki, czy realizacja przydziału zadań do wątków, mogą być istotnym tematem do analizy. Możliwe, że odpowiednie zrozumienie i wykorzystanie niskopoziomowych klas strumieni pozwoliłoby na dokonanie lepszych optymalizacji i w konsekwencji uzyskaniu lepszych wyników. Dobrym pomysłem byłoby zaproponowanie odmiany Stream API zorientowanej na wydajność, do zastosowań podobnych jak te, o których opisuje niniejsza praca.
 
 \begin{thebibliography}{9}
 

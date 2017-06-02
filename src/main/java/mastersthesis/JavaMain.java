@@ -1,13 +1,15 @@
 package mastersthesis;
 
-import java.time.LocalDate;
-import java.time.Month;
+import java.util.stream.IntStream;
 
 public class JavaMain {
     
     public static void main(String[] args) throws Exception {
-        System.out.println(
-                LocalDate.of(2017, Month.JANUARY, 31).plusMonths(1)
-        );
+        IntStream.range(1, 100).parallel()
+                .forEach(e -> System.out.println(
+                        Thread.currentThread().getName()
+                        )
+                );
+
     }
 }
