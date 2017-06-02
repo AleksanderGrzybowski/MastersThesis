@@ -20,7 +20,7 @@ public class Tpc4BenchmarkH2 {
     
     Connection connection;
     
-    @Param({"0.01", "0.02", "0.05", "0.1"})
+    @Param({"0.010", "0.025", "0.050", "0.075", "0.100", "0.125", "0.150", "0.175"})
     public String scaleFactor;
     
     @Setup

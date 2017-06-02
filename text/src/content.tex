@@ -653,7 +653,7 @@ order by customers.name;
 
 \subsection{Proces wykonywania zapytania strumieniowego}
 
-    Podobnie jak w przypadku języka SQL, zapytanie strumieniowe wykonuje się w kilku etapach. Ważną różnicą jest to, że nie występuje tutaj żaden mechanizm parsowania i tłumaczenia kodu, ponieważ zwykły kod języka Java jest już skompilowany do kodu bajtowego i wykonywany na maszynie wirtualnej Java. Maszyna wirtualna Javy po uruchomieniu programu realizuje dużą liczbę optymalizacji kodu, więc możliwe jest uzyskanie wzrostu wydajności jedynie dzięki tym optymalizacjom. Fragment kodu \ref{streamsexample} przezentuje zapytanie strumieniowe odpowiadające zapytaniu z listingu \ref{sqlexample} :
+    Podobnie jak w przypadku języka SQL, zapytanie strumieniowe wykonuje się w kilku etapach. Ważną różnicą jest to, że nie występuje tutaj żaden mechanizm parsowania i tłumaczenia kodu, ponieważ zwykły kod języka Java jest już skompilowany do kodu bajtowego i wykonywany na maszynie wirtualnej Java. Maszyna wirtualna Javy po uruchomieniu programu realizuje dużą liczbę optymalizacji kodu, więc możliwe jest uzyskanie wzrostu wydajności jedynie dzięki tym optymalizacjom. Fragment kodu \ref{streamsexample} przezentuje zapytanie strumieniowe odpowiadające zapytaniu z listingu \ref{sqlexample}:
 
 \begin{lstlisting}[label=streamsexample, caption=Analogiczne rozwiązanie wykorzystujące Stream API]
 List<Pair<String, Double>> result = StreamUtils.innerJoin(
@@ -769,7 +769,7 @@ Filtering: 5
 
     Przy wykonywaniu zapytania SQL z poziomu API JDBC nie istnieje żadne sprawdzanie poprawniości zapytania oraz jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie i przystępuje do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu odwzorowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator.
     
-    Jako przykład przedstawiona zostanie sygnatura statycznej metody \texttt{Collectors.groupingBy}, we fragmencie \ref{genericsexample}. Dzięki zastosowaniu typów ogólnych \cite{generics} (generycznych), możliwe jest zagwarantowanie zgodności typów, o ile nie zostanie zastosowanie niebezpieczne rzutowanie.
+    Jako przykład dobrana została sygnatura statycznej metody \texttt{Collectors.groupingBy}, zaprezentowana we fragmencie \ref{genericsexample}. Dzięki zastosowaniu typów ogólnych \cite{generics} (generycznych), możliwe jest zagwarantowanie zgodności typów, o ile nie zostanie zastosowanie niebezpieczne rzutowanie.
 
 \begin{lstlisting}[label=genericsexample, caption=Sygnatura metody grupującej]
   public static <T, K> Collector<T, ?, Map<K, List<T>>>
@@ -896,13 +896,9 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
 
 \subsection{Wnioski}
 
-strumienie i FP wygodne
-strumienie do przetwarzania w pamięci zrównoleglalnch rzeczy - super
-parallel ma narzut
-sql do pamięci - może być, ale potrzebne np. pamięci z podtrzymaniem, jeśli dane są ważne to słabo (bakcupy)
-strumienie nie nadają się do skomplikowanych operacji bez dużej ilości kodu, statyczne typowanie wchodzi w drogę, 
-raczej ciągi pojedynczych obiektów, nie osobne kolekcje
-nie chodzi tu tylko o szybkość, ale np. backupy i wsparcie vendorów
+    Stream API w połączeniu z wyrażeniami lambda jest bardzo przydatną nowością wprowadzoną w Javie 8. Wprowadzone niewielkie części paradygmatu funkcyjnego pozwalają na pisanie wydajnego i łatwo testowalnego kodu. Strumienie są bardzo dobrą alternatywą dla tradycyjnych elementów składni języka, jak pętle i warunki, które można zastąpić przez metody Stream API. Z drugiej strony, strumienie działają najlepiej na pojedynczych kolekcjach homegenicznych obiektów, próby łączenia wielu kolekcji charakteryzujących się typowo relacyjną strukturą nie jest wspierane domyślnie i okazuje się znacznie utrudnione. Tworzenie skomplikowanych sekwencji operacji, zwłaszcza własnoręcznie definiowanych, jest zdecydowanie bardziej skomplikowane i wymaga znacznie więcej kodu niż w języku SQL, który do takich operacji został stworzony. Możliwe jest osiągnięcie znacznych szybkości wykonywania zapytań SQL w pamięci, natomiast należy mieć na uwadze, że wydajność nie jest najważniejszą rzeczą w systemie bazodanowym. Należy zwrócić uwagę na wsparcie producentów, narzędzia wspomagające (np. analizatory planu zapytań) i bezpieczeństwo (kopie zapasowe, metody replikacji), ponieważ w ogólnym rozrachunku elementy te mają bardzo duże znaczenie.
+
+    Strumienie doskonale nadają się do prostego przetwarzania równoległych danych, pod warunkiem, że całe zadanie daje się łatwo rekurencyjnie podzielić na mniejsze podzadania, a szybkość wykonywania zależna jest od mocy obliczeniowej procesora. W prostych przypadkach sama zmiana strumienia z domyślnego sekwencyjnego na równoległy może przynieść kilkukrotny wzrost wydajności. Należy jednak zwrócić uwagę, iż strumienie równoległe mają pewien narzut, który, w przypadku małych zbiorów danych, bądź zbyt małej ilości pracy do wykonania w podzadaniu, może okazać się większy, niż narzut strumieni sekwencyjnych. Warto więc zawsze badać, czy próba optymalizacji na pewno przyniesie oczekiwane efekty.
 
 
 \subsection{Napotkane problemy}
