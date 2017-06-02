@@ -102,6 +102,8 @@
     
     Zdecydowano się na wybór bazy H2 jako obiektu badań wydajnościowych. Jest ona wykorzystywana jako domyślne źródło danych w sprawdzonych, powszechnie wykorzystywanych szkieletach aplikacji, takich jak Spring Boot czy Grails. Autorzy H2 na bieżąco poprawiają błędy i tworzą nowe wersje, z których ostatnia została wydana w kwietniu 2017 \cite{h2maven}. Rozwiązanie to implementuje w zdecydowanej większości standard ANSI-SQL wraz z dodatkowymi rozszerzeniami, jednakże pewne niewielkie braki nie powodują problemów w przypadku niniejszej pracy, ze względu na zastosowanie najbardziej podstawowych elementów języka SQL przy badaniu wydajności.
 
+    W ramach testów wydajnościowych zbadano także bazę dyskową MySQL, wykonując na niej te same badania, co na bazie H2. Uczyniono to między innymi, aby móc sprawdzić poprawność wyników zapytań pomiędzy bazami - błędnie skonstruowane zapytanie mogłoby niezauważalnie wykazywać niepoprawne szybkości wykonania. Drugim powodem wykonania dodatkowych testów jest chęć sprawdzenia, czy rozwiązania SQL działające w pamięci może stanowić konkurencję dla sprawdzonych, dyskowych rozwiąząń SQL.
+
 \section{Strumienie w Java 8}
 
 \subsection{Wstęp}
@@ -244,6 +246,9 @@ IntStream.range(1, 100).parallel()
     Thread.currentThread().getName()
   )
 );
+
+\end{lstlisting}
+
 \begin{verbatim}
 ...
 ForkJoinPool.commonPool-worker-1
@@ -267,7 +272,6 @@ main
 
     Warto zwrócić uwagę, że wśród wątków wykonawczych znajduje się też wątek \texttt{main}, czyli wątek inicjujący operację strumieniową. Jako iż wykonywanie się ciągu operacji strumieniowych jest blokujące (nie jest asynchroniczne), dobrym rozwiązaniem jest wykorzystanie do obliczeń także wątku inicjującego. Jeśli nie jest to oczekiwane zachowanie, istnieje możliwość ręcznego utworzenia instancji puli wątków \texttt{ForkJoinPool} i przekazanie zadania w postaci funkcji lambda \texttt{Callable<T>}. W takim podejściu możliwe jest też zdefiniowanie liczby dostępnych wątków.
 
-\end{lstlisting}
 
 \subsection{Interfejs \texttt{Collector}}
 
@@ -404,7 +408,9 @@ Combining #42c with #46f
 
 \subsection{Język domenowy (DSL) a język ogólnego przeznaczenia}
 
-    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (\textit{stored procedures}). Przy użyciu Stream możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach, interwałach czasowych i strefach czasowych. Funkcje SQL są ograniczone w tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
+    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (\textit{stored procedures}). 
+    
+    Przy użyciu Stream możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach, interwałach czasowych i strefach czasowych. Funkcje SQL są ograniczone w tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
     
 
 \section{Środowisko badawcze}
@@ -529,7 +535,7 @@ public class SummingIntegersH2 {
 
 \subsection{Wnioski}
 
-    Już po pobieżnym spojrzeniu na wyniki testów rzuca się w oczy kilka wniosków. Najszybszą i zarazem najprostszą ciągła strukturą danych jest zwykła tablica typu prymitywnego. Ze względu na zachowanie ciągłości w pamięci (w typowych implementacjach) i najszybszym możliwym czasie dostępu do elementów z bardzo niskim poziomem abstrakcji, proste operacje wymagające sekwencyjnego odczytu są najszybsze spośród porównanych. Czasy sumowania liczb w tablicy, w porównaniu do czasów sumowania liczb w liście są średnio 3 razy mniejsze. Należy jednak zaznaczyć, że optymalizacje tego typu znacząco utrudniają pisanie kodu, ze względu na rezygnację z wygodnych metod interfejsu \texttt{List<T>}. W większości typowych, biznesowych zastosowań mikrooptymalizacje tego typu nie będą istotne z punku widzenia wydajności całych aplikacji, aczkolwiek w pewnych szczególnych zastosowaniach (np. dziedzina High Frequency Trading) mogą mieć pewne znaczenie.
+    Już po pobieżnym spojrzeniu na wyniki testów rzuca się w oczy kilka wniosków. Najszybszą i zarazem najprostszą ciągła strukturą danych jest zwykła tablica typu prostego. Ze względu na zachowanie ciągłości w pamięci (w typowych implementacjach) i najszybszym możliwym czasie dostępu do elementów z bardzo niskim poziomem abstrakcji, proste operacje wymagające sekwencyjnego odczytu są najszybsze spośród porównanych. Czasy sumowania liczb w tablicy, w porównaniu do czasów sumowania liczb w liście są średnio 3 razy mniejsze. Należy jednak zaznaczyć, że optymalizacje tego typu znacząco utrudniają pisanie kodu, ze względu na rezygnację z wygodnych metod interfejsu \texttt{List<T>}. W większości typowych, biznesowych zastosowań mikrooptymalizacje tego typu nie będą istotne z punku widzenia wydajności całych aplikacji, aczkolwiek w pewnych szczególnych zastosowaniach (np. dziedzina High Frequency Trading) mogą mieć pewne znaczenie.
 
     W zbadanych przypadkach strumienie równoległe wykazują większą wydajność niż strumienie sekwencyjne od pewnego rozmiaru danych wejściowych. Utworzenie strumienia równoległego i jego skonsumowanie wymaga uruchomienie całego procesu podziału danych na wątki, wykonywania operacji i łączenia wyników z poszczególnych wątków. Daje to pewien narzut, który jest szczególnie widoczny przy małych listach, dla których operacje sekwencyjne wykonują się szybciej. Niestety, nie istnieje sposób pozwalający przewidzieć, który rodzaj strumienia (sekwencyjny czy równoległy) byłby lepszym wyborem dla danej sytuacji. Możliwe byłoby zaproponowanie heurystycznej metody, określającej rodzaj na podstawie wielkości danych wejściowych, ale nie byłby on niezawodny, więc dobór metody pozostawiony jest programiście.
 
@@ -647,22 +653,22 @@ having sum(order.totalprice) > 10000
 order by customers.name;
 \end{lstlisting}
 
-Pomijając bardzo prawdopodobne optymalizacje, powyższe zapytanie interpretowane jest w następujący sposób, w następującej kolejności:
+    Bazy SQL posiadają zwykle optymalizatory zapytań o różnym stopniu złożoności. Możliwe jest sprawdzenie dokładnego planu zapytania (\textit{query execution plan}) za pomocą składni odpowiedniej dla danego systemu, przykładowo, w MySQL istnieje specjalna klauzula \texttt{EXPLAIN}. Optymalizacje i zmiany kolejności nie wpływają jednak na wynik, który jest zawsze taki sam, jak przy wykonywaniu zapytania zgodnie z logiczną kolejnością SQL. Zapytanie zamieszczone we fragmencie \ref{sqlexample} posiada następującą kolejność wykonywania:
 
 \begin{itemize}
-    \item \textbf{from orders join customer} - pierwszym krokiem jest wybranie tabeli (tabel), z których pobrane zostaną dane. Należy zauważyć, że klauzula \textbf{join} jest logicznie częścią klauzuli \textbf{where}, jedynie skrótowo zapisaną.
-    \item \textbf{where customer.acctbal > 1000} - następnie wiersze są filtrowane. W tym momencie następuje odrzucenie niechcianych danych. 
-    \item \textbf{group by customers.custkey, customers.name} - następuje tworzenie grup na podstawie podanej krotki. Podczas grupowania obliczane są wszystkie funkcje agregujące występujące w zapytaniu.
-    \item \textbf{having sum(order.totalprice) > 10000} - na grupach wykonywane jest dalsze filtrowanie, na podstawie wyliczonych w poprzednim kroku funkcji, tutaj sprawdzana jest wartość sumy.
-    \item \textbf{select customers.name, sum(order.totalprice)} - z pośredniej tabeli, zawierającej jak dotąd wszystkie kolumny z obu tabel po połączeniu, wybierane są jedynie wymagane kolumny.
-    \item \textbf{order by customers.name} - na samym końcu wykonywane jest sortowanie.
+    \item \textbf{from orders join customer} - wybranie tabeli (tabel), z których pobrane zostaną dane (należy zauważyć, że klauzula \textbf{join} jest logicznie częścią klauzuli \textbf{where}, jedynie skrótowo zapisaną),
+    \item \textbf{where customer.acctbal > 1000} - filtrowanie wierszy, odrzucenie niechcianych danych,
+    \item \textbf{group by customers.custkey, customers.name} - tworzenie grup na podstawie podanej krotki, podczas grupowania obliczane są wszystkie funkcje agregujące występujące w zapytaniu.
+    \item \textbf{having sum(order.totalprice) > 10000} - filtrowanie całych grup, na podstawie wyliczonych w poprzednim kroku funkcji (tutaj sprawdzana jest wartość sumy),
+    \item \textbf{select customers.name, sum(order.totalprice)} - wybranie, na podstawie pośredniej tabeli zawierającej jak dotąd wszystkie kolumny z obu tabel (po połączeniu), jedynie wymaganych kolumn,
+    \item \textbf{order by customers.name} - sortowanie według jednej lub kilku wybranych kolumn.
 \end{itemize}
 
-Jak można zauważyć, logiczna kolejność wykonywania zapytania jest znacząco odmienna od faktycznej kolejności.
+    Jak można zauważyć, logiczna kolejność wykonywania zapytania jest znacząco odmienna od faktycznej kolejności. Wynikiem zapytania jest zbiór wierszy (krotek) z dwoma kolumnami, odpowiednio typu znakowego oraz liczbowego.
 
 \subsection{Proces wykonywania zapytania strumieniowego}
 
-    Podobnie jak w przypadku języka SQL, zapytanie strumieniowe wykonuje się w kilku etapach. Ważną różnicą jest to, że nie występuje tutaj żaden mechanizm parsowania i tłumaczenia kodu, ponieważ zwykły kod języka Java jest już skompilowany do kodu bajtowego i wykonywany na maszynie wirtualnej Java. Maszyna wirtualna Javy po uruchomieniu programu realizuje dużą liczbę optymalizacji kodu, więc możliwe jest uzyskanie wzrostu wydajności jedynie dzięki tym optymalizacjom. Fragment kodu \ref{streamsexample} przezentuje zapytanie strumieniowe odpowiadające zapytaniu z listingu \ref{sqlexample}
+    Podobnie jak w przypadku języka SQL, zapytanie strumieniowe wykonuje się w kilku etapach. Ważną różnicą jest to, że nie występuje tutaj żaden mechanizm parsowania i tłumaczenia kodu, ponieważ zwykły kod języka Java jest już skompilowany do kodu bajtowego i wykonywany na maszynie wirtualnej Java. Maszyna wirtualna Javy po uruchomieniu programu realizuje dużą liczbę optymalizacji kodu, więc możliwe jest uzyskanie wzrostu wydajności jedynie dzięki tym optymalizacjom. Fragment kodu \ref{streamsexample} przezentuje zapytanie strumieniowe odpowiadające zapytaniu z listingu \ref{sqlexample} :
 
 \begin{lstlisting}[label=streamsexample, caption=Analogiczne rozwiązanie wykorzystujące Stream API]
 List<Pair<String, Double>> result = StreamUtils.innerJoin(
@@ -693,8 +699,15 @@ List<Pair<String, Double>> result = StreamUtils.innerJoin(
 
     Pod względem liczby linii kodu oraz czytelności przykład ten prezentuje się mniej korzystnie. W celu wyrażenia tego samego zapytania w Stream API konieczne jest wykorzystanie kilku ręcznych mechanizmów. Strumienie nie wspierają złączeń kolekcji, tak więc konieczne jest ręczne jego wykonanie (propozycja implementacji znajduje się w rozdziale \ref{proposal}). Wynikiem złączenia jest lista par, na której odbywa się filtrowanie, a następnie grupowanie. Aby pogrupować elementy strumienia na podstawie kilku właściwości, konieczne jest ponowne użycie klasy \texttt{ImmutablePair<T1, T2>}, której obiekty reprezentują klucz mapy, na podstawie którego odbywa się grupowanie. Jako iż klasa \texttt{Map} nie udostępnia bezpośrednio możliwości tworzenia strumieni, konieczne jest wykorzystanie metody \texttt{Map.entrySet} w celu uzyskania zbioru par klucz-wartość, na którym ponownie wywoływana jest metoda tworząca strumień. Na koniec z utworzonych grup wyłuskiwane są wymagane pola (imię klienta oraz suma cen zamówień) i zbierane do listy.
 
+    Strumień, będąc abstrakcyjną formą reprezentacji źródła danych, tworzony może być na kilka różnych sposobów, ale sposoby te nie wpływają semantycznie na proces przetwarzania danych. Zwykle strumień tworzony jest na podstawie kolekcji - przy konsumowaniu elementów, kolekcja dostarcza elementy wykonując wewnętrzną iterację (\textit{internal iteration}), która jest procesem ukrytym przed programistą. Inne sposoby tworzenia strumieni, takie jak generowanie ich w locie, wczytywanie z dysku bądź z sieci, nie są zbyt praktyczne. Związane jest to z konstrukcją wewnętrzną strumieni, które działają na zasadzie "pytania o kolejny element" (\textit{pull-based}). Decyzją implementacyjną projektantów Stream API było wykorzystanie modelu przetwarzania ciągłego, w którym to strumień wykonuje akcję pobrania następnego elementu. W związku z tym, nie jest możliwe (przynajmniej w domyślnej formie) efektywne asynchroniczne dostarczanie nowych elementów, ponieważ każda operacja pobrania elementu jest operacją blokującą, wywoływaną po zakończeniu przetwarzania poprzedniego elementu. Model odwrotny do powyższego, tzw. model \textit{push-based}, wykorzystywany np. w bibliotekach RxJava bazujących na wzorcu Observable, ma lepsze zastosowanie w takich przypadkach. Brian Goetz, zapytany o możliwości przetwarzania asynchronicznego w domyślnych strumieniach Java 8 stwierdził \cite{goetz}:
 
-    Strumień, będąc abstrakcyjną formą reprezentacji źródła danych, tworzony może być na kilka różnych sposobów, ale sposoby te nie wpływają semantycznie na proces przetwarzania danych. Zwykle strumień tworzony jest na podstawie kolekcji - przy konsumowaniu elementów, kolekcja dostarcza elementy wykonując wewnętrzną iterację (\textit{internal iteration}), która jest procesem ukrytym przed programistą. Inne sposoby tworzenia strumieni, takie jak generowanie ich w locie, wczytywanie z dysku bądź z sieci nie są zbyt przydatne z powodu ich konstrukcji pull-based. Decyzją implementacyjną projektantów Stream API było wykorzystanie modelu przetwarzania ciągłego, w którym to strumień wykonuje akcję pobrania następnego elementu. W związku z tym, nie jest możliwe (przynajmniej w domyślnej formie) efektywne asynchroniczne dostarczanie nowych elementów, ponieważ każda operacja pobrania elementu jest operacją blokującą, wywoływaną po zakończeniu przetwarzania poprzedniego elementu. Model odwrotny (push-based), wykorzystywany np. w bibliotekach RxJava bazujących na wzorcu Observable, ma lepsze zastosowanie w takich przypadkach.
+\begin{quote}
+The design center for Streams is mostly about data that can be accessed with no latency (either from data structures or generating functions); the design center for Rx is about infinite streams of events which may arrive asynchronously.
+
+    Zamiarem architektonicznym Stream API było przetwarzanie danych, które są dostępne bez żadnych opóźnień (pochodzących ze struktur danych bądź funkcji generujących), celem Rx jest obsługa nieskończonych strumieni zdarzeń, które mogą pojawiać się asynchronicznie (\textit{tłum. aut.}).
+
+\end{quote}
+
 
     Po utworzeniu strumienia możliwe jest wykonanie dostępnych na nim operacji pośrednich, udostępnionych przez metody instancyjne klasy \texttt{Stream<T>}. Każda taka operacja zwraca zawsze strumień, ewentualnie innego typu (\texttt{Stream<...>}, \texttt{IntStream}). Należy zwrócić szczególną uwagę na różnice pomiędzy dwoma typami operacji pośrednich, ponieważ owe typy determinują faktyczną, wewnętrzną kolejność operacji, która mimo iż ukryta przed programistą, może mieć wpływ na złożoność czasową jak i pamięciową. Operacje pośrednie bezstanowe (takie jak \texttt{filter} i \texttt{map}) zapisane tuż obok siebie, łączone są w jedną, większą operację, wykorzystując właściwości kompozycji funkcji bezstanowych. Drugi typ operacji pośrednich, operacje pośrednie stanowe, nie gwarantują fuzji i mogą wprowadzać ukryty stan. Najlepszym przykładem operacji pośredniej stanowej jest sortowanie, które wymaga, aby dokładnie wszystkie elementy strumienia zbuforowane zostały przed sortowaniem. Jest to logiczne, ponieważ nie jest możliwe ustalenie posortowanej kolejności zbioru elementów o nieznanej wielkości. Przykład fuzji operacji zaprezentowany jest we fragmencie kodu \ref{streamstateful1}.
 
@@ -773,7 +786,7 @@ Filtering: 5
 
     Jednym z najczęściej występujących zarzutów odnośnie Stream API jest brak odpowiedzi na istniejące w języku C\# i platformie .NET narzędzie LINQ-to-SQL. Pozwala ono na dostęp do danych znajdujących się w bazie relacyjnej za pomocą specjalniej składni kodu C\#, z automatycznym odwzorowaniem typu ORM. Strumienie umożliwiają tworzenie dość złożonych kombinacji operacji, natomiast wszystkie te operacje zachodzą w pamięci maszyny wirtualnej. Nie jest możliwe tłumaczenie metod klasy \texttt{Stream} na słowa kluczowe zapytania SQL. Taką możliwość dają dodatkowe biblioteki, np. JOOQ bądź Hibernate Criteria API, ale dostępne one były jeszcze przed wydaniem Java 8. 
 
-    Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie spowodować bałaganu. Znaczy to, iż popularne operatory funkcyjne, znane z innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcjonalności, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal to samo.
+    Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie spowodować bałaganu. Znaczy to, iż popularne operatory funkcyjne, znane z innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcjonalności, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal funkcjonalność dorównująca zewnętrznym bibliotekom.
 
 
 \section{Propozycje rozwiązań}
@@ -921,6 +934,10 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
 
     \bibitem{h2maven} 
         \textit{Informacje o pakietach bazy H2 na portalu Maven Central} https://mvnrepository.com/artifact/com.h2database/h2
+
+    \bibitem{goetz}
+        \textit{Wypowiedź architekta języka Java, Brian Goetz}
+        https://stackoverflow.com/questions/17960656/is-it-possible-to-use-java-8-streams-api-for-asynchronous-processing/18826615\#comment36545451\_18826615
 
 \end{thebibliography}
 

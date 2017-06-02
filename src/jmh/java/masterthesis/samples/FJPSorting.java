@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 @State(Scope.Thread)
 public class FJPSorting {
     
-    @Param({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"})
+    @Param({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "20","25", "30"})
     public int poolSize;
     
     List<Integer> numbers = new ArrayList<>();
