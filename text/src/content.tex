@@ -229,8 +229,7 @@ public class SummingTask extends RecursiveTask<Integer> {
 \label{fig:fjpsorting}
 \end{figure}
 
-    Jak można zauważyć, ilość operacji na sekundę rośnie przy wzroście wielkości puli do pewnego momentu, w którym narzut wielowątkowości staje się zbyt duży. Przyjęło się za ogólnie dobrą praktykę, aby liczba wątków była w przybliżeniu równa liczbie logicznych rdzeni procesora. Test przeprowadzono na maszynie z 4 rdzeniami Hyper Threading (logiczne 8 rdzeni), w związku z tym można się spodziewać optymalnego działania procesu dla takiej liczby wątków.
-
+    Jak można zauważyć, ilość operacji na sekundę rośnie przy wzroście wielkości puli do pewnego momentu, w którym narzut wielowątkowości staje się zbyt duży. Przyjęło się za ogólnie dobrą praktykę, aby liczba wątków była w przybliżeniu równa liczbie logicznych rdzeni procesora, ponieważ umożliwia to najlepsze wykorzystanie mocy obliczeniowej. Test przeprowadzono na maszynie z 4 rdzeniami Hyper Threading (logiczne 8 rdzeni), w związku z tym można się spodziewać największej liczby operacji na sekundę dla mniej więcej 8 wątków.
 
 
 
@@ -245,6 +244,28 @@ IntStream.range(1, 100).parallel()
     Thread.currentThread().getName()
   )
 );
+\begin{verbatim}
+...
+ForkJoinPool.commonPool-worker-1
+ForkJoinPool.commonPool-worker-4
+ForkJoinPool.commonPool-worker-4
+ForkJoinPool.commonPool-worker-7
+ForkJoinPool.commonPool-worker-7
+ForkJoinPool.commonPool-worker-7
+ForkJoinPool.commonPool-worker-6
+ForkJoinPool.commonPool-worker-6
+ForkJoinPool.commonPool-worker-6
+ForkJoinPool.commonPool-worker-2
+ForkJoinPool.commonPool-worker-3
+ForkJoinPool.commonPool-worker-3
+ForkJoinPool.commonPool-worker-3
+ForkJoinPool.commonPool-worker-5
+main
+main
+...
+\end{verbatim}
+
+    Warto zwrócić uwagę, że wśród wątków wykonawczych znajduje się też wątek \texttt{main}, czyli wątek inicjujący operację strumieniową. Jako iż wykonywanie się ciągu operacji strumieniowych jest blokujące (nie jest asynchroniczne), dobrym rozwiązaniem jest wykorzystanie do obliczeń także wątku inicjującego. Jeśli nie jest to oczekiwane zachowanie, istnieje możliwość ręcznego utworzenia instancji puli wątków \texttt{ForkJoinPool} i przekazanie zadania w postaci funkcji lambda \texttt{Callable<T>}. W takim podejściu możliwe jest też zdefiniowanie liczby dostępnych wątków.
 
 \end{lstlisting}
 
