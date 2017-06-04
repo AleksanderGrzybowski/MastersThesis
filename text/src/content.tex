@@ -65,7 +65,7 @@
     \endgroup
 \end{titlepage}
 
-\clearpage
+\clearpage\mbox{}\clearpage
 
 \tableofcontents
 
@@ -79,7 +79,7 @@
 
 	Celem niniejszej pracy magisterskiej jest porównanie możliwości przetwarzania danych w bazach SQL-owych ze sposobami dostarczanymi przez Stream API. Badania obejmują eksperymenty wydajnościowe, przeprowadzone w zakresie metod przechowywania danych w pamięci RAM, jak i obserwacje sposobów formułowania kodu i możliwości języka zapytań. Prace obejmują stworzenie środowiska badawczego, zaimplementowanego w języku Java oraz zaproponowanie i wykonanie testów wydajnościowych.
 
-    Rozdział x zawiera/obejmuje ... W rozdziale znajduje się/zawarto ... Rozdziały x/y objmują ... X zawarty/opisany jest w rozdziale TODO
+    Rozdział 2 zawiera opis zastosowań baz SQL działających w pamięci oraz kryteria wyboru implementacji. Rozdział 3 obejmuje szczegółową charakterystykę Stream API, przykłady użycia oraz szczegóły przetwarzania równoległego. W rozdziale 4 zawarto różnice pomiędzy metodami, reprezentację pamięciową danych oraz komentarze. Składniki środowiska badawczego opisane są w rozdziale 5. Rozdziały 6 oraz 7 zawierają wyniki oraz wnioski z badań wydajnościowych, przeprowadzonych na obu rozwiązaniach bazodanowych. Rozdział 8 opisuje porównanie sposobów formułowania i weryfikowania kodu oraz szczegóły implementacyjne. W rozdziale 9 znajduje się propozycja rozwiązania problemu braku operacji złączenia naturalnego w Stream API, natomiast rozdział 10 zawiera podsumowanie prac, całościowe wnioski oraz propozycje przyszłych badań.
 
 \section{Bazy SQL działające w pamięci RAM}
 
@@ -817,7 +817,7 @@ innerJoin(
 
 \end{lstlisting}
 
-    Rozwiązanie to, mimo iż krótkie i czytelne, wykazuje się bardzo niekorzystną złożonością obliczeniową, i w konsekwencji, bardzo słabą wydajnością. Ze względu na konieczność utworzenia $ mn $ par niezależnie od przypadku, aktywność GC jest znaczna, ponieważ mnóstwo obiektów tworzonych jest tylko w celu ich odśmiecenia. TODO przykład z TPC pomnożyć lineitem i cośtam
+    Rozwiązanie to, mimo iż krótkie i czytelne, wykazuje się bardzo niekorzystną złożonością obliczeniową, i w konsekwencji, bardzo słabą wydajnością. Ze względu na konieczność utworzenia $ mn $ par niezależnie od przypadku, aktywność GC jest znaczna, ponieważ mnóstwo obiektów tworzonych jest tylko w celu ich odśmiecenia. Przykładowo, dla współczynnika wielkościo zbioru TPC wynoszącego 20\% połączenie tabeli \texttt{Orders} (300000 wierszy) i \texttt{Lineitem} (1119969 wierszy) powoduje wygenerowanie około 350 miliardów obiektów.
 
     Rozwiązanie drugie polega na przepisaniu strumieniowej części w postaci zwykłej pętli. Strumienie mają nieznaczny narzut czasowy i pamięciowy, więc warto sprawdzić, czy możliwe jest jego uniknięcie.
 
@@ -910,7 +910,7 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
 
     W dalszych pracach nad porównaniem możliwości przetwarzania pamięciowego jednym z pomysłów jest zbadanie baz NoSQL działających w pamięci. Rozwiązania nierelacyjne posiadają wiele cech niespotykanych w tradycyjnych bazach SQL, takich jak brak ściśle zdefiniowanego schematu czy praca w modelu rozproszonym (\textit{sharding}). Być może cechy te przekładają się na wydajność czy sposób formułowania kodu aplikacji w taki sposób, że rozwiązanie typu NoSQL będzie miało przewagę nad analizowanymi w niniejszej pracy rozwiązaniami.
 
-    Stream API jest bardzo wygodnym interfejsem programistycznym, którego zakres widoczny przez końcowego użytkownika jest niewielki. Szczegóły implementacyjne, takie jak interfejs \texttt{Spliterator} pozwalający na dokładne zdefiniowanie sposobu podziału zadań na wątki, czy realizacja przydziału zadań do wątków, mogą być istotnym tematem do analizy. Możliwe, że odpowiednie zrozumienie i wykorzystanie niskopoziomowych klas strumieni pozwoliłoby na dokonanie lepszych optymalizacji i w konsekwencji uzyskaniu lepszych wyników. Dobrym pomysłem byłoby zaproponowanie odmiany Stream API zorientowanej na wydajność, do zastosowań podobnych jak te, o których opisuje niniejsza praca.
+    Stream API jest bardzo wygodnym interfejsem programistycznym, którego zakres widoczny przez końcowego użytkownika jest niewielki. Szczegóły implementacyjne, takie jak interfejs \texttt{Spliterator} pozwalający na dokładne zdefiniowanie sposobu podziału zadań na wątki, czy realizacja przydziału zadań do wątków, mogą być istotnym tematem do analizy. Możliwe, że odpowiednie zrozumienie i wykorzystanie niskopoziomowych klas strumieni pozwoliłoby na dokonanie lepszych optymalizacji i w konsekwencji uzyskanie lepszych wyników. Dobrym pomysłem byłoby zaproponowanie odmiany Stream API zorientowanej na wydajność, do zastosowań podobnych jak te, o których opisuje niniejsza praca.
 
 \begin{thebibliography}{9}
 
