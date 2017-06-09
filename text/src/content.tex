@@ -16,6 +16,9 @@
 
 \setlength\parindent{1cm}
 
+\let\oldsection\section% Store \section in \oldsection
+\renewcommand{\section}{\cleardoublepage\oldsection}% Prepend new \section with \cleardoublepage
+
 \usepackage{listings}
 \renewcommand{\lstlistingname}{Kod}
 \lstset{
