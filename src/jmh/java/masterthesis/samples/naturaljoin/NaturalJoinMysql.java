@@ -17,7 +17,7 @@ public class NaturalJoinMysql {
     
     Connection connection;
     
-    @Param({"0.010", "0.025", "0.050", "0.075", "0.100", "0.125", "0.150", "0.175", "0.200"})
+    @Param({"0.2"})
     public String scaleFactor;
     
     @Setup
