@@ -182,7 +182,7 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 \label{fig:forkjoin}
 \end{figure}
 
-    Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu Fork-Join Pool (FJP), umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę `dziel i zwyciężaj'. W programie wykorzystującym to rozwiązanie tworzona jest pula wątków (o dowolnej ilości), do której wysyła się zadanie, symbolizowane przez obiekt typu \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. Kod programu powinien być w stanie zadecydować, czy zadanie jest zbyt duże i należy w związku z tym dokonać podziału. Jeśli tak, zadanie jest dzielone na podzadania i wysyłane do puli wątków, a po jego wykonaniu pośrednie wyniki zostają zebrane. Jeśli nie, program przystępuje do normalnego wykonywania przydzielonego zadania.  Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest w kodzie \ref{fjpexample}.
+    Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu Fork-Join Pool \cite{fjpdocs}, umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę `dziel i zwyciężaj'. W programie wykorzystującym to rozwiązanie tworzona jest pula wątków (o dowolnej ilości), do której wysyła się zadanie, symbolizowane przez obiekt typu \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. Kod programu powinien być w stanie zadecydować, czy zadanie jest zbyt duże i należy w związku z tym dokonać podziału. Jeśli tak, zadanie jest dzielone na podzadania i wysyłane do puli wątków, a po jego wykonaniu pośrednie wyniki zostają zebrane. Jeśli nie, program przystępuje do normalnego wykonywania przydzielonego zadania.  Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest w kodzie \ref{fjpexample}.
 
 \begin{lstlisting}[label=fjpexample, caption=Przykładowe wykorzystanie FJP]
 
@@ -554,7 +554,7 @@ public class SummingIntegersH2 {
 
 \subsection{Wyniki badań}
 
-TODO osie, parametry JMH (iteracje itd.)
+    Poniższe wykresy prezentują wyniki wszystkich testów syntetycznych przeprowadzonych w środowisku testowym. Dla każdego testu referencyjnego wykonano 20 grup iteracji, przy czym każda grupa iteracja wykonywała się przez nie mniej niż 1 sekundę. Na osi X zaznaczona jest wielkość zbioru danych testowych, natomiast oś Y prezentuje osiągniętą ilość operacji na sekundę, w skali logarytmicznej. Wykresy zostały wygenerowane na podstawie pojedynczych raportów wygenerowanych przez narzędzie JMH, przy użyciu biblioteki matplotlib \cite{matplotlib} i języka Python.
 
 \begin{figure}[H]
 \centering
@@ -562,7 +562,7 @@ TODO osie, parametry JMH (iteracje itd.)
 \caption{SummingIntegers}
 \end{figure}
 
-TODO komentarz
+    Test \texttt{SummingIntegers} pokazuje wyraźnie typowe wydajności poszczególnych metod dostępu do danych. Najszybszy dostęp uzyskać można do zwykłej tablicy typu prostego, nieco wolniejsze okazują się listy (tutaj typ \texttt{ArrayList}). Dla małych zbiorów danych strumienie sekwencyjne są nawet kilka rzędów wielkości szybsze od strumieni równoległych, co nie jest zaskakujące, biorąc pod uwagę spory narzut tworzenia struktur kontrolujących przetwarzanie równoległe. Baza H2 i MySQL dla tak prostego testu mają zbyt duże narzuty, aby konkurować z pozostałymi metodami.
 
 \begin{figure}[H]
 \centering
@@ -570,7 +570,7 @@ TODO komentarz
 \caption{GroupingAndSumming}
 \end{figure}
 
-TODO komentarz
+    Test \texttt{GroupingAndSumming} w bardzo jasny sposób ukazuje przewagę strumieni równoległych dla większych zbiorów danych i zadań, w których możliwy jest dobry podział podzadań. Strumienie typu \texttt{.parallel} okazują się szybsze od zwykłych pętli, co z jednej strony może dziwić, biorąc pod uwagę wyniki innych testów, ale z drugiej strony pokazuje, dla jakiego typu problemów strumienie są dobrym rozwiązaniem.
 
 \begin{figure}[H]
 \centering
@@ -578,7 +578,8 @@ TODO komentarz
 \caption{CrossJoinAndFilter}
 \end{figure}
 
-TODO komentarz
+    Przykład \texttt{CrossJoinAndFilter} dobrze pokazuje, dla jakich typów danych przetwarzanie równoległe nie jest przydatne. Tradycyjne złączenia strumieni nie są zbyt wydajne (propozycja lepszego rozwiązania znajduje się w rozdziale X), tak więc wsparcie się równoległością prowadzi jedynie do niewielkiego zysku wydajnościowego.
+
 
 \begin{figure}[H]
 \centering
@@ -586,7 +587,7 @@ TODO komentarz
 \caption{FilteringAndCountingIntegers}
 \end{figure}
 
-TODO komentarz
+    Wyniki testu są bardzo podobne do testu \texttt{GroupingAndSumming}, bardzo dobrze widoczna jest przewaga strumieni równoległych nad sekwencyjnymi przy przekroczeniu pewnego rozmiaru danych wejściowych.
 
 \begin{figure}[H]
 \centering
@@ -594,7 +595,7 @@ TODO komentarz
 \caption{SortingStrings}
 \end{figure}
 
-TODO komentarz
+    Bardzo ciekawe zachowanie można zaobserwować w teście \texttt{SortingStrings} - dla małego rozmiaru danych wejściowych, wydajność sortowania jest bardzo zbliżona. Jest to prawdopodobnie związane z wykorzystaniem tego samego algorytmu sortowania w przypadkach, dla których wykresy praktycznie nachodzą na siebie (sortowanie tablicy, listy i sortowanie przy użyciu strumieni sekwencyjnych).
 
 \newpage
 
@@ -1007,6 +1008,11 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
         \textit{java.util.stream Javadoc documentation}. 
         http://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html\#MutableReduction, czas dostępu 29.05.2017
 
+    \bibitem{fjpdocs} 
+        Oracle Corporation
+        \textit{ForkJoinPool documentation}. 
+        https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html
+
     \bibitem{generics} 
         Oracle Corporation
         \textit{The Java Tutorials: Generics}. 
@@ -1030,6 +1036,9 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
 
     \bibitem{h2maven} 
         \textit{Informacje o pakietach bazy H2 na portalu Maven Central} https://mvnrepository.com/artifact/com.h2database/h2
+
+    \bibitem{matplotlib} 
+        \textit{Dokumentacja biblioteki matplotlib} https://matplotlib.org/users/pyplot\_tutorial.html
 
     \bibitem{goetz}
         \textit{Wypowiedź architekta języka Java, Brian Goetz}
