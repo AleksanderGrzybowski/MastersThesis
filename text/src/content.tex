@@ -77,7 +77,7 @@
 
 \section{Wstęp}
 
-	Dział informatyki zajmujący się przetwarzaniem danych zajmuje ważne miejsce w obszarze nauk informatycznych. W każdym programie obliczeniowym dobór odpowiednich mechanizmów gromadzenia i przetwarzania informacji znacząco wpływa na jego wydajność. Dotyczy to zwłaszcza systemów gromadzenia danych wielkiej skali (tzw. Big Data), które bardzo często wymagają przetwarzania w czasie zbliżonym do rzeczywistego.
+    Dział informatyki zajmujący się przetwarzaniem danych zajmuje ważne miejsce w obszarze nauk informatycznych. W każdym programie obliczeniowym dobór odpowiednich mechanizmów gromadzenia i przetwarzania informacji znacząco wpływa na jego wydajność. Dotyczy to zwłaszcza systemów gromadzenia danych wielkiej skali (tzw. \textit{Big Data}), które bardzo często wymagają przetwarzania w czasie zbliżonym do rzeczywistego.
 
     Najpopularniejszym sposobem na gromadzenie danych są sprawdzone bazy relacyjne, wykorzystujące język SQL. Od wielu lat rozwiązania relacyjne wykorzystywane są we wdrożeniach różnorakiej skali, od małych aplikacji osobistych po klastry obliczeniowe. Niestety, korzystanie z baz relacyjnych w aplikacjach opartych o języki obiektowe jest zwykle problematyczne i wymaga wykorzystywania dodatkowych warstw pośrednich, np. metody mapowania obiektowo-relacyjnego. Pojawienie się wśród dostępnych rozwiązań języka Java w wersji 8 oraz nowo wprowadzonego Stream API, pozwalającego na wydajne i łatwe przetwarzanie danych z wykorzystaniem mechanizmów automatycznego zrównoleglania, zwiększyło liczbę możliwych metod, które można rozważyć przy wyborze technologii. Pojawia się pytanie, czy jest możliwe wykorzystanie strumieni do przetwarzania danych w sposób natywny dla języka w podobny sposób.
 
@@ -88,11 +88,13 @@
 
 \section{Analiza dziedziny}
 
-TODO tekst
+    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym w praktyce rozwiązaniem (rysunek \ref{fig:dbstats}).
+
+    Z drugiej strony, języki programowania wspierające programowanie funkcyjne są coraz bardziej popularne. Możliwość definiowania operacji na danych za pomocą funkcji, a następnie składania pojedynczych bloków funkcyjnych w złożone procesy wydaje się bardzo przydatne. Najpopularniejszym przykładem są funkcje LINQ występujące w języku C\#, dzięki którym możliwe jest deklaratywne tworzenie procesów przetwarzania danych, wraz ze wsparciem dla odpytywania baz SQL w identyczny sposób, jak w przypadku zwykłych kolekcji.
+
 
 \subsection{Pamięciowe bazy SQL}
 
-    Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym w praktyce rozwiązaniem (rysunek \ref{fig:dbstats}). Bazy danych działające całkowicie w pamięci RAM mogą być wykorzystywane w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, pamięć cache wprowadzona na poziomie aplikacji) nie spełniają wymagań biznesowych.
 
 \begin{figure}
 \centering
@@ -100,6 +102,8 @@ TODO tekst
 \caption{Popularność rozwiązań DBMS, źródło: Stack Overflow Developer Survey 2017}
 \label{fig:dbstats}
 \end{figure}
+
+    Bazy danych działające całkowicie w pamięci RAM mogą być wykorzystywane w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, pamięć cache wprowadzona na poziomie aplikacji) nie spełniają wymagań biznesowych.
 
       Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania, co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM (\textit{Object Relational Mapping}) możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów. Powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i pamięciowe obsługuje się praktycznie w ten sam sposób. 
 
@@ -113,11 +117,11 @@ TODO tekst
 
 \section{Przetwarzanie strumieniowe}
 
-TODO tekst (wziąć coś z poniższego)
+    Pojawienie się nowej wersji 8 platformy Java przyniosło dużo nowych zmian w języku. Wprowadzenie wyrażeń lambda jako zwięzłej alternatywy wobec anonimowych klas wewnętrznych, dodanie referencji do metod oraz wprowadzenie interfejsów domyślnych przełamało w pewien sposób popularną opinię, że język Java jest językiem jedynie obiektowym. Funkcyjne paradygmaty, coraz częściej analizowane i opisywane, okazują się dobrym sposobem na tworzenie bezpiecznych i łatwych w analizie aplikacji. 
+
+    Strumienie wykorzystują w bezpośredni sposób wszystkie powyższe, nowo wprowadzone udogodnienia. Skrócone funkcje lambda ułatwiają tworzenie prostych i silnie typowanych parametrów funkcyjnych, referencje do metod upraszczają pisanie odwzorowań operujących na aktualnie przetwarzanym obiekcie, a interfejsy domyślne pozwalają na tworzenie łatwiejszych w obsłudze interfejsów aplikacyjnych.
 
 \subsection{Stream API}
-
-    Pojawienie się nowej wersji 8 platformy Java przyniosło dużo nowych zmian w języku. Wprowadzenie wyrażeń lambda jako zwięzłej alternatywy wobec anonimowych klas wewnętrznych, dodanie referencji do metod oraz wprowadzenie interfejsów domyślnych przełamało w pewien sposób popularną opinię, że język Java jest językiem jedynie obiektowym. Funkcyjne paradygmaty, coraz częściej analizowane i opisywane, okazują się dobrym sposobem na tworzenie bezpiecznych i łatwych w analizie aplikacji.
 
     Stream API jest komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest abstrakcyjną reprezentacją ciągu obiektów, które pochodzą z pewnego źródła. Zazwyczaj strumienie tworzone są na podstawie kolekcji obiektów, ale ogólnie możliwe jest generowanie obiektów w dowolny sposób. Strumienie obsługują wykonywanie prostych i złożonych operacji filtrowania, sortowania, odwzorowania i grupowania, przy czym możliwe jest też samodzielne tworzenie obiektów przetwarzających dane (interfejs \texttt{Collector}). Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są `leniwie', to znaczy żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej. Wystąpienie operacji terminalnej powoduje łańcuchowe wykonanie się wszystkich operacji pośrednich.
 
@@ -400,14 +404,65 @@ Combining #42c with #46f
     Bazy pamięciowe wykorzystują wewnętrzne struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i zabezpieczonym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty ukrytych klas implementacyjnych z pakietu \texttt{org.h2.*} - rysunek \ref{fig:jvmmemory}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
 
 
+    \subsection{Odpowiedniki operacji}
+
+    Stream API umożliwia wykonywanie wielu operacji znanych z języka SQL. Część z nich posiada dokładne odpowiedniki (np. ograniczanie ilości czy filtrowanie), natomiast niektóre wymagają częściowo ręcznej implementacji (złączenie albo unia). Należy zauważyć, iż mimo istnienia pewnej wspólnej bazy pojęciowej, sposób przekazywania parametrów do operacji może być zupełnie inny. Przykładowo, aby wykonać sortowanie w SQL na podstawie kilku kolumn, wystarczy wymienić klucze sortowania po przecinku, przykładowo w postaci \texttt{ORDER BY col1, col2}. Silnik bazodanowy jest w stanie wewnętrznie zinterpretować takie zapytanie. Do sortowania strumieni konieczne jest uzyskanie obiektu typu \texttt{Comparator}, który przekazany zostanie do metody sortującej, a utworzyć można go np. poprzez \texttt{Comparator.comparing(e -> e.col1).thenComparing(e -> e.col2)}. Obiekt taki jest całkowicie odseparowany od strumienia i może być tworzony w dowolnym miejscu w kodzie.
+
+
+
+    \begin{table}[t]
+        \caption{podpis do tabeli}
+        \label{nazwa odnośnika, która potem użyjemy do cytowania tabeli}
+\begin{center}
+        \begin{tabular}{ |c|c| }
+            \hline
+            SQL & Stream API \\
+            \hline
+            \texttt{SELECT} & \texttt{.map(...)}  \\
+            \texttt{FROM} & \texttt{.stream()}  \\
+            \texttt{WHERE} & \texttt{.filter(...)}  \\
+            \texttt{JOIN ON} & \texttt{.flatMap(...).filter(...)}  \\
+            \texttt{HAVING} & \texttt{.filter(...)}  \\
+            \hline
+            \texttt{DISTINCT} & \texttt{.distinct()}  \\ 
+            \texttt{UNION ALL} & \texttt{Stream.concat(..., ...)} \\
+            \texttt{UNION} & \texttt{Stream.concat(..., ...).distinct()}  \\
+            \hline
+            \texttt{ORDER BY} & \texttt{.sorted(...)}  \\
+            \texttt{LIMIT} & \texttt{.limit(...)}  \\
+            \texttt{OFFSET} & \texttt{.skip(...)}  \\
+            \hline
+        \end{tabular}
+\end{center}
+    \end{table}
+
 \subsection{Język domenowy (DSL) a język ogólnego przeznaczenia}
 
     Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (\textit{stored procedures}). 
    
-   PRZYKŁADY TODO jednak xD
-
     Przy użyciu Stream API możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach, interwałach czasowych i strefach czasowych. Funkcje SQL są ograniczone w~tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
+
+    Za przykład niech posłuży zadanie znalezienia daty pierwszego poniedziałku aktualnego miesiąca. Takie problemy pojawiają się często przy tworzeniu różnych statystyk na podstawie danych historycznych. W kodzie \ref{date} zaprezentowany jest przykład rozwiązania powyższego problemu, odpowiednio przy użyciu MySQL i Stream API.
     
+
+\begin{lstlisting}[label=date, caption=Problem znalezienia pierwszego poniedziałku w miesiącu]
+set @firstday = DATE_ADD(
+  LAST_DAY(
+    DATE_SUB(CURDATE(), interval 30 day)
+  ),
+  interval 1 day
+);
+SELECT ADDDATE(
+  @firstday,
+  MOD((9 - DAYOFWEEK(@firstday)), 7))
+as first_monday;
+
+
+LocalDateTime.now()
+  .with(dayOfWeekInMonth(1, DayOfWeek.MONDAY));
+\end{lstlisting}
+
+Można od razu zauważyć, że kod SQL jest dość nieczytelny i zawiera wiele szczegółów technicznych, które nie są istotne dla postawionego problemu. Wprowadzone w Java 8 nowe mechanizmy obsługi dat sprawdzają się w takich przypadkach znacznie lepiej, zapewniając bardzo deklaratywny kod i bezpieczne, statyczne typowanie.
 
 \section{Środowisko badawcze}
 
