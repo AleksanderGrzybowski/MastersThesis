@@ -438,7 +438,7 @@ Combining #42c with #46f
     \end{center}
 \end{table}
 
-\subsection{Język domenowy (DSL) a język ogólnego przeznaczenia}
+\subsection{Język dziedzinowy (DSL) a język ogólnego przeznaczenia}
 
     Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (\textit{stored procedures}). 
    
@@ -627,7 +627,9 @@ Filtering: 5
 
     Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie przeładowywać interfejsu biblioteki. Znaczy to, iż popularne operatory funkcyjne, znane z~innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcje, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal funkcjonalność dorównująca zewnętrznym bibliotekom.
 
-\section{Środowisko badawcze}
+\section{Środowisko badawcze i badania na danych syntetycznych}
+
+    Aby zebrane wyniki były jak najbardziej miarodajne, konieczne jest utworzenie solidnego środowiska testowego, w którym możliwe będzie wykonanie wszystkich potrzebnych badań. Jako iż elementem badań wydajności będą fragmenty kodu, pożądane jest, by pomiary czasowe odbywały się w miarę możliwości w sposób zautomatyzowany. Po wykonaniu pomiarów czasowych i wygenerowaniu raportu, należy zaprezentować uzyskane wyniki w postaci wykresów.
 
 \subsection{Kryteria oceny}
 
@@ -636,8 +638,6 @@ Filtering: 5
     Przy porównywaniu dwóch zupełnie różnych metod dostępu do danych, konieczne jest ustalenie postaci wynikowej pojedynczego eksperymentu. W przypadku języka SQL i metod JDBC wynik zapytania do bazy danych reprezentowany jest przez obiekt \texttt{ResultSet}, który udostępnia metody do poruszania się po wynikowych wierszach i wyciągania pojedynczych kolumn. W przypadku Stream API, rezultat zapytania dostępny jest od razu w formie obiektów standardowych kolekcji języka Java, takich jak \texttt{List<T>} czy \texttt{Map<K,V>}. W związku z tym, aby zapewnić sprawiedliwe porównanie obu metod, po wykonaniu zapytania SQL konieczne jest rozpakowanie obiektu \texttt{ResultSet} i przeniesienie danych do kolekcji Javy, aby uzyskać wynik w tej samej postaci.
 
 \subsection{Budowa środowiska badawczego}
-
-    Aby zebrane wyniki były jak najbardziej miarodajne, konieczne jest utworzenie solidnego środowiska testowego, w którym możliwe będzie wykonanie wszystkich potrzebnych badań. Jako iż elementem badań wydajności będą fragmenty kodu, pożądane jest, by pomiary czasowe odbywały się w miarę możliwości w sposób zautomatyzowany.
 
     JMH (\textit{Java Microbenchmark Harness}) jest najpopularniejszym narzędziem służącym do badania wydajności czasowej krótkich fragmentów kodu (\textit{microbenchmarking}). Typowe metody pomiaru czasu w kodzie maszyny wirtualnej Javy nie są dokładne ani odporne na błędy, przykładowo często stosowane i zalecane wywołanie \texttt{System.currentTimeMillis} nie jest odporne na zmiany czasu systemowego w trakcie wykonywania badania i ma różną dokładność na różnych systemach operacyjnych, natomiast \texttt{System.nanoTime()} nie jest bezpieczna wątkowo na poziomie procesora, przez co wykonywanie się zadań testowych na kilku rdzeniach procesora może powodować mylące wyniki. Co więcej, ręczne wykonywanie pomiarów jest dość żmudne i wymagałoby stworzenia własnego narzędzia. Zdecydowano się więc na wykorzystanie narzędzia gotowego. Przy użyciu JMH możliwe jest proste definiowanie metod, których wydajność (wykonania na sekundę) będzie badana, możliwe jest określenie ilości iteracji, ustalanie zmienych parametrów (np. ilość wierszy danych testowych). Raport wynikowy zawiera szczegółowe informacje na temat ilości wykonań metody, wariancje czasów oraz inne statystyki, na podstawie których możliwe jest wyciągnięcie potrzebnych wniosków.
 
@@ -699,9 +699,7 @@ public class SummingIntegersH2 {
     Środowisko badawcze zostało wyposażone w odpowiedni zestaw skryptów, pozwalających na automatyczne uruchomienie wszystkich zdefiniowanych testów referencyjnych i uzyskanie wyników, a następnie wygenerowanie wykresów. Testy wykonujące się w pamięci nie wymagają żadnych zewnętrznych zależności, natomiast testy wykorzystujące bazę MySQL i generator TPC wymagają uruchomionej bazy MySQL na odpowiednim porcie z dodanym odpowiednim użytkownikiem oraz skompilowanych plików binarnych generatora (program \texttt{dbgen}).
 
 
-\section{Badania na danych syntetycznych}
-
-\subsection{Dane testowe}
+\subsection{Syntetyczne dane testowe}
 
     W celu zbadania, ile czasu zajmują proste operacje na danych, zaproponowano kilka przypadków testowych operujących na syntetycznych, pseudolosowych danych testowych. Zapytania dobrano w taki sposób, aby prezentowały typowe operacje filtrowania i grupowania, często spotykane w aplikacjach. Dane testowe generowane są przy użyciu klasy \texttt{Random}, przy wykorzystaniu stałego ziarna generatora pseudolosowego w celu zapewnienia powtarzalności wyników. Każdy eksperyment wykonywany był na wygenerowanym zbiorze testowym o odpowiedniej wielkości, w zależności od przypadku i możliwości sprzętowych.
 
@@ -775,11 +773,11 @@ public class SummingIntegersH2 {
     Strumienie i bezpośrednie operacje na pamięciowych strukturach języka Java są w zdecydowanej większości przypadków szybsze niż ich odpowiedniki w języku SQL. Porównując zaś bazy H2 i MySQL, testy na bazie H2 wykonywane były średnio 1.5-20 razy szybciej niż w przypadku MySQL.  Do połączenia się z bazą dyskową wykorzystany został, tak jak w przypadku bazy pamięciowej, standardowy interfejs JDBC, który wykorzystywał połączenie TCP. Przepustowość tego połączenia nie powinna mieć zbytniego znaczenia (prędkość połączenia typu loopback determinowana jest głównie przez moc procesora, a ilość danych przesyłanych jest znikoma), większy wpływ ma złożoność systemu bazodanowego i metody składowania danych. Należy zauważyć, że w przypadku największych zbiorów testowych różnice w wydajności nie przekraczają 2-3x. Jest to z związane z przystosowaniem i optymalizacjami baz dyskowych.
 
 
-\section{Badania na zbiorze danych TPC-H} \label{tpc}
-
-\subsection{Charakterystyka testu referencyjnego TPC-H}
+\section{Testy wydajnościowe z użyciem TPC-H} \label{tpc}
 
     TPC-H jest testem referencyjnym stworzonym przez organizację \textit{Transaction Processing Performance Council}, stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań.
+
+\subsection{Charakterystyka testu referencyjnego TPC-H}
 
     Generator danych testowych \texttt{dbgen} jest konsolowym programem, służącym do generowania zbiorów danych testowych TPC-H. Schemat bazy danych zaprezentowany jest na rysunku \ref{fig:tpcschema}. Jest to typowa hurtownia danych, gromadząca informacje o produktach, klientach, dostawcach i zamówieniach. Dokładny sens biznesowy wygenerowanych danych nie jest zbyt istotny w rozważaniach wydajnościowych, na potrzeby niniejszej pracy zakłada się ich poprawność w sensie spójności referencyjnej. Ważny jest też fakt, że dane te w przybliżeniu modelują możliwą do zaistnienia w rzeczywistości sytuację. Program \texttt{dbgen} pozwala na zdefiniowanie wielkości wygenerowanego zbioru, procentowo względem zbioru referencyjnego (100\%) o ściśle zdefiniowanym rozmiarze.  Ze względu na praktyczne ograniczenia platformy testowej (16 GiB RAM), konieczne było ograniczenie maksymalnej wielkości zbioru do ok. 20-30\%, zależnie od przypadku testowego. 
 
