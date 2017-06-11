@@ -175,13 +175,6 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
     Język Java od pierwszej wersji wyróżniał się znakomitymi możliwościami programowania równoległego, wykorzystywanego głównie w aplikacjach internetowych, obsługujących wielu użytkowników jednocześnie. Świadczy o tym obecność metod związanych z wątkami już w klasie \texttt{Object}, która jest klasą bazową wszystkich klas języka Java. W wersji 5 języka wprowadzono dużo nowych klas, zawartych w pakiecie \texttt{java.util.concurrent}, mających na celu ułatwienie pracy z kodem tego typu. Wcześniej ręcznie tworzone rozwiązania i wzorce mogą być zastąpione przez wbudowane, wysokiej jakości implementacje pul wątków, kolejek blokujących, list wykorzystującyc kopiowanie przy zapisie (\textit{copy-on-write}), semaforów i barier cyklicznych.
     
-\begin{figure}[h]
-\centering
-\includegraphics{forkjoin.png}
-\caption{Wizualizacja działania mechanizmu Fork-Join (źródło: http://www.developer.com/imagesvr\_ce/3378/join-fork-image001.png)}
-\label{fig:forkjoin}
-\end{figure}
-
     Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu Fork-Join Pool \cite{fjpdocs}, umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę `dziel i zwyciężaj'. W programie wykorzystującym to rozwiązanie tworzona jest pula wątków (o dowolnej ilości), do której wysyła się zadanie, symbolizowane przez obiekt typu \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. Kod programu powinien być w stanie zadecydować, czy zadanie jest zbyt duże i należy w związku z tym dokonać podziału. Jeśli tak, zadanie jest dzielone na podzadania i wysyłane do puli wątków, a po jego wykonaniu pośrednie wyniki zostają zebrane. Jeśli nie, program przystępuje do normalnego wykonywania przydzielonego zadania.  Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest w kodzie \ref{fjpexample}.
 
 \begin{lstlisting}[label=fjpexample, caption=Przykładowe wykorzystanie FJP]
@@ -234,6 +227,14 @@ public class SummingTask extends RecursiveTask<Integer> {
 }
 
 \end{lstlisting}
+
+\begin{figure}[h]
+\centering
+\includegraphics{forkjoin.png}
+\caption{Wizualizacja działania mechanizmu Fork-Join (źródło: http://www.developer.com/imagesvr\_ce/3378/join-fork-image001.png)}
+\label{fig:forkjoin}
+\end{figure}
+
 
     FJP wykorzystany został przy implementacji równoległych strumieni. Jego znajomość nie jest konieczna do ich używania, natomiast może być przydatna przy badaniu wydajności przetwarzania strumieniowego. Domyślnie, przy tworzeniu strumienia nie jest możliwe wybranie puli wątków, w której przetwarzanie będzie zachodzić - przy bezpośrednim użyciu FJP jest to możliwe (metoda \texttt{submit}), wraz z określeniem docelowej, maksymalnej liczby wątków. Przeprowadzono dodatkowy eksperyment, w którym zbadano wydajność (liczbę operacji na sekundę) sortowania 1000000 liczb całkowitych, przy wykorzystaniu równoległych strumieni i zadania wykonywanego bezpośrednio w puli FJP, w zależności od liczby wątków puli. Kod źródłowy znajduje się w pliku \texttt{FJPSorting.java}, a rysunek \ref{fig:fjpsorting} prezentuje wyniki eksperymentu.
 
@@ -564,6 +565,7 @@ public class SummingIntegersH2 {
 
     Test \texttt{SummingIntegers} pokazuje wyraźnie typowe wydajności poszczególnych metod dostępu do danych. Najszybszy dostęp uzyskać można do zwykłej tablicy typu prostego, nieco wolniejsze okazują się listy (tutaj typ \texttt{ArrayList}). Dla małych zbiorów danych strumienie sekwencyjne są nawet kilka rzędów wielkości szybsze od strumieni równoległych, co nie jest zaskakujące, biorąc pod uwagę spory narzut tworzenia struktur kontrolujących przetwarzanie równoległe. Baza H2 i MySQL dla tak prostego testu mają zbyt duże narzuty, aby konkurować z pozostałymi metodami.
 
+\newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/GroupingAndSumming}
@@ -572,6 +574,7 @@ public class SummingIntegersH2 {
 
     Test \texttt{GroupingAndSumming} w bardzo jasny sposób ukazuje przewagę strumieni równoległych dla większych zbiorów danych i zadań, w których możliwy jest dobry podział podzadań. Strumienie typu \texttt{.parallel} okazują się szybsze od zwykłych pętli, co z jednej strony może dziwić, biorąc pod uwagę wyniki innych testów, ale z drugiej strony pokazuje, dla jakiego typu problemów strumienie są dobrym rozwiązaniem.
 
+\newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/CrossJoinAndFilter}
@@ -581,6 +584,7 @@ public class SummingIntegersH2 {
     Przykład \texttt{CrossJoinAndFilter} dobrze pokazuje, dla jakich typów danych przetwarzanie równoległe nie jest przydatne. Tradycyjne złączenia strumieni nie są zbyt wydajne (propozycja lepszego rozwiązania znajduje się w rozdziale X), tak więc wsparcie się równoległością prowadzi jedynie do niewielkiego zysku wydajnościowego.
 
 
+\newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/FilteringAndCountingIntegers}
@@ -589,6 +593,7 @@ public class SummingIntegersH2 {
 
     Wyniki testu są bardzo podobne do testu \texttt{GroupingAndSumming}, bardzo dobrze widoczna jest przewaga strumieni równoległych nad sekwencyjnymi przy przekroczeniu pewnego rozmiaru danych wejściowych.
 
+\newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/SortingStrings}
@@ -630,7 +635,7 @@ public class SummingIntegersH2 {
 
     Aby umożliwić badanie działania strumieni na zbiorze danych testu TPC, konieczne jest przekształcenie relacyjnego modelu danych w model, który jest możliwy do zaprezentowania w języku Java. Typowe odwzorowanie stosowane w systemach obiektowo-relacyjnych wykorzystuje pola obiektów do reprezentacji kolumn oraz referencje do obiektów do reprezentacji powiązań (kluczy obcych) pomiędzy tabelami. Zastosowano więc powyższy sposób do odwzorowania oryginalnej struktury. W rezultacje wynikowy model obiektowy jest bardzo podobny do modelu relacyjnego. Jedyną różnicą jest powiązanie kolekcji \texttt{Partsupp} z kolekcją \texttt{Lineitem} - zbiory te posiadają klucz główny będący kombinacją dwóch pól. Ze względu na dość powolny proces importu danych i budowania kolekcji, konieczne stało się dodanie do klasy \texttt{Partsupp} nowego pola, będącego złączeniem powyższych dwóch pól. Poza procesem wczytywania danych, złączony klucz główny nie jest wykorzystywany.
 
-    Cała hurtownia danych reprezentowana jest przez obiekt klasy \texttt{Store}, który przechowuje wszystkie kolekcje danych TPC. Przy implementacji importu danych okazało się, że nie ma praktycznej możliwości wykorzystania zwykłych list jako kontenerów danych. Import był bardzo powolny, ponieważ wyszukiwanie encji na podstawie kluczy w zwykłych listach wymaga przejrzenia całej listy. W związku z tym zdecydowano się w większości miejsc na wykorzystanie kolekcji haszującej \texttt{HashMap}, w której jako klucze wykorzystano klucze główne obiektów, ze względu na ich unikalność. Z drugiej strony, nie wykorzystuje się właściwości haszujących przy badaniu wydajności strumieni, ponieważ założeniem jest, by właściwości strumieni były badane w izolacji, bez wpływu wykorzystanych struktur danych.
+    Cała hurtownia danych reprezentowana jest przez obiekt klasy \texttt{Store}, który przechowuje wszystkie kolekcje danych TPC. Przy implementacji importu danych okazało się, że nie ma praktycznej możliwości wykorzystania zwykłych list jako kontenerów danych. Import był bardzo powolny, ponieważ wyszukiwanie encji na podstawie kluczy w zwykłych listach wymaga przejrzenia całej listy. W związku z tym zdecydowano się w większości miejsc na wykorzystanie kolekcji mieszającej \texttt{HashMap}, w której jako klucze wykorzystano klucze główne obiektów, ze względu na ich unikalność. Z drugiej strony, nie wykorzystuje się właściwości mieszających przy badaniu wydajności strumieni, ponieważ założeniem jest, by właściwości strumieni były badane w izolacji, bez wpływu wykorzystanych struktur danych.
 
 
 \subsection{Implementacja zapytań TPC przy użyciu Stream API}
@@ -648,8 +653,9 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 \caption{Tpc1Benchmark}
 \end{figure}
 
-    Zapytanie nr 1 obejmowało filtrowanie i wielokrotne wykorzystanie funkcji agregujących \texttt{sum}, \texttt{avg} i \texttt{count}. Bazy SQL prezentują w tym przypadku większą wydajność, przy czym dla każdej wielkości zbioru testowego baza pamięciowa jest lepsza od bazy dyskowej. Przy większych rozmiarach zbioru danych strumienie wykazują większą liczbę operacji na sekundę, a związane to jest z bardzo łatwym zrównoleglaniem operacji agregujących, w których łączenie pośrednich kontenerów danych w implementacji interfejsu \texttt{Collector} jest bardzo szybkie.
+    Zapytanie nr 1 obejmowało filtrowanie i wielokrotne wykorzystanie funkcji agregujących \texttt{sum}, \texttt{avg} i \texttt{count}. Przy większych rozmiarach zbioru danych strumienie wykazują większą liczbę operacji na sekundę, a związane to jest z bardzo łatwym zrównoleglaniem operacji agregujących, w których łączenie pośrednich kontenerów danych w implementacji interfejsu \texttt{Collector} jest bardzo szybkie. W zakresie baz SQL, baza pamięciowa prezentuje w tym przypadku większą wydajność, przy czym dla każdej wielkości zbioru testowego baza pamięciowa jest lepsza od bazy dyskowej. 
 
+\newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc4Benchmark}
@@ -658,22 +664,25 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 
     Wyniki testów dla zapytania nr 4 prezentują bardzo wyraźnie możliwości silnika SQL w zakresie optymalnej interpretacji zapytania zagnieżdżonego (\textit{inner query}) i jego efektywnego wykonania. W przypadku implementacji strumieniowej, zapytanie zagnieżdżone jest zapisane w postaci funkcji wewnętrznej, która wykazuje te same problemy wydajnościowe, co złączenia kolekcji. 
 
+\newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc6Benchmark}
 \caption{Tpc6Benchmark}
 \end{figure}
 
-    Zapytanie nr 6 jest bardzo podobne do zapytania nr 1, ponieważ także obejmuje jedną tabelę, ale tylko jedną funkcję agregującą. Dla małych zbiorów danych narzut strumieni okazuje się na tyle duży, że bazy SQL wykazują większą wydajność, natomiast im większy zbiór, tym lepszym rozwiązaniem są strumienie. Warto zauważyć ponad dwukrotną przewagę strumieni równoległych nad sekwencyjnymi. Taka przewaga jest zawsze widoczna przy operacjach łatwych do podzielenia i zrównoleglenia wzorcem FJP.
+    Zapytanie nr 6 jest bardzo podobne do zapytania nr 1, ponieważ także obejmuje jedną tabelę, ale tylko jedną funkcję agregującą. Podobnie jak w teście nr 1, w tak prostym przypadku strumienie wykazują większą wydajność, przy czym strumienie równoległe prezentują się znacznie lepiej niż strumienie sekwencyjne. Taka przewaga jest zawsze widoczna przy operacjach łatwych do podzielenia i zrównoleglenia wzorcem FJP.
 
+\newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc12Benchmark}
-\caption{Tpc6Benchmark}
+\caption{Tpc12Benchmark}
 \end{figure}
 
     Test nr 12 pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających.
 
+\newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc14Benchmark}
@@ -684,13 +693,9 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 
 \subsection{Wnioski}
 
-    Wyniki testów referencyjnych nie wskazują jednoznacznie na najlepsze rozwiązanie do użycia w każdym przypadku. Praktycznie każdy test prezentuje cechy wydajnościowe metod dostępu do danych w innym kontekście.
+    Wyniki testów referencyjnych nie wskazują jednoznacznie na najlepsze rozwiązanie do użycia w każdym przypadku. Praktycznie każdy test prezentuje cechy wydajnościowe metod dostępu do danych w innym kontekście. Wiele tłumaczy ściśle relacyjny charakter zbioru testowego TPC. Duża liczba tabel i powiązań między nimi powoduje, że zapytania strumieniowe zawierające złączenia są zwykle znacznie mniej wydajne od prostszych zapytań operujących na jednej tabeli. Prawdopodobnie wykorzystanie innego zbioru danych, charakteryzującego się mniejszą normalizacją i większą nadmiarowością przyniosłoby inne wyniki. 
 
-    TODO więcej, bo przeniesione wyżej
-
-
-
-
+    Zapytania zagnieżdżone są sporym problemem dla przetwarzania strumieniowego. W bazach SQL planista zapytania jest w stanie dokonać analizy kodu i dokonać odpowiednich optymalizacji. W przypadku strumieni żadne tego typu optymalizacje nie występują i nie są możliwe do implementacji w prosty sposób, ponieważ wszystkie funkcje strumieniowe wykonują się w izolacji przez wewnętrzne struktury biblioteki. O ile użycie równoległej odmiany strumieni jest w stanie zwiększyć nieco szybkość przetwarzania, nie są to znaczne przyrosty.
 
 
 \subsection{Porównanie ilości zajętej pamięci}
@@ -863,15 +868,13 @@ Filtering: 5
 
     Wprowadzenie do języka Java mechanizmów programowania funkcyjnego zostało bardzo pozytywnie ocenione przez programistów, mimo iż mechanizmy te obecne były w innych językach programowania ogólnego przeznaczenia znacznie wcześniej. Duży nacisk projektantów platformy na wsteczną kompatybilność i obawy przed wprowadzeniem zmian, które nie okażą się korzystne, a konieczne będzie ich utrzymywanie, powodują, że język ten nie rozwija się w takim tempie, jak inne języki. Przykładowo, postanowiono nie wprowadzać metody \texttt{Iterable.stream} konwertującej obiekt wspierający protokół iteracji Java na strumień, mimo iż nie można wskazać żadnych przeciwwskazań do jej istnienia, a i można wskazać zastępcze rozwiązania, które mogłyby być wprowadzone bez większych zmian do API.
 
-    TODO fragment porównawczy Stream-SQL z jooq blog
     Jednym z najczęściej występujących zarzutów odnośnie Stream API jest brak odpowiedzi na istniejące w języku C\# i platformie .NET narzędzie LINQ-to-SQL. Pozwala ono na dostęp do danych znajdujących się w bazie relacyjnej za pomocą specjalniej składni kodu C\#. Strumienie umożliwiają tworzenie dość złożonych kombinacji operacji, natomiast wszystkie te operacje zachodzą w pamięci maszyny wirtualnej. Nie jest możliwe tłumaczenie metod klasy \texttt{Stream} na słowa kluczowe zapytania SQL. Taką możliwość dają dodatkowe biblioteki, np. JOOQ bądź JPA Criteria API, ale dostępne one były jeszcze przed wydaniem Java 8. 
 
     Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie przeładowywać interfejsu biblioteki. Znaczy to, iż popularne operatory funkcyjne, znane z~innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcje, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal funkcjonalność dorównująca zewnętrznym bibliotekom.
 
 
-\section{Proponowane rozszerzenia}
 
-\subsection{Strumieniowy operator złączenia} \label{proposal}
+\section{Strumieniowy operator złączenia} \label{proposal}
 
     Jedną z najczęściej wykonywanych operacji na relacyjnej bazie danych jest łączenie tabel. W języku SQL dostępne są różne typy złączeń (\texttt{JOIN}, \texttt{INNER JOIN}, \texttt{LEFT/RIGHT JOIN} i inne), które wykorzystywane są w różnych sytuacjach. Relacyjne bazy danych posiadają z reguły znaczne optymalizacje w zakresie wykonywania takich operacji, ponieważ wykorzystywane są one bardzo często - ważną zaletą modelu relacyjnego jest podział na tabele połączone ze sobą kluczami i więzami referencyjnymi. Aby osiągnąć wymaganą wydajność, w większości rozwiązań kolumny będące kluczami głównymi otrzymują automatycznie, przy ich tworzeniu, indeks.
 
