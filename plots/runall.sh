@@ -6,7 +6,7 @@ for name in CrossJoinAndFilter FilteringAndCountingIntegers GroupingAndSumming S
 cd ..
 ./gradlew clean jmh -Pinclude="${name}.*"
 cd plots
-./test.py ../build/reports/jmh/results.txt log "${name}"
+./plotgen.py ../build/reports/jmh/results.txt log "${name}"
 
 done
 
@@ -15,6 +15,6 @@ for name in Tpc1Benchmark Tpc4Benchmark Tpc6Benchmark Tpc12Benchmark Tpc14Benchm
 cd ..
 ./gradlew clean jmh -Pinclude="${name}.*"
 cd plots
-./test.py ../build/reports/jmh/results.txt lin "${name}"
+./plotgen.py ../build/reports/jmh/results.txt lin "${name}"
 
 done

@@ -867,6 +867,7 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 \centering
 \includegraphics[width=13cm]{plots/memory}
 \caption{Tpc14Benchmark}
+    \label{fig:memoryconsumption}
 \end{figure}
     
 
@@ -1048,5 +1049,44 @@ Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości kluc
         https://stackoverflow.com/questions/17960656/is-it-possible-to-use-java-8-streams-api-for-asynchronous-processing/18826615\#comment36545451\_18826615
 
 \end{thebibliography}
+
+\appendix
+\section{Dokumentacja środowiska badawczego}
+
+    Środowisko badawcze, przygotowane na potrzeby niniejszej pracy, składa się z kilku części: zawiera testy referencyjne operujące na danych syntetycznych, pełny kod narzędzia \texttt{dbgen}, testy referencyjne operujące na zbiorze danych TPC oraz skrypty do generowania wykresów i automatyzacji procesu testowania. Do poprawnego wykonywania testów powinny być spełnione następujące wymagania:
+
+    
+\begin{itemize}
+    \item pamięć RAM w ilości zależnej od objętości wczytywanych danych testowych (ilość pamięci zajmowana przez zbiór TPC zaprezentowana została na rys. \ref{fig:memoryconsumption})
+    \item maszyna wirtualna Java i środowisko deweloperskie JRE w wersji 8
+    \item kompilator języka C
+    \item do wykonywania testów na bazie MySQL - system bazodanowy MySQL, działający na domyślnym porcie z użytkownikiem i hasłem \texttt{root}
+    \item do generowania wykresów - interpreter języka Python 3 i zainstalowana biblioteka matplotlib
+\end{itemize}
+
+    Kod narzędzia \texttt{dbgen} został włączony w całości do projektu środowiska badawczego. Zbiór TPC o określonej wielkości jest tworzony na nowo za każdym uruchomieniem testu TPC. Import danych testowych w celu badania wydajności strumieni wykonywany jest przy pomocy klasy \texttt{Store} i odpowiadającym tabelom klas odwzorowujących. Ładowanie danych do bazy H2 odbywa się bezpośrednio poprzez funkcję \texttt{RUNSCRIPT} i skrypt tworzący odpowiednie tabele, natomiast baza MySQL zapełniana jest zewnętrznym narzędziem \texttt{mysqlimport}.
+
+    W pliku konfiguracyjnym \texttt{build.gradle} możliwe jest zdefiniowanie kilku parametrów narzędzia JMH, między innymi liczba grup iteracji testu, opcje tworzenia nowej instancji maszyny wirtualnej Java przy każdym teście oraz ilość przydzielonej jej pamięci. Należy mieć na uwadze, że przydzielenie zbyt małej ilości pamięci z dużym prawdopodobieństwem da nierzetelne wyniki, ze względu na wzmożoną aktywność odśmiecacza pamięci, możliwe jest też przepełnienie się pamięci i przerwanie działania. 
+
+    Klasy testowe znajdują się w folderze \texttt{src/jmh/java/masterthesis}. Przykładowo, aby uruchomić test referencyjny \texttt{SummingIntegers} badający strumienie należy wywołać następujące polecenie:
+
+\begin{verbatim}
+$ ./gradlew clean jmh -Pinclude='SummingIntegersStreams'
+\end{verbatim}
+
+    Aby uruchomić testy sumowania liczb dla wszystkich metod dostępu do danych, należy użyć wyrażenia regularnego, które odpowiada wszystkim klasom dla danej metody:
+
+\begin{verbatim}
+$ ./gradlew clean jmh -Pinclude='SummingIntegers.*'
+\end{verbatim}
+
+    Po przeprowadzeniu testu, raport wynikowy zostanie wyświetlony na ekranie, a także zapisany do pliku \texttt{results.txt} w folderze \texttt{build}.
+
+    Wszystkie wielkości zbiorów testowych zaszyte są w odpowiednich klasach testowych, w adnotacjach \texttt{@Param}. Możliwe jest wybranie dowolnej wielkości. Dodatkowo, dostarczony został skrypt \texttt{runall.sh} wykonujący wszystkie istniejące testy i automatycznie generujący wykresy na podstawie raportów. W celu wygenerowania pojedynczego wykresu na podstawie pliku raportu, należy wywołać polecenie:
+
+\begin{verbatim}
+$ ./plotgen.py ../build/reports/jmh/results.txt log "NazwaWykresu"
+\end{verbatim}
+
 
 \end{document}
