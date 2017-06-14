@@ -101,18 +101,11 @@
 \label{fig:dbstats}
 \end{figure}
 
-    Bazy danych działające całkowicie w pamięci RAM mogą być wykorzystywane w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, pamięć cache wprowadzona na poziomie aplikacji) nie spełniają wymagań biznesowych.
+    Bazy danych działające całkowicie w pamięci RAM mogą być wykorzystywane w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, pamięć cache wprowadzona na poziomie aplikacji) nie spełniają wymagań biznesowych. TODO literatura z in-mem-sql
 
-      Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania, co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM (\textit{Object Relational Mapping}) możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów. Powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i pamięciowe obsługuje się praktycznie w ten sam sposób. 
+      Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania, co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM (ang. \textit{Object Relational Mapping}) TODO literatura możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów. Powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i pamięciowe obsługuje się praktycznie w ten sam sposób. 
 
-\subsection{Wybór implementacji}
-
-    Jako iż porównanie baz danych i strumieni w Java 8 powinno być miarodajne, konieczne jest wybranie do badań baz pamięciowych działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB (HyperSQL). Są one powszechnie stosowane w szkieletach nowo tworzonych aplikacji Java, pozwalając na sprawne rozpoczęcie pierwszego etapu wytwarzania oprogramowania. Jeśli wykorzystywane jest narzędzie typu ORM, pozwalające na generowanie schematu bazy danych na podstawie klas domenowych aplikacji, możliwe jest tworzenie pustej bazy danych o określonym schemacie przy każdym restarcie aplikacji. 
-    
-    Zdecydowano się na wybór bazy H2 jako obiektu badań wydajnościowych. Jest ona wykorzystywana jako domyślne źródło danych w sprawdzonych, powszechnie wykorzystywanych szkieletach aplikacji, takich jak Spring Boot czy Grails. Autorzy H2 na bieżąco poprawiają błędy i tworzą nowe wersje, z których ostatnia została wydana w kwietniu 2017 \cite{h2maven}. Rozwiązanie to implementuje w zdecydowanej większości standard ANSI-SQL wraz z dodatkowymi rozszerzeniami, jednakże pewne niewielkie braki nie powodują problemów w przypadku niniejszej pracy, ze względu na zastosowanie najbardziej podstawowych elementów języka SQL przy badaniu wydajności.
-
-    W ramach testów wydajnościowych zbadano także bazę dyskową MySQL, wykonując na niej te same badania, co na bazie H2. Uczyniono to między innymi, aby móc sprawdzić poprawność wyników zapytań pomiędzy bazami - błędnie skonstruowane zapytanie mogłoby niezauważalnie wykazywać niepoprawne szybkości wykonania. Drugim powodem wykonania dodatkowych testów jest chęć sprawdzenia, czy rozwiązania SQL działające w pamięci może stanowić konkurencję dla sprawdzonych, dyskowych rozwiąząń SQL.
-
+      TODO coś o konstrukcji SQL
 
 
 \subsection{Stream API}
@@ -383,6 +376,7 @@ main
 \end{verbatim}
 
     Warto zwrócić uwagę, że wśród wątków wykonawczych znajduje się też wątek \texttt{main}, czyli wątek inicjujący operację strumieniową. Jako iż wykonywanie się ciągu operacji strumieniowych jest blokujące (nie jest asynchroniczne, o ile nie wykorzystuje się FJP ręcznie), dobrym rozwiązaniem jest wykorzystanie do obliczeń także wątku inicjującego. Jeśli nie jest to oczekiwane zachowanie, istnieje możliwość ręcznego utworzenia instancji puli wątków \texttt{ForkJoinPool} i przekazanie zadania w~postaci funkcji lambda \texttt{Callable<T>}. W takim podejściu możliwe jest też zdefiniowanie liczby dostępnych wątków.
+
 \section{Porównanie przetwarzania strumieniowego i zapytań SQL}
 
     Pomiędzy wykonywaniem operacji strumieniowych, a wykonywaniem zapytań SQL w pamięci występuje bardzo dużo różnic, zwłaszcza w zakresie konstruowania zapytań i sposobu ich realizacji, pomimo pozornie podobnej zasady działania i efektu końcowego. Celem obu podejść jest uzyskanie wygodnego i względnie szybkiego wykonywania zapytań, natomiast różnice w implementacji mają znaczący wpływ na te kwestie.
@@ -400,12 +394,40 @@ main
 
     Bazy pamięciowe wykorzystują wewnętrzne struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i zabezpieczonym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty ukrytych klas implementacyjnych z pakietu \texttt{org.h2.*} - rysunek \ref{fig:jvmmemory}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
 
+\subsection{Język dziedzinowy a język ogólnego przeznaczenia}
 
-    \subsection{Odpowiedniki operacji}
+    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (\textit{stored procedures}). 
+   
+    Przy użyciu Stream API możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach, interwałach czasowych i strefach czasowych. Funkcje SQL są ograniczone w~tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
+
+    Za przykład niech posłuży zadanie znalezienia daty pierwszego poniedziałku aktualnego miesiąca. Takie problemy pojawiają się często przy tworzeniu różnych statystyk na podstawie danych historycznych. W kodzie \ref{date} zaprezentowany jest przykład rozwiązania powyższego problemu, odpowiednio przy użyciu MySQL i Stream API.
+    
+
+\begin{lstlisting}[label=date, caption=Problem znalezienia pierwszego poniedziałku w miesiącu]
+set @firstday = DATE_ADD(
+  LAST_DAY(
+    DATE_SUB(CURDATE(), interval 30 day)
+  ),
+  interval 1 day
+);
+SELECT ADDDATE(
+  @firstday,
+  MOD((9 - DAYOFWEEK(@firstday)), 7))
+as first_monday;
+
+
+LocalDateTime.now()
+  .with(dayOfWeekInMonth(1, DayOfWeek.MONDAY));
+\end{lstlisting}
+
+Można od razu zauważyć, że kod SQL jest dość nieczytelny i zawiera wiele szczegółów technicznych, które nie są istotne dla postawionego problemu. Wprowadzone w Java 8 nowe mechanizmy obsługi dat sprawdzają się w takich przypadkach znacznie lepiej, zapewniając bardzo deklaratywny kod i bezpieczne, statyczne typowanie.
+
+
+\subsection{Odpowiedniki operacji}
 
     Stream API umożliwia wykonywanie wielu operacji znanych z języka SQL. Część z nich posiada dokładne odpowiedniki (np. ograniczanie ilości czy filtrowanie), natomiast niektóre wymagają częściowo ręcznej implementacji (złączenie albo unia). Należy zauważyć, iż mimo istnienia pewnej wspólnej bazy pojęciowej, sposób przekazywania parametrów do operacji może być zupełnie inny. Przykładowo, aby wykonać sortowanie w SQL na podstawie kilku kolumn, wystarczy wymienić klucze sortowania po przecinku, przykładowo w postaci \texttt{ORDER BY col1, col2}. Silnik bazodanowy jest w stanie wewnętrznie zinterpretować takie zapytanie. Do sortowania strumieni konieczne jest uzyskanie obiektu typu \texttt{Comparator}, który przekazany zostanie do metody sortującej, a utworzyć można go np. poprzez \texttt{Comparator.comparing(e -> e.col1).thenComparing(e -> e.col2)}. Obiekt taki jest całkowicie odseparowany od strumienia i może być tworzony w dowolnym miejscu w kodzie.
 
-
+TODO coś z algebry relacji np. do tabelki + literatura (ullman?) tabela pozycjonowana w dobrym miejscu
 
 \begin{table}[t]
     \label{nazwa odnośnika, która potem użyjemy do cytowania tabeli}
@@ -434,7 +456,7 @@ main
     \end{center}
 \end{table}
 
-\section{Strumieniowy operator złączenia} \label{proposal}
+\subsection{Strumieniowy operator złączenia} \label{proposal}
 
     Jedną z najczęściej wykonywanych operacji na relacyjnej bazie danych jest łączenie tabel. W języku SQL dostępne są różne typy złączeń (\texttt{JOIN}, \texttt{INNER JOIN}, \texttt{LEFT/RIGHT JOIN} i inne), które wykorzystywane są w różnych sytuacjach. Relacyjne bazy danych posiadają z reguły znaczne optymalizacje w zakresie wykonywania takich operacji, ponieważ wykorzystywane są one bardzo często - ważną zaletą modelu relacyjnego jest podział na tabele połączone ze sobą kluczami i więzami referencyjnymi. Aby osiągnąć wymaganą wydajność, w większości rozwiązań kolumny będące kluczami głównymi otrzymują automatycznie, przy ich tworzeniu, indeks.
 
@@ -529,40 +551,13 @@ innerJoinHashmaps(
 
 Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości klucza w jednej z kolekcji. Porównanie szybkości wykonywania się operacji złączenia na zbiorze danych TPC zaprezentowane jest na rysunku \ref{fig:naturaljoin}.
 
+TODO przenieść to do testów TPC-h
 \begin{figure}[H]
     \centering
     \includegraphics[width=13cm]{plots/NaturalJoin}
     \caption{Porównanie wydajności złączenia naturalnego}
     \label{fig:naturaljoin}
 \end{figure}
-
-\subsection{Język dziedzinowy a język ogólnego przeznaczenia}
-
-    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (\textit{stored procedures}). 
-   
-    Przy użyciu Stream API możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach, interwałach czasowych i strefach czasowych. Funkcje SQL są ograniczone w~tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
-
-    Za przykład niech posłuży zadanie znalezienia daty pierwszego poniedziałku aktualnego miesiąca. Takie problemy pojawiają się często przy tworzeniu różnych statystyk na podstawie danych historycznych. W kodzie \ref{date} zaprezentowany jest przykład rozwiązania powyższego problemu, odpowiednio przy użyciu MySQL i Stream API.
-    
-
-\begin{lstlisting}[label=date, caption=Problem znalezienia pierwszego poniedziałku w miesiącu]
-set @firstday = DATE_ADD(
-  LAST_DAY(
-    DATE_SUB(CURDATE(), interval 30 day)
-  ),
-  interval 1 day
-);
-SELECT ADDDATE(
-  @firstday,
-  MOD((9 - DAYOFWEEK(@firstday)), 7))
-as first_monday;
-
-
-LocalDateTime.now()
-  .with(dayOfWeekInMonth(1, DayOfWeek.MONDAY));
-\end{lstlisting}
-
-Można od razu zauważyć, że kod SQL jest dość nieczytelny i zawiera wiele szczegółów technicznych, które nie są istotne dla postawionego problemu. Wprowadzone w Java 8 nowe mechanizmy obsługi dat sprawdzają się w takich przypadkach znacznie lepiej, zapewniając bardzo deklaratywny kod i bezpieczne, statyczne typowanie.
 
 
 \subsection{Proces wykonywania zapytania SQL}
@@ -626,10 +621,10 @@ List<Pair<String, Double>> result = StreamUtils.innerJoin(
 
     Pod względem liczby linii kodu oraz czytelności przykład ten prezentuje się mniej korzystnie. W celu wyrażenia tego samego zapytania w Stream API konieczne jest wykorzystanie kilku ręcznych mechanizmów. Strumienie nie wspierają złączeń kolekcji, tak więc konieczne jest ręczne jego wykonanie (propozycja implementacji znajduje się w rozdziale \ref{proposal}). Wynikiem złączenia jest lista par, na której odbywa się filtrowanie, a następnie grupowanie. Aby pogrupować elementy strumienia na podstawie kilku właściwości, konieczne jest ponowne użycie klasy \texttt{ImmutablePair<T1, T2>}, której obiekty reprezentują klucz mapy, na podstawie którego odbywa się grupowanie. Jako iż klasa \texttt{Map} nie udostępnia bezpośrednio możliwości tworzenia strumieni, konieczne jest wykorzystanie metody \texttt{Map.entrySet} w celu uzyskania zbioru par klucz-wartość, na którym ponownie wywoływana jest metoda tworząca strumień. Na koniec z utworzonych grup wyłuskiwane są wymagane pola (imię klienta oraz suma cen zamówień) i zbierane do listy.
 
-    Strumień, będąc abstrakcyjną formą reprezentacji źródła danych, tworzony może być na kilka różnych sposobów, ale sposoby te nie wpływają semantycznie na proces przetwarzania danych. Zwykle strumień tworzony jest na podstawie kolekcji - przy konsumowaniu elementów, kolekcja dostarcza elementy wykonując wewnętrzną iterację (\textit{internal iteration}), która jest procesem ukrytym przed programistą. Inne sposoby tworzenia strumieni, takie jak generowanie ich w locie, wczytywanie z dysku bądź z sieci, nie są zbyt praktyczne. Związane jest to z konstrukcją wewnętrzną strumieni, które działają na zasadzie `pytania o kolejny element` (\textit{pull-based}). Decyzją implementacyjną projektantów Stream API było wykorzystanie modelu przetwarzania ciągłego, w którym to strumień wykonuje akcję pobrania następnego elementu. W~związku z tym, nie jest możliwe (przynajmniej w domyślnej formie) efektywne asynchroniczne dostarczanie nowych elementów, ponieważ każda operacja pobrania elementu jest operacją blokującą, wywoływaną po zakończeniu przetwarzania poprzedniego elementu. Model odwrotny do powyższego, tzw. model \textit{push-based}, wykorzystywany np. w bibliotekach RxJava bazujących na wzorcu Observable, ma lepsze zastosowanie w takich przypadkach. Brian Goetz, zapytany o możliwości przetwarzania asynchronicznego w domyślnych strumieniach Java 8 stwierdził \cite{goetz}:
+    Strumień, będąc abstrakcyjną formą reprezentacji źródła danych, tworzony może być na kilka różnych sposobów, ale sposoby te nie wpływają semantycznie na proces przetwarzania danych. Zwykle strumień tworzony jest na podstawie kolekcji - przy konsumowaniu elementów, kolekcja dostarcza elementy wykonując wewnętrzną iterację (\textit{internal iteration}), która jest procesem ukrytym przed programistą. Inne sposoby tworzenia strumieni, takie jak generowanie ich w locie, wczytywanie z dysku bądź z sieci, nie są zbyt praktyczne. Związane jest to z konstrukcją wewnętrzną strumieni, które działają na zasadzie `pytania o kolejny element` (\textit{pull-based}). Decyzją implementacyjną projektantów Stream API było wykorzystanie modelu przetwarzania ciągłego, w którym to strumień wykonuje akcję pobrania następnego elementu. W~związku z tym, nie jest możliwe (przynajmniej w domyślnej formie) efektywne asynchroniczne dostarczanie nowych elementów, ponieważ każda operacja pobrania elementu jest operacją blokującą, wywoływaną po zakończeniu przetwarzania poprzedniego elementu. Model odwrotny do powyższego, tzw. model \textit{push-based}, wykorzystywany np. w bibliotekach RxJava bazujących na wzorcu Observable, ma lepsze zastosowanie w takich przypadkach. Brian Goetz, zapytany o możliwości przetwarzania asynchronicznego w domyślnych strumieniach Java 8 stwierdził:
 
 \begin{quote}
-    ``The design center for Streams is mostly about data that can be accessed with no latency (either from data structures or generating functions); the design center for Rx is about infinite streams of events which may arrive asynchronously''
+    ``The design center for Streams is mostly about data that can be accessed with no latency (either from data structures or generating functions); the design center for Rx is about infinite streams of events which may arrive asynchronously \cite{goetz}''
 
     ``Zamiarem architektonicznym Stream API było przetwarzanie danych, które są dostępne bez żadnych opóźnień (pochodzących ze struktur danych bądź funkcji generujących), celem Rx jest obsługa nieskończonych strumieni zdarzeń, które mogą pojawiać się asynchronicznie''
     (\textit{tłumaczenie autora})
@@ -703,7 +698,7 @@ Filtering: 5
 
     Ostatnim krokiem wykonywania się zapytania strumieniowego jest wykonanie operacji terminalnej, która wyznacza ostateczny wynik zapytania. Wystąpienie takiej operacji powoduje wykonanie wszystkich operacji pośrednich. 
 
-\subsection{Weryfikacja poprawności składni i format wynikowy}
+\subsection{Weryfikacja poprawności składni i postać wyników zapytania}
 
     Przy wykonywaniu zapytania SQL z poziomu API JDBC nie jest wykonywane żadne sprawdzenie poprawności zapytania czy jego składni w czasie kompilacji. Zapytanie wysyłane jest jako zwykły ciąg znaków do serwera bazodanowego, który następnie odczytuje zapytanie, przystępując do jego interpretacji i wykonania. W związku z tym niemożliwe jest zapewnienie, czy dana tabela istnieje, albo czy dana funkcja SQL istnieje w danym oprogramowaniu bazy danych. Istnieją co prawda rozwiązania typu ORM, które chronią programistę przed niewłaściwym wykorzystaniem obiektu odwzorowanego na tabelę, albo edytory programistyczne z integracjami z serwerami baz, które umożliwiają przeskanowanie istniejących symboli (nazw tabel, kolumn itp.) i skorygowanie programisty, natomiast są to rozwiązania zewnętrzne, działające poza językiem Java. Przetwarzanie strumieniowe odbywa się w całości w języku Java, który jest silnie typowany, przez co niewłaściwe wykorzystanie konstrukcji języka zostanie automatycznie dostrzeżone przez kompilator.
     
@@ -727,6 +722,8 @@ Filtering: 5
 
     Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie przeładowywać interfejsu biblioteki. Znaczy to, iż popularne operatory funkcyjne, znane z~innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcje, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal funkcjonalność dorównująca zewnętrznym bibliotekom.
 
+    TODO tabelka SQL vs streams, albo podpunkty
+
 \section{Środowisko badawcze i badania na danych syntetycznych}
 
     Aby zebrane wyniki były jak najbardziej miarodajne, konieczne jest utworzenie solidnego środowiska testowego, w którym możliwe będzie wykonanie wszystkich potrzebnych badań. Jako iż elementem badań wydajności będą fragmenty kodu, pożądane jest, by pomiary czasowe odbywały się w miarę możliwości w sposób zautomatyzowany. Po wykonaniu pomiarów czasowych i wygenerowaniu raportu, należy zaprezentować uzyskane wyniki w postaci wykresów.
@@ -737,7 +734,14 @@ Filtering: 5
 
     Przy porównywaniu dwóch zupełnie różnych metod dostępu do danych, konieczne jest ustalenie postaci wynikowej pojedynczego eksperymentu. W przypadku języka SQL i metod JDBC wynik zapytania do bazy danych reprezentowany jest przez obiekt \texttt{ResultSet}, który udostępnia metody do poruszania się po wynikowych wierszach i wyciągania pojedynczych kolumn. W przypadku Stream API, rezultat zapytania dostępny jest od razu w formie obiektów standardowych kolekcji języka Java, takich jak \texttt{List<T>} czy \texttt{Map<K,V>}. W związku z tym, aby zapewnić sprawiedliwe porównanie obu metod, po wykonaniu zapytania SQL konieczne jest rozpakowanie obiektu \texttt{ResultSet} i przeniesienie danych do kolekcji Javy, aby uzyskać wynik w tej samej postaci.
 
+
 \subsection{Budowa środowiska badawczego}
+
+    Jako iż porównanie baz danych i strumieni w Java 8 powinno być miarodajne, konieczne jest wybranie do badań baz pamięciowych działających w środowisku maszyny wirtualnej Javy. Dwoma najpopularniejszymi rozwiązaniami są H2 oraz HSQLDB (HyperSQL). Są one powszechnie stosowane w szkieletach nowo tworzonych aplikacji Java, pozwalając na sprawne rozpoczęcie pierwszego etapu wytwarzania oprogramowania. Jeśli wykorzystywane jest narzędzie typu ORM, pozwalające na generowanie schematu bazy danych na podstawie klas domenowych aplikacji, możliwe jest tworzenie pustej bazy danych o określonym schemacie przy każdym restarcie aplikacji. 
+    
+    Zdecydowano się na wybór bazy H2 jako obiektu badań wydajnościowych. Jest ona wykorzystywana jako domyślne źródło danych w sprawdzonych, powszechnie wykorzystywanych szkieletach aplikacji, takich jak Spring Boot czy Grails. Autorzy H2 na bieżąco poprawiają błędy i tworzą nowe wersje, z których ostatnia została wydana w kwietniu 2017 \cite{h2maven}. Rozwiązanie to implementuje w zdecydowanej większości standard ANSI-SQL wraz z dodatkowymi rozszerzeniami, jednakże pewne niewielkie braki nie powodują problemów w przypadku niniejszej pracy, ze względu na zastosowanie najbardziej podstawowych elementów języka SQL przy badaniu wydajności.
+
+    W ramach testów wydajnościowych zbadano także bazę dyskową MySQL, wykonując na niej te same badania, co na bazie H2. Uczyniono to między innymi, aby móc sprawdzić poprawność wyników zapytań pomiędzy bazami - błędnie skonstruowane zapytanie mogłoby niezauważalnie wykazywać niepoprawne szybkości wykonania. Drugim powodem wykonania dodatkowych testów jest chęć sprawdzenia, czy rozwiązania SQL działające w pamięci może stanowić konkurencję dla sprawdzonych, dyskowych rozwiąząń SQL.
 
     JMH (\textit{Java Microbenchmark Harness}) jest najpopularniejszym narzędziem służącym do badania wydajności czasowej krótkich fragmentów kodu (\textit{microbenchmarking}). Typowe metody pomiaru czasu w kodzie maszyny wirtualnej Javy nie są dokładne ani odporne na błędy, przykładowo często stosowane i zalecane wywołanie \texttt{System.currentTimeMillis} nie jest odporne na zmiany czasu systemowego w trakcie wykonywania badania i ma różną dokładność na różnych systemach operacyjnych, natomiast \texttt{System.nanoTime} nie jest bezpieczna wątkowo na poziomie procesora, przez co wykonywanie się zadań testowych na kilku rdzeniach procesora może powodować mylące wyniki. Co więcej, ręczne wykonywanie pomiarów jest dość żmudne i wymagałoby stworzenia własnego narzędzia. Zdecydowano się więc na wykorzystanie narzędzia gotowego. Przy użyciu JMH możliwe jest proste definiowanie metod, których wydajność (wykonania na sekundę) będzie badana, możliwe jest określenie ilości iteracji, ustalanie zmienych parametrów (np. ilość wierszy danych testowych). Raport wynikowy zawiera szczegółowe informacje na temat ilości wykonań metody, wariancje czasów oraz inne statystyki, na podstawie których możliwe jest wyciągnięcie potrzebnych wniosków.
 
@@ -879,13 +883,13 @@ public class SummingIntegersH2 {
 
 \subsection{Charakterystyka testu referencyjnego TPC-H}
 
-    Generator danych testowych \texttt{dbgen} jest konsolowym programem, służącym do generowania zbiorów danych testowych TPC-H. Schemat bazy danych zaprezentowany jest na rysunku \ref{fig:tpcschema}. Jest to typowa hurtownia danych, gromadząca informacje o produktach, klientach, dostawcach i zamówieniach. Dokładny sens biznesowy wygenerowanych danych nie jest zbyt istotny w rozważaniach wydajnościowych, na potrzeby niniejszej pracy zakłada się ich poprawność w sensie spójności referencyjnej. Ważny jest też fakt, że dane te w przybliżeniu modelują możliwą do zaistnienia w rzeczywistości sytuację. Program \texttt{dbgen} pozwala na zdefiniowanie wielkości wygenerowanego zbioru, procentowo względem zbioru referencyjnego (100\%) o ściśle zdefiniowanym rozmiarze.  Ze względu na praktyczne ograniczenia platformy testowej (16 GiB RAM), konieczne było ograniczenie maksymalnej wielkości zbioru do ok. 20-30\%, zależnie od przypadku testowego. 
+    Generator danych testowych \texttt{dbgen} jest konsolowym programem, służącym do generowania zbiorów danych testowych TPC-H. Schemat bazy danych zaprezentowany jest na rysunku \ref{fig:tpcschema}. Jest to typowa hurtownia danych, gromadząca informacje o produktach, klientach, dostawcach i zamówieniach. Dokładny sens biznesowy wygenerowanych danych nie jest zbyt istotny w rozważaniach wydajnościowych, na potrzeby niniejszej pracy zakłada się ich poprawność w sensie spójności referencyjnej. Ważny jest też fakt, że dane te w przybliżeniu modelują możliwą do zaistnienia w rzeczywistości sytuację. Program \texttt{dbgen} pozwala na zdefiniowanie wielkości wygenerowanego zbioru, procentowo względem zbioru referencyjnego (100\%) o ściśle zdefiniowanym rozmiarze. Ze względu na praktyczne ograniczenia platformy testowej (16 GiB RAM), konieczne było ograniczenie maksymalnej wielkości zbioru do ok. 20-30\%, zależnie od przypadku testowego. 
 
     Drugą częścią TPC jest zbiór 22 zapytań testowych, z których każde odpowiada na pewne pytanie biznesowe, a na postawie odpowiedzi możliwe jest wspieranie decyzji biznesowych. Różnią się one znacznie stopniem skomplikowania (pod względem ogólnej złożoności kodu SQL) i średnim czasem wykonania. Prawidłowe wyniki wzorcowe są także udostępniane przez TPC, niestety jedynie dla zbioru danych o~wielkości 100\%. Część zapytań można jednak zwalidować mimo tego, jeśli bazują one na typowych agregacjach typu suma, średnia czy ilość - jako iż generowane dane wykazują się rozkładem jednostajnym, możliwe jest przeskalowanie sum i zliczeń względem współczynnika wielkości zbioru, jak i odpowiednie zinterpretowanie średnich. Nie jest to oczywiście zbyt pewny sposób, tak więc do środowiska badawczego wprowadzono zbiór testów jednostkowych, które sprawdzają, czy wyniki uzyskane z wykonania zapytania na wszystkich systemach bazodanowych są identyczne.
 
 \begin{figure}
 \centering
-\includegraphics[width=11cm]{tpc-schema.png}
+\includegraphics[width=14cm]{tpc-schema.png}
 \caption{Schemat bazy danych TPC-H}
 \label{fig:tpcschema}
 \end{figure}
@@ -923,6 +927,7 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 \caption{Tpc4Benchmark}
 \end{figure}
 
+TODO wytłumaczyć nisko punkty
     Wyniki testów dla zapytania nr 4 prezentują bardzo wyraźnie możliwości silnika SQL w zakresie optymalnej interpretacji zapytania zagnieżdżonego (\textit{inner query}) i jego efektywnego wykonania. W przypadku implementacji strumieniowej, zapytanie zagnieżdżone jest zapisane w postaci funkcji wewnętrznej, która wykazuje te same problemy wydajnościowe, co złączenia kolekcji. 
 
 \newpage
@@ -941,6 +946,7 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 \caption{Tpc12Benchmark}
 \end{figure}
 
+TODO wytłumaczyć nisko punkty
     Test nr 12 pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających.
 
 \newpage
@@ -952,7 +958,7 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 
     Ostatni test nr 14 potwierdza znakomitą wydajność bazy MySQL w zakresie operacji łączenia tabel, przy czym baza H2 jest jedynie kilka razy wolniejsza. Funkcje agregujące mogą być bardzo efektywnie wykonywane w przypadku jednoczesnego złączenia tabel.
 
-\subsection{Podsumowanie wyników testów}
+\subsection{Podsumowanie wyników testów TPC}
 
     Wyniki testów referencyjnych nie wskazują jednoznacznie na najlepsze rozwiązanie do użycia w każdym przypadku. Praktycznie każdy test prezentuje cechy wydajnościowe metod dostępu do danych w innym kontekście. Wiele tłumaczy ściśle relacyjny charakter zbioru testowego TPC. Duża liczba tabel i powiązań między nimi powoduje, że zapytania strumieniowe zawierające złączenia są zwykle znacznie mniej wydajne od prostszych zapytań operujących na jednej tabeli. Prawdopodobnie wykorzystanie innego zbioru danych, charakteryzującego się mniejszą normalizacją i większą nadmiarowością przyniosłoby inne wyniki. 
 
@@ -980,6 +986,7 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 
 \subsection{Wnioski}
 
+TODO Celem pracy było ... Cel został osiągnięty. Przeprowadzono (przepisać coś ze wstępu).
     Stream API w połączeniu z wyrażeniami lambda jest bardzo przydatną nowością wprowadzoną w Javie 8. Wprowadzone niewielkie części paradygmatu funkcyjnego pozwalają na pisanie wydajnego i łatwo testowalnego kodu. Strumienie są bardzo dobrą alternatywą dla tradycyjnych elementów składni języka, takich jak pętle i~warunki, które można zastąpić metodami Stream API. Z drugiej strony, strumienie sprawdzają się najlepiej na pojedynczych kolekcjach jednorodnych obiektów, łączenie wielu kolekcji charakteryzujących się typowo relacyjną strukturą nie jest wspierane domyślnie i okazuje się, jak wykazały badania, znacznie utrudnione. Tworzenie skomplikowanych sekwencji operacji, zwłaszcza własnoręcznie definiowanych, jest zdecydowanie bardziej skomplikowane i wymaga znacznie więcej kodu niż w języku SQL, który do takich operacji został stworzony. Możliwe jest osiągnięcie znacznych szybkości wykonywania zapytań SQL w pamięci, natomiast należy mieć na uwadze, że wydajność nie jest najważniejszą rzeczą w systemie bazodanowym. Należy zwrócić uwagę na wsparcie producentów, narzędzia wspomagające (np. analizatory planu zapytań) i bezpieczeństwo (kopie zapasowe, metody replikacji), ponieważ w~ogólnym rozrachunku elementy te mogą mieć większe znaczenie.
 
     Strumienie doskonale nadają się do prostego, równoległego przetwarzania danych, pod warunkiem, że całe zadanie daje się łatwo rekurencyjnie podzielić na mniejsze podzadania, a szybkość wykonywania zależna jest od mocy obliczeniowej procesora. W typowych przypadkach sama zmiana strumienia z domyślnego sekwencyjnego na równoległy może przynieść kilkukrotny wzrost wydajności. Należy jednak zwrócić uwagę, iż strumienie równoległe mają pewien narzut, który, w przypadku małych zbiorów danych, bądź zbyt małej ilości pracy do wykonania w podzadaniu, może okazać się większy, niż narzut strumieni sekwencyjnych. Warto więc zawsze badać, czy próba optymalizacji na pewno przyniesie oczekiwane efekty.
