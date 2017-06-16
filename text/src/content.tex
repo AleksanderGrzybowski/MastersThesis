@@ -13,7 +13,7 @@
 \usepackage{float}
 \usepackage{indentfirst}
 \usepackage[nottoc,notlot,notlof]{tocbibind}
-
+\usepackage{varwidth}
 \setlength\parindent{1cm}
 
 \usepackage{listings}
@@ -101,9 +101,9 @@
 \label{fig:dbstats}
 \end{figure}
 
-      Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania, co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM (ang. \textit{Object Relational Mapping}) TODO literatura możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów. Powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i pamięciowe obsługuje się praktycznie w ten sam sposób. 
+      Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania, co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM \cite{orm} (ang. \textit{Object Relational Mapping}) literatura możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów. Powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i pamięciowe obsługuje się praktycznie w ten sam sposób. 
 
-      Język SQL (ang. \texttt{Structured Query Language}) jest językiem programowania przeznaczonym do interakcji z bazami danych, umożliwiającym odczyt, wstawianie i modyfikowanie zgromadzonych danych poprzez tekstowe polecenia. Jego niewątpliwą zaletą jest wykorzystanie do budowy zapytań prostych słów kluczowych w języku angielskim, które pozwalają na tworzenie bardzo czytelnych kodów. Duże możliwości zapewniają także bardziej zaawansowane elementy języka, takie jak funkcje agregujące czy zapytania wewnętrzne. Szczegóły na temat składni SQL znajdują się w \cite{ullman}, natomiast zestawienie sposobów konstruowania zapytań można znaleźć w rozdziale \ref{counterparts}.
+      Język SQL (ang. \texttt{Structured Query Language}) jest językiem programowania przeznaczonym do interakcji z bazami danych, umożliwiającym odczyt, wstawianie i modyfikowanie zgromadzonych danych poprzez tekstowe polecenia. Został on opracowany na podstawie algebry relacji (Edgar F. Codd, 1970), wykorzystującej algebrę zbiorów jako podstawę teoretyczną. Jego niewątpliwą zaletą jest wykorzystanie do budowy zapytań prostych słów kluczowych w języku angielskim, które pozwalają na tworzenie bardzo czytelnych kodów. Duże możliwości zapewniają także bardziej zaawansowane elementy języka, takie jak funkcje agregujące czy zapytania wewnętrzne. Szczegóły na temat składni SQL znajdują się w \cite{ullman}, natomiast zestawienie sposobów konstruowania zapytań można znaleźć w rozdziale \ref{counterparts}.
 
 
 \subsection{Stream API}
@@ -425,14 +425,12 @@ Można od razu zauważyć, że kod SQL jest dość nieczytelny i zawiera wiele s
 
     Stream API umożliwia wykonywanie wielu operacji znanych z języka SQL. Część z nich posiada dokładne odpowiedniki (np. ograniczanie ilości czy filtrowanie), natomiast niektóre wymagają częściowo ręcznej implementacji (złączenie albo unia). Należy zauważyć, iż mimo istnienia pewnej wspólnej bazy pojęciowej, sposób przekazywania parametrów do operacji może być zupełnie inny. Przykładowo, aby wykonać sortowanie w SQL na podstawie kilku kolumn, wystarczy wymienić klucze sortowania po przecinku, przykładowo w postaci \texttt{ORDER BY col1, col2}. Silnik bazodanowy jest w stanie wewnętrznie zinterpretować takie zapytanie. Do sortowania strumieni konieczne jest uzyskanie obiektu typu \texttt{Comparator}, który przekazany zostanie do metody sortującej, a utworzyć można go np. poprzez \texttt{Comparator.comparing(e -> e.col1).thenComparing(e -> e.col2)}. Obiekt taki jest całkowicie odseparowany od strumienia i może być tworzony w dowolnym miejscu w kodzie.
 
-TODO coś z algebry relacji np. do tabelki + literatura (ullman?) tabela pozycjonowana w dobrym miejscu
-
 \begin{table}[t]
     \label{nazwa odnośnika, która potem użyjemy do cytowania tabeli}
     \begin{center}
         \begin{tabular}{ |c|c| }
             \hline
-            SQL & Stream API \\
+            \textbf{SQL} & \textbf{Stream API} \\
             \hline
             \texttt{SELECT} & \texttt{.map(...)}  \\
             \texttt{FROM} & \texttt{.stream()}  \\
@@ -547,15 +545,7 @@ innerJoinHashmaps(
 }
 \end{lstlisting}
 
-Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości klucza w jednej z kolekcji. Porównanie szybkości wykonywania się operacji złączenia na zbiorze danych TPC zaprezentowane jest na rysunku \ref{fig:naturaljoin}.
-
-TODO przenieść to do testów TPC-h
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=13cm]{plots/NaturalJoin}
-    \caption{Porównanie wydajności złączenia naturalnego}
-    \label{fig:naturaljoin}
-\end{figure}
+Rozwiązanie to jest znacznie szybsze, wymaga jednak unikalności wartości klucza w jednej z kolekcji. Porównanie szybkości wykonywania się operacji złączenia na zbiorze danych TPC zaprezentowane jest w rozdziale \ref{tpcgraphs} na rysunku \ref{fig:naturaljoingraph}.
 
 
 \subsection{Proces wykonywania zapytania SQL}
@@ -720,7 +710,37 @@ Filtering: 5
 
     Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie przeładowywać interfejsu biblioteki. Znaczy to, iż popularne operatory funkcyjne, znane z~innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcje, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal funkcjonalność dorównująca zewnętrznym bibliotekom.
 
-    TODO tabelka SQL vs streams, albo podpunkty
+
+\begin{table}[t]
+    \label{comparison}
+    \begin{center}
+        \begin{tabular}{ |c|c| }
+            \hline
+            \textbf{SQL} & \textbf{Stream API} \\
+            \hline
+
+            interpretowany & kompilowany \\
+            \hline
+
+            język dziedzinowy & język ogólnego przeznaczenia \\
+            \hline
+
+            brak kontroli typów & kontrola typów przy kompilacji \\
+            \hline
+
+            operuje na tabelach & operuje na strumieniach \\
+            \hline
+
+            duże możliwości agregacji & agregacje ograniczone \\
+            \hline
+
+            wymagają odczytywania wyniku zapytania & wynik zapytania w postaci kolekcji Java \\
+            \hline
+        \end{tabular}
+
+        \caption{Podsumowanie porównania SQL i Stream API}
+    \end{center}
+\end{table}
 
 \section{Środowisko badawcze i badania na danych syntetycznych}
 
@@ -908,7 +928,7 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 
 
 \newpage
-\subsection{Wyniki}
+\subsection{Wyniki} \label{tpcgraphs}
 
 \begin{figure}[h]
 \centering
@@ -925,8 +945,7 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 \caption{Tpc4Benchmark}
 \end{figure}
 
-TODO wytłumaczyć nisko punkty
-    Wyniki testów dla zapytania nr 4 prezentują bardzo wyraźnie możliwości silnika SQL w zakresie optymalnej interpretacji zapytania zagnieżdżonego (\textit{inner query}) i jego efektywnego wykonania. W przypadku implementacji strumieniowej, zapytanie zagnieżdżone jest zapisane w postaci funkcji wewnętrznej, która wykazuje te same problemy wydajnościowe, co złączenia kolekcji. 
+    Wyniki testów dla zapytania nr 4 prezentują bardzo wyraźnie możliwości silnika SQL w zakresie optymalnej interpretacji zapytania zagnieżdżonego (\textit{inner query}) i jego efektywnego wykonania. W przypadku implementacji strumieniowej, zapytanie zagnieżdżone jest zapisane w postaci funkcji wewnętrznej, która wykazuje te same problemy wydajnościowe, co złączenia kolekcji. W przypadku strumieni nie przeprowadzono badań wydajnościowych dla wielu wielkości zbioru danych, ze względu na skrajnie wolne wykonywanie się testu.
 
 \newpage
 \begin{figure}[H]
@@ -944,8 +963,7 @@ TODO wytłumaczyć nisko punkty
 \caption{Tpc12Benchmark}
 \end{figure}
 
-TODO wytłumaczyć nisko punkty
-    Test nr 12 pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających.
+    Test nr 12 pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających. Podobnie jak w przypadku testu nr 4, nie przeprowadzony wszystkich testów ze względu na długi czas wykonania.
 
 \newpage
 \begin{figure}[H]
@@ -955,6 +973,16 @@ TODO wytłumaczyć nisko punkty
 \end{figure}
 
     Ostatni test nr 14 potwierdza znakomitą wydajność bazy MySQL w zakresie operacji łączenia tabel, przy czym baza H2 jest jedynie kilka razy wolniejsza. Funkcje agregujące mogą być bardzo efektywnie wykonywane w przypadku jednoczesnego złączenia tabel.
+
+\newpage
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{plots/NaturalJoin}
+    \caption{Porównanie wydajności złączenia naturalnego}
+    \label{fig:naturaljoingraph}
+\end{figure}
+
+Niniejszy wykres obrazuje porównanie szybkości wykonywania się złączenia kolekcji \texttt{LineItem} i \texttt{Order} na podstawie odpowiedniego klucza głównego. Jak można zaobserwować, kolekcja haszująca zapewnia bardzo szybkie wyszukiwanie obiektów przy podaniu klucza, więc przy założeniu jego unikalności połączenie dwóch zbiorów w pamięci jest znacznie szybsze niż wykonanie tego samego zadania czy to w bazie dyskowej, czy w bazie pamięciowej H2. Narzut struktur danych bazy pamięciowej jest tutaj wyraźnie widoczny.
 
 \subsection{Podsumowanie wyników testów TPC}
 
@@ -1012,6 +1040,11 @@ Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzan
         TPC Council,
         \textit{TPC Benchmark H Standard Specification, page 136},
         1993-2014 TPC Council
+
+    \bibitem{orm} 
+        Christian Bauer,
+        \textit{Java Persistence with Hibernate},
+        wyd. Manning Publications, 2015
 
     \bibitem{streamsjavadoc} 
         Oracle Corporation
