@@ -15,6 +15,7 @@
 \usepackage[nottoc,notlot,notlof]{tocbibind}
 \usepackage{varwidth}
 \setlength\parindent{1cm}
+\raggedbottom
 
 \usepackage{listings}
 \renewcommand{\lstlistingname}{Kod}
@@ -82,6 +83,7 @@
 
     Niniejsza praca składa się z 6 rozdziałów. Rozdział 2 zawiera szczegółową charakterystykę Stream API, przykłady użycia oraz szczegóły implementacyjne w kontekście przetwarzania równoległego. Rozdział 3 opisuje różnice pomiędzy metodami, odpowiedniki operacji w obu metodach, wewnętrzną reprezentację pamięciową danych oraz format wynikowy zapytania. Rozdział 4 zawiera wyniki oraz wnioski z badań wydajnościowych przeprowadzonych na danych syntetycznych, przeprowadzonych na obu rozwiązaniach bazodanowych. Rozdział 5 zawiera szczegóły testu referencyjnego TPC-H oraz opis sposobu jego implementacji i uruchomienia. Rozdział 6 zawiera podsumowanie prac, całościowe wnioski oraz propozycje przyszłych badań. Dokumentacja środowiska badawczego oraz wymagania sprzętowo-programowe zawarte są w dodatku A.
 
+\cleardoublepage
 \section{Analiza dziedziny}
     Niniejszy rozdział opisuje cechy i zastosowania pamięciowych baz SQL oraz podstawowe cechy Stream API, wraz z przykładami jego wykorzystania przy uwzględnieniu przetwarzania równoległego.
 
@@ -375,6 +377,7 @@ main
 
     Warto zwrócić uwagę, że wśród wątków wykonawczych znajduje się też wątek \texttt{main}, czyli wątek inicjujący operację strumieniową. Jako iż wykonywanie się ciągu operacji strumieniowych jest blokujące (nie jest asynchroniczne, o ile nie wykorzystuje się FJP ręcznie), dobrym rozwiązaniem jest wykorzystanie do obliczeń także wątku inicjującego. Jeśli nie jest to oczekiwane zachowanie, istnieje możliwość ręcznego utworzenia instancji puli wątków \texttt{ForkJoinPool} i przekazanie zadania w~postaci funkcji lambda \texttt{Callable<T>}. W takim podejściu możliwe jest też zdefiniowanie liczby dostępnych wątków.
 
+\cleardoublepage
 \section{Porównanie przetwarzania strumieniowego i zapytań SQL}
 
     Pomiędzy wykonywaniem operacji strumieniowych, a wykonywaniem zapytań SQL w pamięci występuje bardzo dużo różnic, zwłaszcza w zakresie konstruowania zapytań i sposobu ich realizacji, pomimo pozornie podobnej zasady działania i efektu końcowego. Celem obu podejść jest uzyskanie wygodnego i względnie szybkiego wykonywania zapytań, natomiast różnice w implementacji mają znaczący wpływ na te kwestie.
@@ -742,6 +745,7 @@ Filtering: 5
     \end{center}
 \end{table}
 
+\cleardoublepage
 \section{Środowisko badawcze i badania na danych syntetycznych}
 
     Aby zebrane wyniki były jak najbardziej miarodajne, konieczne jest utworzenie solidnego środowiska testowego, w którym możliwe będzie wykonanie wszystkich potrzebnych badań. Jako iż elementem badań wydajności będą fragmenty kodu, pożądane jest, by pomiary czasowe odbywały się w miarę możliwości w sposób zautomatyzowany. Po wykonaniu pomiarów czasowych i wygenerowaniu raportu, należy zaprezentować uzyskane wyniki w postaci wykresów.
@@ -895,6 +899,7 @@ public class SummingIntegersH2 {
     Strumienie i bezpośrednie operacje na pamięciowych strukturach języka Java są w zdecydowanej większości przypadków szybsze niż ich odpowiedniki w języku SQL. Porównując zaś bazy H2 i MySQL, testy na bazie H2 wykonywane były średnio 1.5-20 razy szybciej niż w przypadku MySQL.  Do połączenia się z bazą dyskową wykorzystany został, tak jak w przypadku bazy pamięciowej, standardowy interfejs JDBC, który wykorzystywał połączenie TCP. Przepustowość tego połączenia nie powinna mieć zbytniego znaczenia (prędkość połączenia typu loopback determinowana jest głównie przez moc procesora, a ilość danych przesyłanych jest znikoma), większy wpływ ma złożoność systemu bazodanowego i metody składowania danych. Należy zauważyć, że w przypadku największych zbiorów testowych różnice w wydajności nie przekraczają 2-3 razy. Jest to z związane z przystosowaniem i optymalizacjami baz dyskowych.
 
 
+\cleardoublepage
 \section{Testy wydajnościowe z użyciem TPC-H} \label{tpc}
 
     TPC-H jest testem referencyjnym stworzonym przez organizację \textit{Transaction Processing Performance Council}, stosowanym do badania wydajności i profilowania silników bazodanowych. Składa się on z dwóch części: generatora danych testowych oraz zbioru zapytań.
@@ -1003,6 +1008,7 @@ Niniejszy wykres obrazuje porównanie szybkości wykonywania się złączenia ko
 \end{figure}
     
 
+\cleardoublepage
 \section{Podsumowanie}
 
 
@@ -1025,6 +1031,7 @@ Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzan
 
     Stream API jest bardzo wygodnym interfejsem programistycznym, którego zakres widoczny przez końcowego użytkownika jest niewielki. Szczegóły implementacyjne, takie jak interfejs \texttt{Spliterator} pozwalający na dokładne zdefiniowanie sposobu podziału zadań na wątki, czy realizacja przydziału zadań do wątków, mogą być istotnym tematem do analizy. Możliwe, że odpowiednie zrozumienie i wykorzystanie niskopoziomowych klas strumieni pozwoliłoby na dokonanie lepszych optymalizacji i w konsekwencji uzyskanie lepszych wyników. Dobrym pomysłem byłoby zaproponowanie odmiany Stream API zorientowanej na wydajność, do zastosowań podobnych jak te, o których opisuje niniejsza praca.
 
+\cleardoublepage
 \begin{thebibliography}{9}
 
     \bibitem{ullman} 
@@ -1084,6 +1091,7 @@ Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzan
 
 \end{thebibliography}
 
+\cleardoublepage
 \appendix
 \section{Dokumentacja środowiska badawczego}
 
