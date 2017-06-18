@@ -77,11 +77,11 @@
 
     Dział informatyki zajmujący się przetwarzaniem danych zajmuje ważne miejsce w obszarze nauk informatycznych. W każdym programie obliczeniowym dobór odpowiednich mechanizmów gromadzenia i przetwarzania informacji znacząco wpływa na jego wydajność. Dotyczy to zwłaszcza systemów gromadzenia danych wielkiej skali (tzw. \textit{Big Data}), które bardzo często wymagają przetwarzania w czasie zbliżonym do rzeczywistego.
 
-    Najpopularniejszym sposobem na gromadzenie danych są sprawdzone bazy relacyjne, wykorzystujące język SQL. Od wielu lat rozwiązania relacyjne wykorzystywane są we wdrożeniach różnorakiej skali, od małych aplikacji osobistych po klastry obliczeniowe. Niestety, korzystanie z baz relacyjnych w aplikacjach opartych o języki obiektowe jest zwykle problematyczne i wymaga wykorzystywania dodatkowych warstw pośrednich, np. metody mapowania obiektowo-relacyjnego. Pojawienie się wśród dostępnych rozwiązań języka Java w wersji 8 oraz nowo wprowadzonego Stream API, pozwalającego na wydajne i łatwe przetwarzanie danych z wykorzystaniem mechanizmów automatycznego zrównoleglania, zwiększyło liczbę możliwych metod, które można rozważyć przy wyborze technologii. Pojawia się pytanie, czy jest możliwe wykorzystanie strumieni do przetwarzania danych w sposób natywny dla języka w podobny sposób.
+    Najpopularniejszym sposobem na gromadzenie danych są sprawdzone bazy relacyjne, wykorzystujące język SQL. Od wielu lat rozwiązania relacyjne wykorzystywane są we wdrożeniach różnorakiej skali, od małych aplikacji osobistych po klastry obliczeniowe. Niestety, korzystanie z baz relacyjnych w aplikacjach opartych o języki obiektowe jest zwykle problematyczne i wymaga wykorzystywania dodatkowych warstw pośrednich, np. metod mapowania obiektowo-relacyjnego. Pojawienie się wśród dostępnych rozwiązań języka Java w wersji 8 oraz nowo wprowadzonego Stream API, pozwalającego na wydajne i łatwe przetwarzanie danych z wykorzystaniem mechanizmów równoległych, zwiększyło liczbę możliwych metod, które można rozważyć przy wyborze technologii. Pojawia się pytanie, czy jest możliwe wykorzystanie strumieni do przetwarzania danych w sposób natywny dla języka w podobny sposób.
 
 	Celem niniejszej pracy magisterskiej jest porównanie możliwości przetwarzania danych w bazach wykorzystujących język SQL z metodami dostarczanymi przez Stream API. Badania obejmują eksperymenty wydajnościowe, przeprowadzone w zakresie metod przechowywania danych w pamięci RAM, jak i obserwacje sposobów formułowania kodu i możliwości języka zapytań. W ramach pracy stworzone zostało środowisko badawcze, zaimplementowane w języku Java, oraz zaproponowano i wykonano zbiór testów wydajnościowych.
 
-    Niniejsza praca składa się z 6 rozdziałów. Rozdział 2 zawiera szczegółową charakterystykę Stream API, przykłady użycia oraz szczegóły implementacyjne w kontekście przetwarzania równoległego. Rozdział 3 opisuje różnice pomiędzy metodami, odpowiedniki operacji w obu metodach, wewnętrzną reprezentację pamięciową danych oraz format wynikowy zapytania. Rozdział 4 zawiera wyniki oraz wnioski z badań wydajnościowych przeprowadzonych na danych syntetycznych, przeprowadzonych na obu rozwiązaniach bazodanowych. Rozdział 5 zawiera szczegóły testu referencyjnego TPC-H oraz opis sposobu jego implementacji i uruchomienia. Rozdział 6 zawiera podsumowanie prac, całościowe wnioski oraz propozycje przyszłych badań. Dokumentacja środowiska badawczego oraz wymagania sprzętowo-programowe zawarte są w dodatku A.
+    Niniejsza praca składa się z 6 rozdziałów. Rozdział 2 zawiera szczegółową charakterystykę Stream API, przykłady użycia oraz szczegóły implementacyjne w kontekście przetwarzania równoległego. Rozdział 3 opisuje różnice pomiędzy metodami, odpowiedniki operacji w obu metodach, wewnętrzną reprezentację pamięciową danych oraz format wynikowy zapytania. Rozdział 4 zawiera wyniki oraz wnioski z badań wydajnościowych wykonanych przy użyciu danych syntetycznych, przeprowadzonych na obu rozwiązaniach bazodanowych. Rozdział 5 zawiera szczegóły testu referencyjnego TPC-H oraz opis sposobu jego implementacji i uruchomienia. Rozdział 6 zawiera podsumowanie prac, całościowe wnioski oraz propozycje przyszłych badań. Dokumentacja środowiska badawczego oraz wymagania sprzętowo-programowe zawarte są w dodatku A.
 
 \cleardoublepage
 \section{Analiza dziedziny}
@@ -89,12 +89,10 @@
 
     Bazy danych SQL są powszechnie stosowanymi rozwiązaniami do gromadzenia i odczytu danych. Struktura danych ściśle określona przez definicje tabel, ochrona integralności poprzez ograniczenia i więzy referencyjne oraz wygodny język SQL zachęcają do ich stosowania zarówno dla małych, jak i dużych zbiorów danych. Mimo pojawienia się nowych technologii, takich jak bazy dokumentowe typu MongoDB czy bazy grafowe typu Neo4j, tradycyjne bazy relacyjne są wciąż najczęściej stosowanym w praktyce rozwiązaniem (rysunek \ref{fig:dbstats}).
 
-    Z drugiej strony, języki programowania wspierające programowanie funkcyjne są coraz bardziej popularne. Możliwość definiowania operacji na danych za pomocą funkcji, a następnie składania pojedynczych bloków funkcyjnych w złożone procesy wydaje się bardzo przydatne. Najpopularniejszym przykładem są funkcje LINQ występujące w języku C\# \cite{linq}, dzięki którym możliwe jest deklaratywne tworzenie procesów przetwarzania danych, wraz ze wsparciem dla odpytywania baz SQL w identyczny sposób, jak w przypadku zwykłych kolekcji.
+    Z drugiej strony, języki programowania wspierające programowanie funkcyjne są coraz bardziej popularne. Możliwość definiowania operacji na danych za pomocą funkcji, a następnie składania pojedynczych bloków funkcyjnych w złożone procesy wydaje się bardzo przydatna. Najpopularniejszym przykładem są funkcje LINQ występujące w języku C\# \cite{linq}, dzięki którym możliwe jest deklaratywne tworzenie procesów przetwarzania danych, wraz ze wsparciem dla odpytywania baz SQL w identyczny sposób, jak w przypadku zwykłych kolekcji.
 
 
 \subsection{Pamięciowe bazy SQL}
-
-    Bazy danych działające całkowicie w pamięci RAM mogą być wykorzystywane w dużych hurtowniach danych, gdzie szybkość ma pierwszorzędne znaczenie, a zwyczajowo stosowane rozwiązania (pamięć podręczna, pamięć cache wprowadzona na poziomie aplikacji) nie spełniają wymagań biznesowych.
 
 \begin{figure}[h]
 \centering
@@ -103,9 +101,9 @@
 \label{fig:dbstats}
 \end{figure}
 
-      Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania, co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM \cite{orm} (ang. \textit{Object Relational Mapping}) literatura możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów. Powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość tracona jest po zamknięciu programu. Interfejs programistyczny JDBC jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i pamięciowe obsługuje się praktycznie w ten sam sposób. 
+      Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania, co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM \cite{orm} (ang. \textit{Object Relational Mapping}) możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów. Powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość bazy czyszczona jest po zamknięciu programu. Interfejs programistyczny JDBC \cite{jdbc} jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i pamięciowe obsługuje się praktycznie w ten sam sposób. 
 
-      Język SQL (ang. \texttt{Structured Query Language}) jest językiem programowania przeznaczonym do interakcji z bazami danych, umożliwiającym odczyt, wstawianie i modyfikowanie zgromadzonych danych poprzez tekstowe polecenia. Został on opracowany na podstawie algebry relacji (Edgar F. Codd, 1970), wykorzystującej algebrę zbiorów jako podstawę teoretyczną. Jego niewątpliwą zaletą jest wykorzystanie do budowy zapytań prostych słów kluczowych w języku angielskim, które pozwalają na tworzenie bardzo czytelnych kodów. Duże możliwości zapewniają także bardziej zaawansowane elementy języka, takie jak funkcje agregujące czy zapytania wewnętrzne. Szczegóły na temat składni SQL znajdują się w \cite{ullman}, natomiast zestawienie sposobów konstruowania zapytań można znaleźć w rozdziale \ref{counterparts}.
+      Język SQL (ang. \textit{Structured Query Language}) jest językiem programowania przeznaczonym do interakcji z bazami danych, umożliwiającym odczyt, wstawianie i modyfikowanie zgromadzonych danych poprzez tekstowe polecenia. Został on opracowany na podstawie algebry relacji (Edgar F. Codd, 1970), wykorzystującej algebrę zbiorów jako podstawę teoretyczną. Jego niewątpliwą zaletą jest wykorzystanie do budowy zapytań prostych słów kluczowych w języku angielskim, które pozwalają na tworzenie bardzo czytelnych kodów. Duże możliwości zapewniają także bardziej zaawansowane elementy języka, takie jak funkcje agregujące czy zapytania wewnętrzne. Szczegóły na temat składni SQL znajdują się w \cite{ullman}, natomiast zestawienie sposobów konstruowania zapytań SQL i strumieniowych można znaleźć w rozdziale \ref{counterparts}.
 
 
 \subsection{Stream API}
@@ -135,7 +133,7 @@ customers.stream()
 
 \end{lstlisting}
 
-\begin{figure}
+\begin{figure}[h]
 \centering
 \includegraphics[width=14cm]{flow.png}
 \caption{Przepływ danych}
@@ -147,7 +145,8 @@ customers.stream()
 \begin{lstlisting}[label=advanced, caption=Zaawansowane wykorzystanie Stream API]
 
 List<String> high = asList("1-URGENT", "2-HIGH");
-Map<Customer, Long> orderCountsByCustomer = orders.stream()
+Map<Customer, Long> orderCountsByCustomer = orders
+  .stream()
   .filter(o -> high.contains(o.orderPriority))
   .collect(
     Collectors.groupingBy(
@@ -164,7 +163,7 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 
 \subsection{Interfejs \texttt{Collector}}
 
-    Typ \texttt{Collector} jest ważną częścią Stream API. Pozwala on na definiowanie tzw. operacji terminalnych, czyli takich, które mogą występować jedynie na samym końcu potoku przetwarzania strumieniowego. Jest to dość niskopoziomowy mechanizm, który jednak nie jest zbyt skomplikowany, a wymusza na programiście zwrócenie uwagi na przetwarzanie równoległe. Parametrem wejściowym obiektu zbierającego jest strumień obiektów, przy czym nie jest on przekazywany jawnie, lecz poszczególne obiekty dostarczane są do odpowienich funkcji definujących obiekt zbierający. Wynikiem działania kolektora jest obiekt lub kolekcja, będąca wynikiem operacji redukującej strumień danych. Instancja kolektora nie posiada stanu - cały stan jest kontrolowany przez wewnętrzne struktury Stream API, co jest bardzo pożądane, zwłaszcza w przypadku strumieni równoległych, dla których zachowanie bezpieczeństwa wątkowego byłoby utrudnione.
+    Typ \texttt{Collector} jest ważną częścią Stream API. Pozwala on na definiowanie tzw. operacji terminalnych, czyli takich, które mogą występować jedynie na samym końcu potoku przetwarzania strumieniowego. Jest to dość niskopoziomowy mechanizm, który jednak nie jest zbyt skomplikowany, a wymusza na programiście zwrócenie uwagi na przetwarzanie równoległe. Parametrem wejściowym obiektu zbierającego jest strumień obiektów, przy czym nie jest on przekazywany jawnie, lecz poszczególne obiekty dostarczane są do odpowienich funkcji definujących obiekt zbierający. Wynikiem działania obiektu zbierającego jest obiekt lub kolekcja, będąca wynikiem operacji redukującej strumień danych. Instancja obiektu zbierającego nie posiada stanu - cały stan jest kontrolowany przez wewnętrzne struktury Stream API, co jest bardzo pożądane, zwłaszcza w przypadku strumieni równoległych, dla których zachowanie bezpieczeństwa wątkowego byłoby utrudnione.
 
     Do utworzenia obiektu \texttt{Collector} wymagane są trzy (w szczególnym przypadku cztery) funkcje:
 
@@ -175,7 +174,7 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
     \item \texttt{Function<A, R> finisher} (opcjonalnie) - funkcja przekształcająca pośredni kontener danych w obiekt wynikowy.
 \end{itemize}
 
-    Konieczność istnienia pośrednich kontenerów i możliwości ich scalania związana jest bezpośrednio z równoległą naturą strumieni. Jako iż kolektory powinny działać w identyczny sposób ze strumieniami sekwencyjnymi, jak i równoległymi, narzucony został wzorzec uwzględniający przetwarzanie równoległe w każdym przypadku.
+    Konieczność istnienia pośrednich kontenerów i możliwości ich scalania związana jest bezpośrednio z równoległą naturą strumieni. Jako iż obiekty zbierające powinny działać w identyczny sposób ze strumieniami sekwencyjnymi, jak i równoległymi, narzucony został wzorzec uwzględniający przetwarzanie równoległe w każdym przypadku.
 
     Kod \ref{toList} prezentuje przykład ręcznie zaimplementowanego obiektu zbierającego \texttt{toList}, który dostępny jest domyślnie w bibliotece standardowej języka Java pod postacią metody statycznej \texttt{Collectors.toList}.
 
@@ -184,7 +183,7 @@ Map<Customer, Long> orderCountsByCustomer = orders.stream()
 Collector<Integer, List<Integer>, List<Integer>> toList =
 Collector.of(
     () -> {
-      ArrayList<Integer> list = new ArrayList<>();
+      List<Integer> list = new ArrayList<>();
       out.println("New mutable container " + id(list));
       return list;
     },
@@ -208,7 +207,7 @@ out.println(numbers.stream().collect(toList));
 
 \end{lstlisting}
 
-Wynik wykonania tego programu zaprezentowany jest na poniższym wyjściu programu. Warto zauważyć, że funkcja łącząca pośrednie kontenery nie została w~ogóle wywołana. 
+Wynik wykonania tego programu zaprezentowany jest na poniższym wyjściu. Warto zauważyć, że funkcja łącząca pośrednie kontenery nie została w~ogóle wywołana. 
     
 \begin{verbatim}
 
@@ -266,7 +265,7 @@ Combining #42c with #46f
 
     Język Java od pierwszej wersji wyróżniał się znakomitymi możliwościami programowania równoległego, wykorzystywanego głównie w aplikacjach internetowych, obsługujących wielu użytkowników jednocześnie. Świadczy o tym obecność metod związanych z wątkami już w klasie \texttt{Object}, która jest klasą bazową wszystkich klas języka Java. W wersji 5 języka wprowadzono dużo nowych klas, zawartych w pakiecie \texttt{java.util.concurrent}, mających na celu ułatwienie pracy z kodem tego typu. Wcześniej ręcznie tworzone rozwiązania i wzorce mogą być zastąpione przez wbudowane, wysokiej jakości implementacje pul wątków, kolejek blokujących, list wykorzystującyc kopiowanie przy zapisie (\textit{copy-on-write}), semaforów i barier cyklicznych.
     
-    Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu Fork-Join Pool \cite{fjpdocs}, umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę `dziel i zwyciężaj'. W programie wykorzystującym to rozwiązanie tworzona jest pula wątków (o dowolnej ilości), do której wysyła się zadanie, symbolizowane przez obiekt typu \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. Kod programu powinien być w stanie zadecydować, czy zadanie jest zbyt duże i należy w związku z tym dokonać podziału. Jeśli tak, zadanie jest dzielone na podzadania i wysyłane do puli wątków, a po jego wykonaniu pośrednie wyniki zostają zebrane. Jeśli nie, program przystępuje do normalnego wykonywania przydzielonego zadania.  Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest w kodzie \ref{fjpexample}.
+    Wersja siódma języka przyniosła kolejną nowość w postaci mechanizmu Fork-Join Pool \cite{fjpdocs}, umożliwiającego uproszczone tworzenie równolegle wykonywanych framentów kodu, wykorzystujące bezpośrednio regułę `dziel i zwyciężaj'. W programie wykorzystującym to rozwiązanie tworzona jest pula wątków (o dowolnej ilości), do której wysyła się zadanie, symbolizowane przez obiekt typu \texttt{RecursiveTask}. Klasa ta reprezentuje pojedyncze zadanie, które potrafi w razie potrzeby podzielić się na $ n $ mniejszych zadań. Kod programu powinien być w stanie zadecydować, czy zadanie jest zbyt duże czy i należy w związku z tym dokonać podziału. Jeśli tak, zadanie jest dzielone na podzadania i wysyłane do puli wątków, a po jego wykonaniu pośrednie wyniki zostają zebrane. Jeśli nie, program przystępuje do normalnego wykonywania przydzielonego zadania.  Przykładowy kod programu, mający na celu zsumowanie listy liczb całkowitych, zaprezentowany jest w kodzie \ref{fjpexample}.
 
 \begin{lstlisting}[label=fjpexample, caption=Przykładowe wykorzystanie FJP]
 
@@ -339,10 +338,9 @@ public class SummingTask extends RecursiveTask<Integer> {
     Jak można zauważyć, liczba operacji na sekundę rośnie przy wzroście wielkości puli do pewnego momentu, w którym narzut tworzenia i wykorzystywania nowych wątków staje się zbyt duży. Przyjęło się za ogólnie dobrą praktykę, aby liczba wątków była w przybliżeniu równa liczbie logicznych rdzeni procesora, ponieważ umożliwia to najlepsze wykorzystanie mocy obliczeniowej. Test przeprowadzono na maszynie z 4 rdzeniami Hyper Threading (logiczne 8 rdzeni), w związku z tym można się spodziewać największej liczby operacji na sekundę dla mniej więcej 8 wątków.
 
 
-
 \subsection{Przetwarzanie równoległe}
 
-    Jednym z najczęstszych zastosowań strumieni jest równoległe przetwarzanie danych. Strumienie równoległe wykorzystują FJP, natomiast w pełni ukrywają jego wykorzystanie w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, odwzorowanie itd.) wykonują się w tworzonej przy starcie maszyny wirtualnej puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to w kodzie \ref{streamsthreads}, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod funkcji jest wykonywany.  Wynikiem wywołania tego programu jest przemieszana lista wątków, w której znajdują się wątek główny programu \texttt{main} oraz wątki znajdujące się w puli o nazwach \texttt{ForkJoinPool.commonPool-worker-N} z numerami od 1 do 7 (test przeprowadzony na maszynie z 8 logicznymi procesorami).
+    Jednym z najczęstszych zastosowań strumieni jest równoległe przetwarzanie danych. Strumienie równoległe wykorzystują FJP, natomiast w pełni ukrywają fakt jego użycia w taki sposób, że w większości przypadków wiedza na temat szczegółów implementacyjnych nie jest konieczna. Poszczególne zadania przetwarzania danych (filtrowanie, odwzorowanie itd.) wykonują się w tworzonej przy starcie maszyny wirtualnej puli wątków, w której domyślnie znajduje się $ n-1 $ wątków, gdzie $ n $ jest liczbą logicznych rdzeni procesora. Najlepiej widać to w kodzie \ref{streamsthreads}, w którym dla każdego elementu wypisywana jest nazwa wątku, w którym kod funkcji jest wykonywany.  Wynikiem wywołania tego programu jest przemieszana lista wątków, w której znajdują się wątek główny programu \texttt{main} oraz wątki znajdujące się w puli o nazwach \texttt{ForkJoinPool.commonPool-worker-N} z numerami od 1 do 7 (test przeprowadzony na maszynie z 8 logicznymi procesorami).
 
 \begin{lstlisting}[label=streamsthreads, caption=Struktura puli wątków FJP]
 
@@ -393,13 +391,13 @@ main
 \label{fig:jvmmemory}
 \end{figure}
 
-    Bazy pamięciowe wykorzystują wewnętrzne struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i zabezpieczonym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty ukrytych klas implementacyjnych z pakietu \texttt{org.h2.*} - rysunek \ref{fig:jvmmemory}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
+    Bazy pamięciowe wykorzystują wewnętrzne struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i zabezpieczonym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty klas implementacyjnych z pakietu \texttt{org.h2.*} - rysunek \ref{fig:jvmmemory}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
 
 \subsection{Język dziedzinowy a język ogólnego przeznaczenia}
 
-    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (\textit{stored procedures}). 
+    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (ang. \textit{stored procedures}). 
    
-    Przy użyciu Stream API możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach, interwałach czasowych i strefach czasowych. Funkcje SQL są ograniczone w~tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
+    Przy użyciu Stream API możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach i interwałach czasowych, przy uwzględnieniu stref czasowych. Funkcje SQL są ograniczone w~tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
 
     Za przykład niech posłuży zadanie znalezienia daty pierwszego poniedziałku aktualnego miesiąca. Takie problemy pojawiają się często przy tworzeniu różnych statystyk na podstawie danych historycznych. W kodzie \ref{date} zaprezentowany jest przykład rozwiązania powyższego problemu, odpowiednio przy użyciu MySQL i Stream API.
     
@@ -459,7 +457,7 @@ Można od razu zauważyć, że kod SQL jest dość nieczytelny i zawiera wiele s
 
     Jedną z najczęściej wykonywanych operacji na relacyjnej bazie danych jest łączenie tabel. W języku SQL dostępne są różne typy złączeń (\texttt{JOIN}, \texttt{INNER JOIN}, \texttt{LEFT/RIGHT JOIN} i inne), które wykorzystywane są w różnych sytuacjach. Relacyjne bazy danych posiadają z reguły znaczne optymalizacje w zakresie wykonywania takich operacji, ponieważ wykorzystywane są one bardzo często - ważną zaletą modelu relacyjnego jest podział na tabele połączone ze sobą kluczami i więzami referencyjnymi. Aby osiągnąć wymaganą wydajność, w większości rozwiązań kolumny będące kluczami głównymi otrzymują automatycznie, przy ich tworzeniu, indeks.
 
-    Indeks jest strukturą danych, zbudowaną na podstawie wartości danych określonej kolumny (kolumn) danej tabeli. Bazuje on zwykle na drzewiastej strukturze danych, gromadzącej wszystkie pary klucz-wartość z indeksowanej kolumny, gdzie kluczem jest zawartość kolumny, a wartością wskaźnik do wiersza, zawierającego daną wartość. Dzięki ustanowionemu porządkowi (drzewo jest posortowane) i korzystnych złożonościach wyszukiwania, możliwe jest zastąpienie liniowego wyszukiwania szybkim wyszukiwaniem w drzewie. Bazy danych SQL bardzo często wykorzystują indeksy, większość z nich tworzy domyślnie indeks na kolumnach będących kluczami głównymi nowo dodawanej tabeli. Wydaje się więc wskazane, aby wypróbować podobne rozwiązanie w przypadku łączenia strumieni. Jako kontener danych wykorzystano implementację zbioru mieszającego z biblioteki standardowej języka Java, \texttt{java.util.HashSet}, ze względu na jego wydajność. Istnieje też alternatywne rozwiązanie w postaci kontenera \texttt{java.util.TreeSet} wykorzystującego zmodyfikowane drzewo czerwono-czarne, natomiast jest ono mniej wydajne niż rozwiązanie z kolekcją mieszającą.
+    Indeks jest strukturą danych, zbudowaną na podstawie wartości danych określonej kolumny (kolumn) danej tabeli. Bazuje on zwykle na drzewiastej strukturze danych, gromadzącej wszystkie pary klucz-wartość z indeksowanej kolumny, gdzie kluczem jest zawartość kolumny, a wartością wskaźnik do wiersza, zawierającego daną wartość. Dzięki ustanowionemu porządkowi (drzewo jest posortowane) i korzystnych złożonościach wyszukiwania, możliwe jest zastąpienie liniowego wyszukiwania w liście szybkim wyszukiwaniem w drzewie. Bazy danych SQL bardzo często wykorzystują indeksy, większość z nich tworzy domyślnie indeks na kolumnach będących kluczami głównymi nowo dodawanej tabeli. Wydaje się więc wskazane, aby wypróbować podobne rozwiązanie w przypadku łączenia strumieni. Jako kontener danych wykorzystano implementację zbioru mieszającego z biblioteki standardowej języka Java, \texttt{java.util.HashSet}, ze względu na jego wydajność. Istnieje też alternatywne rozwiązanie w postaci kontenera \texttt{java.util.TreeSet} wykorzystującego zmodyfikowane drzewo czerwono-czarne, natomiast jest ono mniej wydajne niż rozwiązanie z kolekcją mieszającą.
 
     Ze względu na porównawczy charakter niniejszej pracy, zdecydowano się na opracowanie podobnego rozwiązania, działającego w oparciu o Stream API. Problem zdefiniowany został następująco:
 
@@ -485,7 +483,7 @@ innerJoin(
 
 \end{lstlisting}
 
-    Rozwiązanie to, mimo iż krótkie i czytelne, wykazuje się bardzo niekorzystną złożonością obliczeniową, i w konsekwencji, bardzo słabą wydajnością. Ze względu na konieczność utworzenia $ mn $ par niezależnie od przypadku, aktywność GC jest znaczna, ponieważ mnóstwo obiektów tworzonych jest tylko w celu ich odśmiecenia. Przykładowo, dla współczynnika wielkościo zbioru TPC wynoszącego 20\% połączenie tabeli \texttt{Orders} (300000 wierszy) i \texttt{Lineitem} (1119969 wierszy) powoduje wygenerowanie około 350 miliardów obiektów.
+    Rozwiązanie to, mimo iż krótkie i czytelne, wykazuje się bardzo niekorzystną złożonością obliczeniową, i w konsekwencji, bardzo słabą wydajnością. Ze względu na konieczność utworzenia $ mn $ par niezależnie od przypadku, aktywność GC jest znaczna, ponieważ mnóstwo obiektów tworzonych jest tylko w celu ich odśmiecenia. Przykładowo, dla współczynnika wielkości zbioru TPC wynoszącego 20\% połączenie tabeli \texttt{Orders} (300000 wierszy) i \texttt{Lineitem} (1119969 wierszy) powoduje wygenerowanie około 350 miliardów obiektów.
 
     Rozwiązanie drugie polega na przepisaniu strumieniowej części w postaci zwykłej pętli. Strumienie mają nieznaczny narzut czasowy i pamięciowy, więc warto sprawdzić, czy możliwe jest jego uniknięcie.
 
@@ -566,10 +564,10 @@ having sum(order.totalprice) > 10000
 order by customers.name;
 \end{lstlisting}
 
-    Bazy SQL posiadają zwykle optymalizatory zapytań o różnym stopniu złożoności. Możliwe jest sprawdzenie dokładnego planu zapytania (\textit{query execution plan}) za pomocą składni odpowiedniej dla danego systemu, przykładowo, w MySQL istnieje specjalna klauzula \texttt{EXPLAIN}. Optymalizacje i zmiany kolejności nie wpływają jednak na wynik, który jest zawsze taki sam, jak przy wykonywaniu zapytania zgodnie z logiczną kolejnością SQL. Zapytanie zamieszczone we fragmencie \ref{sqlexample} posiada następującą kolejność wykonywania:
+    Bazy SQL posiadają zwykle optymalizatory zapytań o różnym stopniu złożoności. Możliwe jest sprawdzenie dokładnego planu zapytania (ang. \textit{query execution plan}) za pomocą składni odpowiedniej dla danego systemu, przykładowo, w MySQL istnieje specjalna klauzula \texttt{EXPLAIN}. Optymalizacje i zmiany kolejności nie wpływają jednak na wynik, który jest zawsze taki sam, jak przy wykonywaniu zapytania zgodnie z logiczną kolejnością SQL. Zapytanie zamieszczone we fragmencie \ref{sqlexample} posiada następującą kolejność wykonywania:
 
 \begin{itemize}
-    \item \textbf{from orders join customer} - wybranie tabeli (tabel), z których pobrane zostaną dane (należy zauważyć, że klauzula \textbf{join} jest logicznie częścią klauzuli \textbf{where}, jedynie skrótowo zapisaną),
+    \item \textbf{from orders join customer} - wybranie tabeli (tabel), z których pobrane zostaną dane (należy zaznaczyć, że klauzula \textbf{join} jest logicznie częścią klauzuli \textbf{where}, jedynie skrótowo zapisaną),
     \item \textbf{where customer.acctbal > 1000} - filtrowanie wierszy, odrzucenie niechcianych danych,
     \item \textbf{group by customers.custkey, customers.name} - tworzenie grup na podstawie podanej krotki, podczas grupowania obliczane są wszystkie funkcje agregujące występujące w zapytaniu,
     \item \textbf{having sum(order.totalprice) > 10000} - filtrowanie całych grup, na podstawie wyliczonych w poprzednim kroku funkcji (tutaj sprawdzana jest wartość sumy),
@@ -709,7 +707,7 @@ Filtering: 5
 
     Wprowadzenie do języka Java mechanizmów programowania funkcyjnego zostało bardzo pozytywnie ocenione przez programistów, mimo iż mechanizmy te obecne były w innych językach programowania ogólnego przeznaczenia znacznie wcześniej. Duży nacisk projektantów platformy na wsteczną kompatybilność i obawy przed wprowadzeniem zmian, które nie okażą się korzystne, a konieczne będzie ich utrzymywanie, powodują, że język ten nie rozwija się w takim tempie, jak inne języki. Przykładowo, postanowiono nie wprowadzać metody \texttt{Iterable.stream} konwertującej obiekt wspierający protokół iteracji Java na strumień, mimo iż nie można wskazać żadnych przeciwwskazań do jej istnienia, a i można wskazać zastępcze rozwiązania, które mogłyby być wprowadzone bez większych zmian do API.
 
-    Jednym z najczęściej występujących zarzutów odnośnie Stream API jest brak odpowiedzi na istniejące w języku C\# i platformie .NET narzędzie LINQ-to-SQL. Pozwala ono na dostęp do danych znajdujących się w bazie relacyjnej za pomocą specjalniej składni kodu C\#. Strumienie umożliwiają tworzenie dość złożonych kombinacji operacji, natomiast wszystkie te operacje zachodzą w pamięci maszyny wirtualnej. Nie jest możliwe tłumaczenie metod klasy \texttt{Stream} na słowa kluczowe zapytania SQL. Taką możliwość dają dodatkowe biblioteki, np. JOOQ bądź JPA Criteria API, ale dostępne one były jeszcze przed wydaniem Java 8. 
+    Jednym z najczęściej występujących zarzutów odnośnie Stream API jest brak odpowiedzi na istniejące w języku C\# i platformie .NET narzędzie LINQ-to-SQL. Pozwala ono na dostęp do danych znajdujących się w bazie relacyjnej za pomocą specjalnej składni kodu C\#. Strumienie umożliwiają tworzenie dość złożonych kombinacji operacji, natomiast wszystkie te operacje zachodzą w pamięci maszyny wirtualnej. Nie jest możliwe tłumaczenie metod klasy \texttt{Stream} na słowa kluczowe zapytania SQL. Taką możliwość dają dodatkowe biblioteki, np. JOOQ bądź JPA Criteria API, ale dostępne one były jeszcze przed wydaniem Java 8. 
 
     Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie przeładowywać interfejsu biblioteki. Znaczy to, iż popularne operatory funkcyjne, znane z~innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcje, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal funkcjonalność dorównująca zewnętrznym bibliotekom.
 
@@ -754,7 +752,7 @@ Filtering: 5
 
     W niniejszej pracy pod pojęciem `wydajność' rozumie się efektywny, uśredniony czas wykonania się danego zapytania i uzyskania wyników dostępnych w pamięci programu. Kryterium czasowe zostało przyjęte ze względu na łatwość jego pomiaru i bezpośrednie jego przełożenie na ogólną wydajność systemu wykorzystującego dany system bazodanowy. Niemniej jednak, w celach porównawczych, wykonane zostały również pomiary ilości zajętej pamięci, w celu zbadania wpływu struktur danych baz pamięciowych na zużycie pamięci. Jednym z problemów może być działanie odśmiecacza pamięci (\textit{garbage collector}), który może być uruchamiany przez maszynę wirtualną w różnych fazach wykonywania badań, tak więc konieczna jest szczególna ostrożność przy interpretowaniu wyników.
 
-    Przy porównywaniu dwóch zupełnie różnych metod dostępu do danych, konieczne jest ustalenie postaci wynikowej pojedynczego eksperymentu. W przypadku języka SQL i metod JDBC wynik zapytania do bazy danych reprezentowany jest przez obiekt \texttt{ResultSet}, który udostępnia metody do poruszania się po wynikowych wierszach i wyciągania pojedynczych kolumn. W przypadku Stream API, rezultat zapytania dostępny jest od razu w formie obiektów standardowych kolekcji języka Java, takich jak \texttt{List<T>} czy \texttt{Map<K,V>}. W związku z tym, aby zapewnić sprawiedliwe porównanie obu metod, po wykonaniu zapytania SQL konieczne jest rozpakowanie obiektu \texttt{ResultSet} i przeniesienie danych do kolekcji Javy, aby uzyskać wynik w tej samej postaci.
+    Przy porównywaniu dwóch zupełnie różnych metod dostępu do danych, konieczne jest ustalenie postaci wynikowej pojedynczego eksperymentu. W przypadku języka SQL i metod JDBC wynik zapytania do bazy danych reprezentowany jest przez obiekt \texttt{ResultSet}, który udostępnia metody do poruszania się po wynikowych wierszach i wyciągania pojedynczych kolumn. W przypadku Stream API, rezultat zapytania dostępny jest od razu w formie obiektów standardowych kolekcji języka Java, takich jak \texttt{List<T>} czy \texttt{Map<K, V>}. W związku z tym, aby zapewnić sprawiedliwe porównanie obu metod, po wykonaniu zapytania SQL konieczne jest rozpakowanie obiektu \texttt{ResultSet} i przeniesienie danych do kolekcji Javy, aby uzyskać wynik w tej samej postaci.
 
 
 \subsection{Budowa środowiska badawczego}
@@ -767,12 +765,12 @@ Filtering: 5
 
     JMH (\textit{Java Microbenchmark Harness}) jest najpopularniejszym narzędziem służącym do badania wydajności czasowej krótkich fragmentów kodu (\textit{microbenchmarking}). Typowe metody pomiaru czasu w kodzie maszyny wirtualnej Javy nie są dokładne ani odporne na błędy, przykładowo często stosowane i zalecane wywołanie \texttt{System.currentTimeMillis} nie jest odporne na zmiany czasu systemowego w trakcie wykonywania badania i ma różną dokładność na różnych systemach operacyjnych, natomiast \texttt{System.nanoTime} nie jest bezpieczna wątkowo na poziomie procesora, przez co wykonywanie się zadań testowych na kilku rdzeniach procesora może powodować mylące wyniki. Co więcej, ręczne wykonywanie pomiarów jest dość żmudne i wymagałoby stworzenia własnego narzędzia. Zdecydowano się więc na wykorzystanie narzędzia gotowego. Przy użyciu JMH możliwe jest proste definiowanie metod, których wydajność (wykonania na sekundę) będzie badana, możliwe jest określenie ilości iteracji, ustalanie zmienych parametrów (np. ilość wierszy danych testowych). Raport wynikowy zawiera szczegółowe informacje na temat ilości wykonań metody, wariancje czasów oraz inne statystyki, na podstawie których możliwe jest wyciągnięcie potrzebnych wniosków.
 
-    Do budowania projektu wykorzystano Gradle, które jest popularnym i używanym w zastosowaniach produkcyjnych narzędziem budowania projektów w Javie. Służy ono do kompilowania kodu, uruchamiania testów jednostkowych, jak i wykonywania testów wydajnościowych dzięki integracji z JMH, które dostępne jest w~ekosystemie Gradle jako gotowy plugin z możliwością opcjonalnej konfiguracji.
+    Do budowania projektu wykorzystano Gradle, które jest popularnym i używanym w zastosowaniach produkcyjnych narzędziem budowania projektów w Javie. Służy ono do kompilowania kodu, uruchamiania testów jednostkowych, jak i wykonywania testów wydajnościowych dzięki integracji z JMH, które dostępne jest w~ekosystemie Gradle jako gotowy dodatek z możliwością opcjonalnej konfiguracji.
 
 \subsection{Schemat klasy testu referencyjnego}
 
 
-    Każdy zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej, której przykład zaprezentowany jest w kodzie \ref{testclass}. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytując z plików w przypadku wykorzystania testu TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Biblioteka JMH zapewnia dokładny pomiar czasu wykonywania się fragmentów kodu, chroni przed zbyt agresywnymi optymalizacjami maszyny wirtualnej oraz udostępnia wygodny raport z przeprowadzonych testów, wraz ze średnimi i wariancjami dla wszystkich pomiarów.
+    Każdy zbiór metod testujących wydajność danego rozwiązania zawarty jest w jednej klasie testowej, której przykład zaprezentowany jest w kodzie \ref{testclass}. Metoda \texttt{setup} przygotowuje potrzebne dane testowe - generując je w czasie wykonania programu w przypadku danych losowych, bądź wczytując z plików w przypadku wykorzystania testu TPC. Dane testowe ładowane są do bazy SQL oraz do zwykłych kolekcji języka Java, głównie list. Pozostałe metody, oznaczone adnotacją \texttt{@Benchmark} są metodami przeznaczonymi do profilowania. Biblioteka JMH zapewnia dokładny pomiar czasu wykonywania się fragmentów kodu, chroni przed zbyt agresywnymi optymalizacjami maszyny wirtualnej oraz udostępnia wygodny raport z przeprowadzonych testów, wraz z wartościami średnimi dla wszystkich pomiarów.
 
 \begin{lstlisting}[label=testclass, caption=Przykładowa klasa JMH]
 
@@ -820,7 +818,7 @@ public class SummingIntegersH2 {
 
 \subsection{Platforma sprzętowa i programowa}
 
-    Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobistym ASUS PU551-JA, z czterordzeniowym procesorem Intel(R) Core(TM) i7-4712MQ CPU @ 2.30GHz i pamięcią RAM o pojemności 16 GiB. Wydajność rozwiązań pamięciowych zależy w zdecydowanej mierze od powyższych komponentów. Dodatkowe testy przeprowadzone na bazie MySQL wykorzystywały wewnętrzny dysk SSD  do przechowywania danych, natomiast badania bazy dyskowej przeprowadzone zostały jedynie w celach poglądowych, oraz dla sprawdzenia, czy nie zostały popełnione błędy przy implementacji zapytań. Kody testów referencyjnych wykonywane były na serwerowej maszynie wirtualnej Javy w wersji 1.8.0\_131-b11 oraz systemie operacyjnym Debian 9.0 x64 z jądrem 4.9.0-3-amd64.
+    Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobistym ASUS PU551-JA, z czterordzeniowym procesorem Intel(R) Core(TM) i7-4712MQ CPU 2.30GHz i pamięcią RAM o pojemności 16 GiB. Wydajność rozwiązań pamięciowych zależy w zdecydowanej mierze od powyższych komponentów. Dodatkowe testy przeprowadzone na bazie MySQL wykorzystywały wewnętrzny dysk SSD  do przechowywania danych, natomiast badania bazy dyskowej przeprowadzone zostały jedynie w celach poglądowych, oraz dla sprawdzenia, czy nie zostały popełnione błędy przy implementacji zapytań. Kody testów referencyjnych wykonywane były na serwerowej maszynie wirtualnej Javy w wersji 1.8.0\_131-b11 oraz systemie operacyjnym Debian 9.0 x64 z jądrem 4.9.0-3-amd64.
 
     Środowisko badawcze zostało wyposażone w odpowiedni zestaw skryptów, pozwalających na automatyczne uruchomienie wszystkich zdefiniowanych testów referencyjnych i uzyskanie wyników, a następnie wygenerowanie wykresów. Testy wykonujące się w pamięci nie wymagają żadnych zewnętrznych zależności, natomiast testy wykorzystujące bazę MySQL i generator TPC wymagają uruchomionej bazy MySQL na odpowiednim porcie z dodanym odpowiednim użytkownikiem oraz skompilowanych plików binarnych generatora (program \texttt{dbgen}).
 
@@ -1072,6 +1070,11 @@ Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzan
         Oracle Corporation
         \textit{The Java Tutorials: Generics}, 
         https://docs.oracle.com/javase/tutorial/java/generics/types.html, czas dostępu 29.05.2017
+
+    \bibitem{jdbc} 
+        Oracle Corporation
+        \textit{JDBC Database Access}, 
+        https://docs.oracle.com/javase/tutorial/jdbc/, czas dostępu 15.06.2017
 
     \bibitem{goetz}
         \textit{Wypowiedź architekta języka Java, Brian Goetz}
