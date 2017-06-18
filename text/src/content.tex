@@ -91,15 +91,17 @@
 
     Z drugiej strony, języki programowania wspierające programowanie funkcyjne są coraz bardziej popularne. Możliwość definiowania operacji na danych za pomocą funkcji, a następnie składania pojedynczych bloków funkcyjnych w złożone procesy wydaje się bardzo przydatna. Najpopularniejszym przykładem są funkcje LINQ występujące w języku C\# \cite{linq}, dzięki którym możliwe jest deklaratywne tworzenie procesów przetwarzania danych, wraz ze wsparciem dla odpytywania baz SQL w identyczny sposób, jak w przypadku zwykłych kolekcji.
 
-
-\subsection{Pamięciowe bazy SQL}
-
 \begin{figure}[h]
 \centering
 \includegraphics{dbstats.png}
 \caption{Popularność rozwiązań DBMS, źródło: Stack Overflow Developer Survey 2017}
 \label{fig:dbstats}
 \end{figure}
+
+
+
+\subsection{Pamięciowe bazy SQL}
+
 
       Bazy danych działające w pamięci RAM są wykorzystywane głównie podczas procesu wytwarzania oprogramowania, jako tymczasowe środowiska do testowania programów wymagających dowolnej bazy danych SQL. Typowe aplikacje, zwłaszcza internetowe, z reguły wymagają bazy danych, natomiast nie jest konieczne stosowanie tego samego rozwiązania przy tworzeniu oprogramowania, co przy wdrożeniu. Dzięki wykorzystaniu bibliotek typu ORM \cite{orm} (ang. \textit{Object Relational Mapping}) możliwe jest transparentne użycie dowolnej bazy, o ile aplikacja nie wykorzystuje specyficznych rozszerzeń języka SQL dostarczanych przez producentów. Powszechnie akceptowaną praktyką jest unikanie wiązania się z konkretną implementacją SQL. Dzięki wykorzystaniu pamięci programu jako miejsca zapisu danych, nie jest konieczne tworzenie baz poza aplikacją, a zawartość bazy czyszczona jest po zamknięciu programu. Interfejs programistyczny JDBC \cite{jdbc} jest wspierany przez wszystkie te rozwiązania, tak więc zarówno bazy dyskowe, jak i pamięciowe obsługuje się praktycznie w ten sam sposób. 
 
@@ -391,13 +393,11 @@ main
 \label{fig:jvmmemory}
 \end{figure}
 
-    Bazy pamięciowe wykorzystują wewnętrzne struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty i zabezpieczonym przed zmianami. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty klas implementacyjnych z pakietu \texttt{org.h2.*} - rysunek \ref{fig:jvmmemory}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
+    Bazy pamięciowe wykorzystują wewnętrzne struktury danych, które są ścisłym szczegółem implementacyjnym, niewidocznym dla programisty. Jest to w większości przypadków dobre rozwiązanie, pozwalające na odseparowanie wewnętrznej reprezentacji danych od metody dostępu do nich (przykładowo, dane w bazie H2 reprezentowane są przez obiekty klas implementacyjnych z pakietu \texttt{org.h2.*} - rysunek \ref{fig:jvmmemory}). Jednakże przy takim podejściu programista nie ma możliwości optymalizacji (o ile to możliwe) struktur danych i musi polegać na wykorzystanym w silniku bazy optymalizatorze zapytań. W przypadku strumieni wewnętrzne procesy zachodzące przy przetwarzaniu danych są ukryte, natomiast możliwe jest w każdym przypadku przepisanie części procesu na czystą Javę. Strumienie są bardzo wydajne, natomiast tak jak każda abstrakcja nad danymi wprowadzają pewnien niewielki narzut. W przypadku, gdy szybkość jest parametrem krytycznym, możliwe jest zastąpienie operacji klasy \texttt{Stream} zwykłymi konstrukcjami języka (pętle, warunki). 
 
 \subsection{Język dziedzinowy a język ogólnego przeznaczenia}
 
-    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (ang. \textit{stored procedures}). 
-   
-    Przy użyciu Stream API możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach i interwałach czasowych, przy uwzględnieniu stref czasowych. Funkcje SQL są ograniczone w~tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
+    Język SQL, poza metodami dostępu do danych umożliwia także ich wstępne przetwarzanie. Dostępne są proste funkcje matematyczne, funkcje operujące na ciągach znaków czy datach. Problemem jest jednak często brak standaryzacji - różni dostawcy baz danych rozszerzają możliwości języka o różne funkcje, przez co migracja pomiędzy bazami danych może być problematyczna, zwłaszcza, jeśli w użyciu są własne procedury składowane (ang. \textit{stored procedures}). Przy użyciu Stream API możliwe jest wykorzystanie praktycznie dowolnego kodu Javy, przez co aplikacja je wykorzystująca jest znacznie bardziej przenośna i łatwiej testowalna. Przykładem jest obsługa dat - język Java wyposażony został w wersji 8 w klasy pakietu \texttt{java.time.*}, umożliwiające wygodne i poprawne operacje na datach i interwałach czasowych, przy uwzględnieniu stref czasowych. Funkcje SQL są ograniczone w~tym zakresie i ich rozszerzanie nie jest zbyt wygodne.
 
     Za przykład niech posłuży zadanie znalezienia daty pierwszego poniedziałku aktualnego miesiąca. Takie problemy pojawiają się często przy tworzeniu różnych statystyk na podstawie danych historycznych. W kodzie \ref{date} zaprezentowany jest przykład rozwiązania powyższego problemu, odpowiednio przy użyciu MySQL i Stream API.
     
@@ -424,9 +424,7 @@ Można od razu zauważyć, że kod SQL jest dość nieczytelny i zawiera wiele s
 
 \subsection{Odpowiedniki operacji} \label{counterparts}
 
-    Stream API umożliwia wykonywanie wielu operacji znanych z języka SQL. Część z nich posiada dokładne odpowiedniki (np. ograniczanie ilości czy filtrowanie), natomiast niektóre wymagają częściowo ręcznej implementacji (złączenie albo unia). Należy zauważyć, iż mimo istnienia pewnej wspólnej bazy pojęciowej, sposób przekazywania parametrów do operacji może być zupełnie inny. Przykładowo, aby wykonać sortowanie w SQL na podstawie kilku kolumn, wystarczy wymienić klucze sortowania po przecinku, przykładowo w postaci \texttt{ORDER BY col1, col2}. Silnik bazodanowy jest w stanie wewnętrznie zinterpretować takie zapytanie. Do sortowania strumieni konieczne jest uzyskanie obiektu typu \texttt{Comparator}, który przekazany zostanie do metody sortującej, a utworzyć można go np. poprzez \texttt{Comparator.comparing(e -> e.col1).thenComparing(e -> e.col2)}. Obiekt taki jest całkowicie odseparowany od strumienia i może być tworzony w dowolnym miejscu w kodzie.
-
-\begin{table}[t]
+\begin{table}[h]
     \label{nazwa odnośnika, która potem użyjemy do cytowania tabeli}
     \begin{center}
         \begin{tabular}{ |c|c| }
@@ -452,6 +450,9 @@ Można od razu zauważyć, że kod SQL jest dość nieczytelny i zawiera wiele s
         \caption{Odpowiedniki operacji w języku SQL i Stream API}
     \end{center}
 \end{table}
+
+    Stream API umożliwia wykonywanie wielu operacji znanych z języka SQL. Część z nich posiada dokładne odpowiedniki (np. ograniczanie ilości czy filtrowanie), natomiast niektóre wymagają częściowo ręcznej implementacji (złączenie albo unia). Należy zauważyć, iż mimo istnienia pewnej wspólnej bazy pojęciowej, sposób przekazywania parametrów do operacji może być zupełnie inny. Przykładowo, aby wykonać sortowanie w SQL na podstawie kilku kolumn, wystarczy wymienić klucze sortowania po przecinku, przykładowo w postaci \texttt{ORDER BY col1, col2}. Silnik bazodanowy jest w stanie wewnętrznie zinterpretować takie zapytanie. Do sortowania strumieni konieczne jest uzyskanie obiektu typu \texttt{Comparator}, który przekazany zostanie do metody sortującej, a utworzyć można go np. poprzez \texttt{Comparator.comparing(e -> e.col1).thenComparing(e -> e.col2)}. Obiekt taki jest całkowicie odseparowany od strumienia i może być tworzony w dowolnym miejscu w kodzie.
+
 
 \subsection{Strumieniowy operator złączenia} \label{proposal}
 
@@ -707,12 +708,7 @@ Filtering: 5
 
     Wprowadzenie do języka Java mechanizmów programowania funkcyjnego zostało bardzo pozytywnie ocenione przez programistów, mimo iż mechanizmy te obecne były w innych językach programowania ogólnego przeznaczenia znacznie wcześniej. Duży nacisk projektantów platformy na wsteczną kompatybilność i obawy przed wprowadzeniem zmian, które nie okażą się korzystne, a konieczne będzie ich utrzymywanie, powodują, że język ten nie rozwija się w takim tempie, jak inne języki. Przykładowo, postanowiono nie wprowadzać metody \texttt{Iterable.stream} konwertującej obiekt wspierający protokół iteracji Java na strumień, mimo iż nie można wskazać żadnych przeciwwskazań do jej istnienia, a i można wskazać zastępcze rozwiązania, które mogłyby być wprowadzone bez większych zmian do API.
 
-    Jednym z najczęściej występujących zarzutów odnośnie Stream API jest brak odpowiedzi na istniejące w języku C\# i platformie .NET narzędzie LINQ-to-SQL. Pozwala ono na dostęp do danych znajdujących się w bazie relacyjnej za pomocą specjalnej składni kodu C\#. Strumienie umożliwiają tworzenie dość złożonych kombinacji operacji, natomiast wszystkie te operacje zachodzą w pamięci maszyny wirtualnej. Nie jest możliwe tłumaczenie metod klasy \texttt{Stream} na słowa kluczowe zapytania SQL. Taką możliwość dają dodatkowe biblioteki, np. JOOQ bądź JPA Criteria API, ale dostępne one były jeszcze przed wydaniem Java 8. 
-
-    Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie przeładowywać interfejsu biblioteki. Znaczy to, iż popularne operatory funkcyjne, znane z~innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcje, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal funkcjonalność dorównująca zewnętrznym bibliotekom.
-
-
-\begin{table}[t]
+\begin{table}[h]
     \label{comparison}
     \begin{center}
         \begin{tabular}{ |c|c| }
@@ -742,6 +738,12 @@ Filtering: 5
         \caption{Podsumowanie porównania SQL i Stream API}
     \end{center}
 \end{table}
+
+
+    Jednym z najczęściej występujących zarzutów odnośnie Stream API jest brak odpowiedzi na istniejące w języku C\# i platformie .NET narzędzie LINQ-to-SQL. Pozwala ono na dostęp do danych znajdujących się w bazie relacyjnej za pomocą specjalnej składni kodu C\#. Strumienie umożliwiają tworzenie dość złożonych kombinacji operacji, natomiast wszystkie te operacje zachodzą w pamięci maszyny wirtualnej. Nie jest możliwe tłumaczenie metod klasy \texttt{Stream} na słowa kluczowe zapytania SQL. Taką możliwość dają dodatkowe biblioteki, np. JOOQ bądź JPA Criteria API, ale dostępne one były jeszcze przed wydaniem Java 8. 
+
+    Kolejnym argumentem przemiawiającym na niekorzyść strumieni jest obiektywnie niewielka liczba operacji możliwych do wykonywania na strumieniach. Podstawowe operacje znane z języków funkcyjnych są oczywiście dostępne, natomiast postanowiono celowo nie rozszerzać zbytnio API klasy \texttt{Stream}, aby nie przeładowywać interfejsu biblioteki. Znaczy to, iż popularne operatory funkcyjne, znane z~innych języków programowania, takie jak \texttt{takeWhile}, \texttt{zip} czy \texttt{sliding} nie są dostępne i nie będą w natywnej formie, ponieważ nie jest możliwe modyfikowanie klas języka Java bez tworzenia własnych klas pośredniczących. Istnieją co prawda biblioteki takie jak jOO$\lambda$ \cite{joolambda} czy StreamEx \cite{streamex}, dostarczające dodatkowe funkcje, ale nie są one oficjalne i nie posiadają wsparcia ze strony języka. W nowej wersji języka, Java 9, zapowiedziano wprowadzenie kilku dodatkowych operatorów, ale nie jest to nadal funkcjonalność dorównująca zewnętrznym bibliotekom.
+
 
 \cleardoublepage
 \section{Środowisko badawcze i badania na danych syntetycznych}
@@ -1010,7 +1012,7 @@ Niniejszy wykres obrazuje porównanie szybkości wykonywania się złączenia ko
 \section{Podsumowanie}
 
 
-Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzania danych w pamięciowych bazach SQL i przy użyciu Stream API w Java 8. Cel został osiągnięty. Przeprowadzono szczegółowe badania wydajnościowe przy użyciu zarówno losowych danych testowych, jak i przy użyciu testu referencyjnego TPC, korzystając z odpowiednio skonstruowanego środowiska badawczego i przy wykorzystaniu odpowiednich narzędzi programowych. Środowisko badawcze pozwala na powtórzenie badań na dowolnie wybranej platformie sprzętowej spełniającej wymagania. Dokonano porównania dwóch metod dostępu do danych w zakresie języka programowania, sposobu konstruowania zapytań jak i możliwości języka zapytań.
+Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzania danych w pamięciowych bazach SQL i przy użyciu Stream API w Java 8. Cel został osiągnięty. Przeprowadzono szczegółowe badania wydajnościowe przy użyciu zarówno losowych danych testowych, jak i przy użyciu testu referencyjnego TPC, korzystając z odpowiednio skonstruowanego środowiska badawczego i przy wykorzystaniu odpowiednich narzędzi programowych. Środowisko badawcze pozwala na powtórzenie badań na dowolnie wybranej platformie sprzętowej spełniającej jego wymagania. Dokonano porównania dwóch metod dostępu do danych w zakresie języka programowania, sposobu konstruowania zapytań jak i możliwości języka zapytań.
 
     Stream API w połączeniu z wyrażeniami lambda jest bardzo przydatną nowością wprowadzoną w Javie 8. Wprowadzone niewielkie części paradygmatu funkcyjnego pozwalają na pisanie wydajnego i łatwo testowalnego kodu. Strumienie są bardzo dobrą alternatywą dla tradycyjnych elementów składni języka, takich jak pętle i~warunki, które można zastąpić metodami Stream API. Z drugiej strony, strumienie sprawdzają się najlepiej na pojedynczych kolekcjach jednorodnych obiektów, łączenie wielu kolekcji charakteryzujących się typowo relacyjną strukturą nie jest wspierane domyślnie i okazuje się, jak wykazały badania, znacznie utrudnione. Tworzenie skomplikowanych sekwencji operacji, zwłaszcza własnoręcznie definiowanych, jest zdecydowanie bardziej skomplikowane i wymaga znacznie więcej kodu niż w języku SQL, który do takich operacji został stworzony. Możliwe jest osiągnięcie znacznych szybkości wykonywania zapytań SQL w pamięci, natomiast należy mieć na uwadze, że wydajność nie jest najważniejszą rzeczą w systemie bazodanowym. Należy zwrócić uwagę na wsparcie producentów, narzędzia wspomagające (np. analizatory planu zapytań) i bezpieczeństwo (kopie zapasowe, metody replikacji), ponieważ w~ogólnym rozrachunku elementy te mogą mieć większe znaczenie.
 
@@ -1018,14 +1020,14 @@ Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzan
 
 
 
-    Jednym z największych wyzwań było zaproponowanie i zaimplementowanie rozwiązania, pozwalającego na import danych bazy testowej TPC zarówno do środowiska bazy SQL, jak i do modelu danych w pamięci wykorzystywanego przez Stream API. Różnice w sposobie dodawania danych, jak i w sposobie ich odczytu wymagały przemyślenia struktury rozwiązania, a następnie napisania dużej ilości pomocniczego kodu pośredniczącego. Pojawiły się poważne problemy wydajnościowe, związane z~ prędkością importowania danych do bazy MySQL przez dużą liczbę kwerend \texttt{SELECT}. Konieczne okazało się opakowanie narzędzia importującego \texttt{mysqlimport} i zintegrowanie go z istniejącym kodem Java.
+    Jednym z największych wyzwań było zaproponowanie i zaimplementowanie rozwiązania, pozwalającego na import danych bazy testowej TPC zarówno do środowiska bazy SQL, jak i do modelu danych w pamięci wykorzystywanego przez Stream API. Różnice w sposobie dodawania danych, jak i w sposobie ich odczytu wymagały przemyślenia struktury rozwiązania, a następnie napisania dużej ilości pomocniczego kodu pośredniczącego. Pojawiły się poważne problemy wydajnościowe, związane z~ prędkością importowania danych do bazy MySQL przez dużą liczbę kwerend \texttt{INSERT}. Konieczne okazało się opakowanie narzędzia importującego \texttt{mysqlimport} i zintegrowanie go z istniejącym kodem Java.
 
     Technicznym problemem, który pojawił się na samym początku budowy środowiska testowego, było umożliwienie wykonywania metod przeznaczonych do badania zarówno poprzez narzędzie JMH, jak i w testach jednostkowych JUnit. Specificzna budowa klasy testu referencyjnego (m. in. automatyczna, zewnętrzna parametryzacja), wspierająca łatwe wykonywanie prostych badań, okazała się bardzo problematyczna w zakresie możliwości jej użycia poza kontekstem JMH. Konieczne było znalezienie sposobu, w którym kolejne wywołania metod z klasy testu referencyjnego nie naruszają logicznej struktury kodu i umożliwiają wyciągnięcie, a następnie porównanie wyników wszystkich typów testów.
 
     Generowanie danych pseudolosowych było konieczne do implementacji testów operujących na danych syntetycznych. Okazało się, że testowanie poprawności wyników zapytań dla wszystkich metod dostępu do danych jest niemożliwe, jeśli generator dostarcza różne dane przy kolejnych jego uruchomieniach. Ze względu na chęć uzyskania jak największej powtarzalności, wykorzystano stałe ziarno generatora losowego \texttt{java.util.Random}.
 
 
-    W dalszych pracach nad porównaniem możliwości przetwarzania pamięciowego jednym z pomysłów jest zbadanie baz NoSQL działających w pamięci. Rozwiązania nierelacyjne posiadają wiele cech niespotykanych w tradycyjnych bazach SQL, takich jak brak ściśle zdefiniowanego schematu czy praca w modelu rozproszonym (\textit{sharding}). Być może cechy te przekładają się na wydajność czy sposób formułowania kodu aplikacji w taki sposób, że rozwiązanie typu NoSQL będzie miało przewagę nad analizowanymi w niniejszej pracy rozwiązaniami.
+    W dalszych pracach nad porównaniem możliwości przetwarzania pamięciowego jednym z pomysłów jest zbadanie baz NoSQL działających w pamięci. Rozwiązania nierelacyjne posiadają wiele cech niespotykanych w tradycyjnych bazach SQL, takich jak brak ściśle zdefiniowanego schematu czy praca w modelu rozproszonym (ang. \textit{sharding}). Być może cechy te przekładają się na wydajność czy sposób formułowania kodu aplikacji w taki sposób, że rozwiązanie typu NoSQL będzie miało przewagę nad analizowanymi w niniejszej pracy rozwiązaniami.
 
     Stream API jest bardzo wygodnym interfejsem programistycznym, którego zakres widoczny przez końcowego użytkownika jest niewielki. Szczegóły implementacyjne, takie jak interfejs \texttt{Spliterator} pozwalający na dokładne zdefiniowanie sposobu podziału zadań na wątki, czy realizacja przydziału zadań do wątków, mogą być istotnym tematem do analizy. Możliwe, że odpowiednie zrozumienie i wykorzystanie niskopoziomowych klas strumieni pozwoliłoby na dokonanie lepszych optymalizacji i w konsekwencji uzyskanie lepszych wyników. Dobrym pomysłem byłoby zaproponowanie odmiany Stream API zorientowanej na wydajność, do zastosowań podobnych jak te, o których opisuje niniejsza praca.
 
