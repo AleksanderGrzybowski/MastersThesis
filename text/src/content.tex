@@ -1123,7 +1123,7 @@ Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzan
 
     W pliku konfiguracyjnym \texttt{build.gradle} możliwe jest zdefiniowanie kilku parametrów narzędzia JMH, między innymi liczba grup iteracji testu, opcje tworzenia nowej instancji maszyny wirtualnej Java przy każdym teście oraz ilość przydzielonej jej pamięci. Należy mieć na uwadze, że przydzielenie zbyt małej ilości pamięci z~dużym prawdopodobieństwem da nierzetelne wyniki, ze względu na wzmożoną aktywność odśmiecacza pamięci, możliwe jest też przepełnienie się pamięci i przerwanie działania. 
 
-    Klasy testowe znajdują się w folderze \texttt{src/jmh/java/masterthesis}. Przykładowo, aby uruchomić test referencyjny \texttt{SummingIntegers} badający strumienie należy wywołać następujące polecenie:
+    Klasy testowe znajdują się w folderze \texttt{src/jmh/java/masterthesis}. Każda z nich posiada metodę \texttt{setup}, wywoływaną przez narzędzie JMH przed uruchomieniem danego testu, metoda ta jest też ręcznie wywoływana w testach jednostkowych. Starano się zachować możliwie maksymalną niezależność klas, aby poszczególne badania mogły być wykonywane oddzielnie. Adnotacja \texttt{@Param} definiuje oczekiwane wielkości zbioru danych i powinna być dostosowana odpowiednio do oczekiwań i możliwości platformy sprzętowej. Przykładowo, aby uruchomić test referencyjny \texttt{SummingIntegers} badający strumienie należy wywołać następujące polecenie:
 
 \begin{verbatim}
 $ ./gradlew clean jmh -Pinclude='SummingIntegersStreams'
