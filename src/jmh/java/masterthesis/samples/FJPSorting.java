@@ -22,7 +22,7 @@ public class FJPSorting {
     
     @Setup
     public void setup() throws Exception {
-        numbers = new Random().ints().boxed().limit(1000000).collect(toList());
+        numbers = new Random(12345L).ints().boxed().limit(1000000).collect(toList());
         pool = new ForkJoinPool(poolSize);
     }
     
@@ -31,6 +31,5 @@ public class FJPSorting {
         return pool.submit(
                 () -> numbers.parallelStream().sorted().collect(toList())
         ).get();
-        
     }
 }
