@@ -86,8 +86,10 @@
 \tableofcontents
 
 \listoffigures
-\listoftables
+
 \lstlistoflistings
+
+\listoftables
 
 \cleardoublepage
 \section{Wstęp}
@@ -956,7 +958,7 @@ public class SummingIntegersH2 {
 
 \subsection{Implementacja zapytań TPC przy użyciu Stream API}
 
-    Zapytania TPC w większości charakteryzują się bardzo dużą złożonością kodu oraz wykorzystaniem skomplikowanych złączeń tabel. Do implementacji wybrano kilka kwerend, kierując się stopniem skomplikowania i liczbą złączeń. Starano się zachować jak największe podobieństwo do kodu SQL, przy wykorzystaniu istniejących odpowiedników w Stream API. Niestety, w kilku przypadkach konieczne było ręczne zaimplementowanie operacji nie mających odzwierciedlenia w strumieniach, np. funkcje agregujące operujące na kilku kolumnach jednocześnie. Spowodowało to znaczne rozrośnięcie się kodu i znaczący spadek jego czytelności. Przykładowo, mając daną tabelę z dwoma kolumnami \texttt{val1} i \texttt{val2}, aby uzyskać sumę obu kolumn, należy wykonać zapytanie \texttt{SELECT sum(val1), sum(val2)}. Strream API nie wspiera agregacji przy użyciu więcej niż jednego pola, więc powyższy przykład mógłby zostać wyrażony w sposób zaprezentowany w kodzie \ref{streamsaggregations}.
+    Zapytania TPC w większości charakteryzują się bardzo dużą złożonością kodu oraz wykorzystaniem skomplikowanych złączeń tabel. Do implementacji wybrano kilka kwerend, kierując się stopniem skomplikowania i liczbą złączeń. Starano się zachować jak największe podobieństwo do kodu SQL, przy wykorzystaniu istniejących odpowiedników w Stream API. Niestety, w kilku przypadkach konieczne było ręczne zaimplementowanie operacji nie mających odzwierciedlenia w strumieniach, np. funkcji agregujących operujących na kilku kolumnach jednocześnie. Spowodowało to znaczne rozrośnięcie się kodu i znaczący spadek jego czytelności. Przykładowo, mając daną tabelę z dwoma kolumnami \texttt{val1} i \texttt{val2}, aby uzyskać sumę obu kolumn, należy wykonać zapytanie \texttt{SELECT sum(val1), sum(val2)}. Stream API nie wspiera agregacji przy użyciu więcej niż jednego pola, więc powyższy przykład mógłby zostać wyrażony w sposób zaprezentowany w kodzie \ref{streamsaggregations}.
 
 \begin{lstlisting}[label=streamsaggregations, caption=Przykładowa implementacja funkcji agregującej operującej na dwóch polach]
 
@@ -996,7 +998,7 @@ out.println(results.get(1).getSum());
 \begin{figure}[h]
 \centering
 \includegraphics[width=15cm]{plots/Tpc1Benchmark}
-\caption{Test nr 1}
+\caption{Test TPC nr 1}
     \label{fig:tpc1}
 \end{figure}
 
@@ -1006,7 +1008,7 @@ out.println(results.get(1).getSum());
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc4Benchmark}
-\caption{Test nr 4}
+\caption{Test TPC nr 4}
     \label{fig:tpc4}
 \end{figure}
 
@@ -1016,7 +1018,7 @@ out.println(results.get(1).getSum());
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc6Benchmark}
-\caption{Test nr 6}
+\caption{Test TPC nr 6}
     \label{fig:tpc6}
 \end{figure}
 
@@ -1026,7 +1028,7 @@ out.println(results.get(1).getSum());
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc12Benchmark}
-\caption{Test nr 12}
+\caption{Test TPC nr 12}
     \label{fig:tpc12}
 \end{figure}
 
@@ -1036,7 +1038,7 @@ out.println(results.get(1).getSum());
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc14Benchmark}
-\caption{Test nr 14}
+\caption{Test TPC nr 14}
     \label{fig:tpc14}
 \end{figure}
 
