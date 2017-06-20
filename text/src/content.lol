@@ -13,3 +13,4 @@
 \contentsline {lstlisting}{\numberline {13}Brak fuzji operacji stanowych}{32}{lstlisting.13}
 \contentsline {lstlisting}{\numberline {14}Sygnatura metody grupuj\IeC {\k a}cej}{33}{lstlisting.14}
 \contentsline {lstlisting}{\numberline {15}Przyk\IeC {\l }adowa klasa JMH}{39}{lstlisting.15}
+\contentsline {lstlisting}{\numberline {16}Przyk\IeC {\l }adowa implementacja funkcji agreguj\IeC {\k a}cej operuj\IeC {\k a}cej na dw\IeC {\'o}ch polach}{49}{lstlisting.16}

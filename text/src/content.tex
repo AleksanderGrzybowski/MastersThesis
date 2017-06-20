@@ -129,7 +129,7 @@
 
     Pojawienie się nowej wersji 8 platformy Java przyniosło dużo nowych zmian w~języku. Wprowadzenie wyrażeń lambda jako zwięzłej alternatywy wobec anonimowych klas wewnętrznych, dodanie referencji do metod oraz wprowadzenie interfejsów domyślnych przełamało w pewien sposób popularną opinię, że język Java jest językiem jedynie obiektowym. Funkcyjne paradygmaty, coraz częściej analizowane i opisywane, okazują się dobrym sposobem na tworzenie bezpiecznych i łatwych w analizie aplikacji. Strumienie wykorzystują w bezpośredni sposób wszystkie powyższe, nowo wprowadzone udogodnienia. Skrócone funkcje lambda ułatwiają tworzenie prostych i silnie typowanych parametrów funkcyjnych, referencje do metod upraszczają pisanie odwzorowań operujących na aktualnie przetwarzanym obiekcie, a interfejsy domyślne pozwalają na tworzenie łatwiejszych w obsłudze interfejsów aplikacyjnych.
 
-    Stream API jest komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest abstrakcyjną reprezentacją ciągu obiektów, które pochodzą z pewnego źródła. Zazwyczaj strumienie tworzone są na podstawie kolekcji obiektów, ale ogólnie możliwe jest generowanie obiektów w dowolny sposób. Strumienie obsługują wykonywanie prostych i złożonych operacji filtrowania, sortowania, odwzorowania i grupowania, przy czym możliwe jest też samodzielne tworzenie obiektów przetwarzających dane (interfejs \texttt{Collector}). Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są `leniwie', to znaczy żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej. Wystąpienie operacji terminalnej powoduje łańcuchowe wykonanie się wszystkich operacji pośrednich.
+    Stream API (\cite{streamsdoc1}, \cite{streamsdoc2}) jest komponentem biblioteki standardowej, który pozwala na tworzenie tzw. strumieni. Strumień jest abstrakcyjną reprezentacją ciągu obiektów, które pochodzą z pewnego źródła. Zazwyczaj strumienie tworzone są na podstawie kolekcji obiektów, ale ogólnie możliwe jest generowanie obiektów w dowolny sposób. Strumienie obsługują wykonywanie prostych i złożonych operacji filtrowania, sortowania, odwzorowania i grupowania, przy czym możliwe jest też samodzielne tworzenie obiektów przetwarzających dane (interfejs \texttt{Collector}). Należy mieć na uwadze, że wszystkie wykonane w ciągu operacje wykonywane są `leniwie', to znaczy żadna obróbka danych nie zachodzi przed wykonaniem tzw. operacji terminalnej. Wystąpienie operacji terminalnej powoduje łańcuchowe wykonanie się wszystkich operacji pośrednich.
 
     Cechą szczególną strumieni jest możliwość ich łatwego zrównoleglania, udostępniona programistom w postaci metody \texttt{Stream.parallelStream}. Wielowątkowe przetwarzanie danych jest dość złożonym zagadnieniem w Javie, wymagającym dużej wiedzy na temat działania pamięci maszyny wirtualnej (ang. \textit{Java Memory Model}) i szczególnej ostrożności przy blokowaniu zasobów. Jako iż strumienie definiowane są zwykle przez funkcje nie zmieniające globalnego czy współdzielonego stanu, dodanie elementu równoległości jest znacznie prostsze. Jednym z celów niniejszej pracy jest zbadanie, jaki wpływ na wydajność przetwarzania może mieć zrównoleglenie strumieni.
 
@@ -340,7 +340,7 @@ public class SummingTask extends RecursiveTask<Integer> {
 \begin{figure}[h]
 \centering
 \includegraphics{forkjoin.png}
-\caption{Wizualizacja działania mechanizmu Fork-Join (źródło: http://www.developer.com /imagesvr\_ce/3378 /join-fork-image001.png)}
+    \caption{Wizualizacja działania mechanizmu Fork-Join, źródło: \url{http://www.developer.com/imagesvr\_ce/3378 /join-fork-image001.png}}
 \label{fig:forkjoin}
 \end{figure}
 
@@ -844,7 +844,7 @@ public class SummingIntegersH2 {
 
 \subsection{Platforma sprzętowa i programowa}
 
-    Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobistym ASUS PU551-JA, z czterordzeniowym procesorem Intel(R) Core(TM) i7-4712MQ CPU 2.30GHz i pamięcią RAM o pojemności 16 GB. Wydajność rozwiązań pamięciowych zależy w zdecydowanej mierze od powyższych komponentów. Dodatkowe testy przeprowadzone na bazie MySQL wykorzystywały wewnętrzny dysk SSD  do przechowywania danych, natomiast badania bazy dyskowej przeprowadzone zostały jedynie w celach poglądowych, oraz dla sprawdzenia, czy nie zostały popełnione błędy przy implementacji zapytań. Kody testów referencyjnych wykonywane były na serwerowej maszynie wirtualnej Javy w wersji 1.8.0\_131-b11 oraz systemie operacyjnym Debian 9.0 x64 z jądrem 4.9.0-3-amd64.
+    Testy wydajnościowe i pamięciowe przeprowadzone zostały na komputerze osobistym ASUS PU551-JA, z czterordzeniowym procesorem Intel(R) Core(TM) i7-4712MQ CPU 2.30GHz i pamięcią RAM o pojemności 16 GB. Wydajność rozwiązań pamięciowych zależy w zdecydowanej mierze od powyższych komponentów. Dodatkowe testy przeprowadzone na bazie MySQL wykorzystywały wewnętrzny dysk SSD  do przechowywania danych. Badania bazy dyskowej przeprowadzone zostały jedynie w celach poglądowych, oraz dla sprawdzenia, czy nie zostały popełnione błędy przy implementacji zapytań. Kody testów referencyjnych wykonywane były na serwerowej maszynie wirtualnej Javy w wersji 1.8.0\_131-b11 oraz systemie operacyjnym Debian 9.0 x64 z jądrem 4.9.0-3-amd64.
 
     Środowisko badawcze zostało wyposażone w odpowiedni zestaw skryptów, pozwalających na automatyczne uruchomienie wszystkich zdefiniowanych testów referencyjnych i uzyskanie wyników, a następnie wygenerowanie wykresów. Testy wykonujące się w pamięci nie wymagają żadnych zewnętrznych zależności, natomiast testy wykorzystujące bazę MySQL i generator TPC wymagają uruchomionej bazy MySQL na odpowiednim porcie z dodanym odpowiednim użytkownikiem oraz skompilowanych plików binarnych generatora (program \texttt{dbgen}).
 
@@ -865,52 +865,57 @@ public class SummingIntegersH2 {
 
 \subsection{Wyniki badań}
 
-    Poniższe wykresy prezentują wyniki wszystkich testów syntetycznych przeprowadzonych w środowisku testowym. Dla każdego testu referencyjnego wykonano 20 grup iteracji, przy czym każda grupa iteracja wykonywała się przez nie mniej niż 1 sekundę. Na osi X zaznaczona jest wielkość zbioru danych testowych, natomiast oś Y prezentuje osiągniętą ilość operacji na sekundę, w skali logarytmicznej. Wykresy zostały wygenerowane na podstawie pojedynczych raportów wygenerowanych przez narzędzie JMH, przy użyciu biblioteki matplotlib \cite{matplotlib} i języka Python.
+    Poniższe wykresy prezentują wyniki wszystkich testów syntetycznych przeprowadzonych w środowisku testowym. Dla każdego testu referencyjnego wykonano 20 grup iteracji, przy czym każda grupa iteracji wykonywała się przez nie mniej niż 1 sekundę. Na osi X zaznaczona jest wielkość zbioru danych testowych, natomiast oś Y prezentuje osiągniętą liczbę operacji na sekundę, w skali logarytmicznej. Wykresy zostały utworzone na podstawie pojedynczych raportów wygenerowanych przez narzędzie JMH, przy użyciu biblioteki matplotlib \cite{matplotlib} i języka Python.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/SummingIntegers}
-\caption{SummingIntegers}
+\caption{Test wydajności sumowania liczb całkowitych}
+    \label{fig:summingintegers}
 \end{figure}
 
-    Test \texttt{SummingIntegers} pokazuje wyraźnie typowe wydajności poszczególnych metod dostępu do danych. Najszybszy dostęp uzyskać można do zwykłej tablicy typu prostego, nieco wolniejsze okazują się listy (tutaj typ \texttt{ArrayList}). Dla małych zbiorów danych strumienie sekwencyjne są nawet kilka rzędów wielkości szybsze od strumieni równoległych, co nie jest zaskakujące, biorąc pod uwagę spory narzut tworzenia struktur kontrolujących przetwarzanie równoległe. Baza H2 i MySQL dla tak prostego testu mają zbyt duże narzuty, aby konkurować z pozostałymi metodami.
+    Test z rysunku \ref{fig:summingintegers} pokazuje wyraźnie typowe wydajności poszczególnych metod dostępu do danych. Najszybszy dostęp uzyskać można do zwykłej tablicy typu prostego, nieco wolniejsze okazują się listy (tutaj typ \texttt{ArrayList}). Dla małych zbiorów danych strumienie sekwencyjne są nawet kilka rzędów wielkości szybsze od strumieni równoległych, co nie jest zaskakujące, biorąc pod uwagę spory narzut tworzenia struktur kontrolujących przetwarzanie równoległe. Baza H2 i MySQL dla tak prostego testu mają zbyt duże narzuty, aby konkurować z pozostałymi metodami.
 
 \newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/GroupingAndSumming}
-\caption{GroupingAndSumming}
+\caption{Test wydajności grupowania i sumowania}
+    \label{fig:groupingandsumming}
 \end{figure}
 
-    Test \texttt{GroupingAndSumming} w bardzo jasny sposób ukazuje przewagę strumieni równoległych dla większych zbiorów danych i zadań, w których możliwy jest dobry podział podzadań. Strumienie typu równoległego okazują się szybsze od zwykłych pętli, co z jednej strony może dziwić, biorąc pod uwagę wyniki innych testów, ale z~drugiej strony pokazuje, dla jakiego typu problemów strumienie są dobrym rozwiązaniem.
+    Test z rysunku \ref{fig:groupingandsumming} w bardzo jasny sposób ukazuje przewagę strumieni równoległych dla większych zbiorów danych i zadań, w których możliwy jest dobry podział podzadań. Strumienie typu równoległego okazują się szybsze od zwykłych pętli, co z jednej strony może dziwić, biorąc pod uwagę wyniki innych testów, ale z~drugiej strony pokazuje, dla jakiego typu problemów strumienie są dobrym rozwiązaniem.
 
 \newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/CrossJoinAndFilter}
-\caption{CrossJoinAndFilter}
+\caption{Test wydajności iloczynu kartezjańskiego i filtrowania}
+    \label{fig:crossjoinandfilter}
 \end{figure}
 
-    Przykład \texttt{CrossJoinAndFilter} dobrze pokazuje, dla jakich typów danych przetwarzanie równoległe nie jest przydatne. Tradycyjne złączenia strumieni nie są zbyt wydajne (propozycja lepszego rozwiązania znajduje się w rozdziale X), tak więc wsparcie się równoległością prowadzi jedynie do niewielkiego zysku wydajnościowego.
+    Przykład przedstawiony na rysunku \ref{fig:crossjoinandfilter} dobrze pokazuje, dla jakich typów danych przetwarzanie równoległe nie jest przydatne. Tradycyjne złączenia strumieni nie są zbyt wydajne (propozycja lepszego rozwiązania znajduje się w rozdziale \ref{proposal}), tak więc wsparcie się równoległością prowadzi jedynie do niewielkiego zysku wydajnościowego.
 
 
 \newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/FilteringAndCountingIntegers}
-\caption{FilteringAndCountingIntegers}
+\caption{Test wydajności filtrowania i zliczania wystąpień liczb}
+    \label{fig:filteringandcountingintegers}
 \end{figure}
 
-    Wyniki testu są bardzo podobne do testu \texttt{GroupingAndSumming}, bardzo dobrze widoczna jest przewaga strumieni równoległych nad sekwencyjnymi przy przekroczeniu pewnego rozmiaru danych wejściowych.
+    Wyniki testu z rysunku \ref{fig:filteringandcountingintegers} są bardzo podobne do testu grupowania i sumowania, bardzo dobrze widoczna jest przewaga strumieni równoległych nad sekwencyjnymi przy przekroczeniu pewnego rozmiaru danych wejściowych.
 
 \newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/SortingStrings}
-\caption{SortingStrings}
+\caption{Test wydajności sortowania ciągów znaków}
+    \label{fig:sortingstrings}
 \end{figure}
 
-    Bardzo ciekawe zachowanie można zaobserwować w teście \texttt{SortingStrings} - dla małego rozmiaru danych wejściowych, wydajność sortowania jest bardzo zbliżona. Jest to prawdopodobnie związane z wykorzystaniem tego samego algorytmu sortowania w~przypadkach, dla których wykresy praktycznie nachodzą na siebie (sortowanie tablicy, listy i sortowanie przy użyciu strumieni sekwencyjnych).
+    Bardzo ciekawe zachowanie można zaobserwować w teście przedstawionym na rysunku \ref{fig:sortingstrings} - dla małego rozmiaru danych wejściowych, wydajność sortowania jest bardzo zbliżona. Jest to prawdopodobnie związane z wykorzystaniem tego samego algorytmu sortowania w~przypadkach, dla których wykresy praktycznie nachodzą na siebie (sortowanie tablicy, listy i sortowanie przy użyciu strumieni sekwencyjnych).
 
 \newpage
 
@@ -930,7 +935,7 @@ public class SummingIntegersH2 {
 
 \subsection{Charakterystyka testu referencyjnego TPC-H}
 
-    Generator danych testowych \texttt{dbgen} jest konsolowym programem, służącym do generowania zbiorów danych testowych TPC-H. Schemat bazy danych zaprezentowany jest na rysunku \ref{fig:tpcschema}. Jest to typowa hurtownia danych, gromadząca informacje o produktach, klientach, dostawcach i zamówieniach. Dokładny sens biznesowy wygenerowanych danych nie jest zbyt istotny w rozważaniach wydajnościowych, na potrzeby niniejszej pracy zakłada się ich poprawność w sensie spójności referencyjnej. Ważny jest też fakt, że dane te w przybliżeniu modelują możliwą do zaistnienia w rzeczywistości sytuację. Program \texttt{dbgen} pozwala na zdefiniowanie wielkości wygenerowanego zbioru, procentowo względem zbioru referencyjnego (100\%) o ściśle zdefiniowanym rozmiarze. Ze względu na praktyczne ograniczenia platformy testowej (16 GiB RAM), konieczne było ograniczenie maksymalnej wielkości zbioru do ok. 20-30\%, zależnie od przypadku testowego. 
+    Generator danych testowych \texttt{dbgen} jest konsolowym programem, służącym do generowania zbiorów danych testowych TPC-H. Schemat bazy danych zaprezentowany jest na rysunku \ref{fig:tpcschema}. Jest to typowa hurtownia danych, gromadząca informacje o produktach, klientach, dostawcach i zamówieniach. Dokładny sens biznesowy wygenerowanych danych nie jest zbyt istotny w rozważaniach wydajnościowych, na potrzeby niniejszej pracy zakłada się ich poprawność w sensie spójności referencyjnej. Ważny jest też fakt, że dane te w przybliżeniu modelują możliwą do zaistnienia w rzeczywistości sytuację. Program \texttt{dbgen} pozwala na zdefiniowanie wielkości wygenerowanego zbioru, procentowo względem zbioru referencyjnego (100\%) o ściśle zdefiniowanym rozmiarze. Ze względu na praktyczne ograniczenia platformy testowej (16 GB RAM), konieczne było ograniczenie maksymalnej wielkości zbioru do ok. 20-30\%, zależnie od przypadku testowego. 
 
     Drugą częścią TPC jest zbiór 22 zapytań testowych, z których każde odpowiada na pewne pytanie biznesowe, a na postawie odpowiedzi możliwe jest wspieranie decyzji biznesowych. Różnią się one znacznie stopniem skomplikowania (pod względem ogólnej złożoności kodu SQL) i średnim czasem wykonania. Prawidłowe wyniki wzorcowe są także udostępniane przez TPC, niestety jedynie dla zbioru danych o~wielkości 100\%. Część zapytań można jednak zwalidować mimo tego, jeśli bazują one na typowych agregacjach typu suma, średnia czy ilość - jako iż generowane dane wykazują się rozkładem jednostajnym, możliwe jest przeskalowanie sum i zliczeń względem współczynnika wielkości zbioru, jak i odpowiednie zinterpretowanie średnich. Nie jest to oczywiście zbyt pewny sposób, tak więc do środowiska badawczego wprowadzono zbiór testów jednostkowych, które sprawdzają, czy wyniki uzyskane z wykonania zapytania na wszystkich systemach bazodanowych są identyczne.
 
@@ -951,7 +956,36 @@ public class SummingIntegersH2 {
 
 \subsection{Implementacja zapytań TPC przy użyciu Stream API}
 
-Zapytania TPC w większości charakteryzują się bardzo dużą złożonością kodu oraz wykorzystaniem skomplikowanych złączeń tabel. Do implementacji wybrano kilka kwerend, kierując się stopniem skomplikowania i liczbą złączeń. Starano się zachować jak największe podobieństwo do kodu SQL, przy wykorzystaniu istniejących odpowiedników w Stream API. Niestety, w kilku przypadkach konieczne było ręczne zaimplementowanie operacji nie mających odzwierciedlenia w strumieniach, np. funkcje agregujące operujące na kilku kolumnach jednocześnie. Spowodowało to znaczne rozrośnięcie się ilości kodu i znaczący spadek jego czytelności. 
+    Zapytania TPC w większości charakteryzują się bardzo dużą złożonością kodu oraz wykorzystaniem skomplikowanych złączeń tabel. Do implementacji wybrano kilka kwerend, kierując się stopniem skomplikowania i liczbą złączeń. Starano się zachować jak największe podobieństwo do kodu SQL, przy wykorzystaniu istniejących odpowiedników w Stream API. Niestety, w kilku przypadkach konieczne było ręczne zaimplementowanie operacji nie mających odzwierciedlenia w strumieniach, np. funkcje agregujące operujące na kilku kolumnach jednocześnie. Spowodowało to znaczne rozrośnięcie się kodu i znaczący spadek jego czytelności. Przykładowo, mając daną tabelę z dwoma kolumnami \texttt{val1} i \texttt{val2}, aby uzyskać sumę obu kolumn, należy wykonać zapytanie \texttt{SELECT sum(val1), sum(val2)}. Strream API nie wspiera agregacji przy użyciu więcej niż jednego pola, więc powyższy przykład mógłby zostać wyrażony w sposób zaprezentowany w kodzie \ref{streamsaggregations}.
+
+\begin{lstlisting}[label=streamsaggregations, caption=Przykładowa implementacja funkcji agregującej operującej na dwóch polach]
+
+List<IntSummaryStatistics> results = Stream.of(
+    of(1, 2), of(2, 3),
+    of(3, 2), of(4, 1),
+    of(2, 0), of(0, 1)
+).collect(Collector.of(
+    () -> asList(
+        new IntSummaryStatistics(),
+        new IntSummaryStatistics()
+    ),
+    (acc, val) -> {
+      acc.get(0).accept(val.left);
+      acc.get(1).accept(val.right);
+    },
+    (acc1, acc2) -> {
+      acc1.get(0).combine(acc2.get(0));
+      acc1.get(1).combine(acc2.get(1));
+      return acc1;
+    }
+));
+
+out.println(results.get(0).getSum());
+out.println(results.get(1).getSum());
+
+\end{lstlisting}
+
+    Wszystkie zapytania testu TPC zrealizowane przy użyciu oryginalnego kodu SQL i przy użyciu Stream API znajdują się na dołączonej płycie zawierającej środowisko testowe.
 
     Dodatkowo, wprowadzono zbiór testów jednostkowych, weryfikujących zgodność wyników zapytań dla wszystkich metod dostępu do danych. Referencyjne wyniki \cite{tpcresults} udostępniane przez konsorcjum TPC mają zastosowanie jedynie dla zbioru danych generowanego z współczynnikiem 1.0, więc konieczne jest wprowadzenie innej metody weryfikacji poprawności wyników. Jako iż postać wyniku zapytania w~przypadku wszystkich metod jest identyczna, nie było problemem zaimplementowanie kilku prostych testów dla każdej metody przetwarzania danych.
 
@@ -962,46 +996,51 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
 \begin{figure}[h]
 \centering
 \includegraphics[width=15cm]{plots/Tpc1Benchmark}
-\caption{Tpc1Benchmark}
+\caption{Test nr 1}
+    \label{fig:tpc1}
 \end{figure}
 
-    Zapytanie nr 1 obejmowało filtrowanie i wielokrotne wykorzystanie funkcji agregujących \texttt{sum}, \texttt{avg} i \texttt{count}. Przy większych rozmiarach zbioru danych strumienie wykazują większą liczbę operacji na sekundę, a związane to jest z bardzo łatwym zrównoleglaniem operacji agregujących, w których łączenie pośrednich kontenerów danych w implementacji interfejsu \texttt{Collector} jest bardzo szybkie. W zakresie baz SQL, baza pamięciowa prezentuje w tym przypadku większą wydajność, przy czym dla każdej wielkości zbioru testowego baza pamięciowa jest lepsza od bazy dyskowej. 
+    Zapytanie nr 1 (rysunek \ref{fig:tpc1}) obejmowało filtrowanie i wielokrotne wykorzystanie funkcji agregujących \texttt{sum}, \texttt{avg} i \texttt{count}. Przy większych rozmiarach zbioru danych strumienie wykazują większą liczbę operacji na sekundę, a związane to jest z bardzo łatwym zrównoleglaniem operacji agregujących, w których łączenie pośrednich kontenerów danych w implementacji interfejsu \texttt{Collector} jest bardzo szybkie. W zakresie baz SQL, baza pamięciowa prezentuje w tym przypadku większą wydajność, przy czym dla każdej wielkości zbioru testowego baza pamięciowa jest lepsza od bazy dyskowej. 
 
 \newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc4Benchmark}
-\caption{Tpc4Benchmark}
+\caption{Test nr 4}
+    \label{fig:tpc4}
 \end{figure}
 
-    Wyniki testów dla zapytania nr 4 prezentują bardzo wyraźnie możliwości silnika SQL w zakresie optymalnej interpretacji zapytania zagnieżdżonego (\textit{inner query}) i jego efektywnego wykonania. W przypadku implementacji strumieniowej, zapytanie zagnieżdżone jest zapisane w postaci funkcji wewnętrznej, która wykazuje te same problemy wydajnościowe, co złączenia kolekcji. W przypadku strumieni nie przeprowadzono badań wydajnościowych dla wielu wielkości zbioru danych, ze względu na skrajnie wolne wykonywanie się testu.
+    Wyniki testów dla zapytania nr 4 (rysunek \ref{fig:tpc4}) prezentują bardzo wyraźnie możliwości silnika SQL w zakresie optymalnej interpretacji zapytania zagnieżdżonego (\textit{inner query}) i jego efektywnego wykonania. W przypadku implementacji strumieniowej, zapytanie zagnieżdżone jest zapisane w postaci funkcji wewnętrznej, która wykazuje te same problemy wydajnościowe, co złączenia kolekcji. W przypadku strumieni nie przeprowadzono badań wydajnościowych dla wielu wielkości zbioru danych, ze względu na skrajnie wolne wykonywanie się testu.
 
 \newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc6Benchmark}
-\caption{Tpc6Benchmark}
+\caption{Test nr 6}
+    \label{fig:tpc6}
 \end{figure}
 
-    Zapytanie nr 6 jest bardzo podobne do zapytania nr 1, ponieważ także obejmuje jedną tabelę, ale tylko jedną funkcję agregującą. Podobnie jak w teście nr 1, w~tak prostym przypadku strumienie wykazują większą wydajność, przy czym strumienie równoległe prezentują się znacznie lepiej niż strumienie sekwencyjne. Taka przewaga jest zawsze widoczna przy operacjach łatwych do podzielenia i zrównoleglenia wzorcem FJP.
+    Zapytanie nr 6 (rysunek \ref{fig:tpc6}) jest bardzo podobne do zapytania nr 1, ponieważ także obejmuje jedną tabelę, ale tylko jedną funkcję agregującą. Podobnie jak w teście nr 1, w~tak prostym przypadku strumienie wykazują większą wydajność, przy czym strumienie równoległe prezentują się znacznie lepiej niż strumienie sekwencyjne. Taka przewaga jest zawsze widoczna przy operacjach łatwych do podzielenia i zrównoleglenia wzorcem FJP.
 
 \newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc12Benchmark}
-\caption{Tpc12Benchmark}
+\caption{Test nr 12}
+    \label{fig:tpc12}
 \end{figure}
 
-    Test nr 12 pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających. Podobnie jak w przypadku testu nr 4, nie przeprowadzony wszystkich testów ze względu na długi czas wykonania.
+    Test nr 12 (rysunek \ref{fig:tpc12}) pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających. Podobnie jak w przypadku testu nr 4, nie przeprowadzony wszystkich testów ze względu na długi czas wykonania.
 
 \newpage
 \begin{figure}[H]
 \centering
 \includegraphics[width=15cm]{plots/Tpc14Benchmark}
-\caption{Tpc14Benchmark}
+\caption{Test nr 14}
+    \label{fig:tpc14}
 \end{figure}
 
-    Ostatni test nr 14 potwierdza znakomitą wydajność bazy MySQL w zakresie operacji łączenia tabel, przy czym baza H2 jest jedynie kilka razy wolniejsza. Funkcje agregujące mogą być bardzo efektywnie wykonywane w przypadku jednoczesnego złączenia tabel.
+    Ostatni test nr 14 (rysunek \ref{fig:tpc14}) potwierdza znakomitą wydajność bazy MySQL w zakresie operacji łączenia tabel, przy czym baza H2 jest jedynie kilka razy wolniejsza. Funkcje agregujące mogą być bardzo efektywnie wykonywane w przypadku jednoczesnego złączenia tabel.
 
 \newpage
 \begin{figure}[H]
@@ -1011,13 +1050,13 @@ Zapytania TPC w większości charakteryzują się bardzo dużą złożonością 
     \label{fig:naturaljoingraph}
 \end{figure}
 
-Niniejszy wykres obrazuje porównanie szybkości wykonywania się złączenia kolekcji \texttt{LineItem} i \texttt{Order} na podstawie odpowiedniego klucza głównego. Jak można zaobserwować, kolekcja haszująca zapewnia bardzo szybkie wyszukiwanie obiektów przy podaniu klucza, więc przy założeniu jego unikalności połączenie dwóch zbiorów w pamięci jest znacznie szybsze niż wykonanie tego samego zadania czy to w bazie dyskowej, czy w bazie pamięciowej H2. Narzut struktur danych bazy pamięciowej jest tutaj wyraźnie widoczny.
+    Wykres znajdujący się na rysunku \ref{fig:naturaljoingraph} obrazuje porównanie szybkości wykonywania się złączenia kolekcji \texttt{LineItem} i \texttt{Order} na podstawie odpowiedniego klucza głównego. Jak można zaobserwować, kolekcja haszująca zapewnia bardzo szybkie wyszukiwanie obiektów przy podaniu klucza, więc przy założeniu jego unikalności połączenie dwóch zbiorów w pamięci jest znacznie szybsze niż wykonanie tego samego zadania czy to w bazie dyskowej, czy w bazie pamięciowej H2. Narzut struktur danych bazy pamięciowej jest tutaj wyraźnie widoczny.
 
 \subsection{Podsumowanie wyników testów TPC}
 
     Wyniki testów referencyjnych nie wskazują jednoznacznie na najlepsze rozwiązanie do użycia w każdym przypadku. Praktycznie każdy test prezentuje cechy wydajnościowe metod dostępu do danych w innym kontekście. Wiele tłumaczy ściśle relacyjny charakter zbioru testowego TPC. Duża liczba tabel i powiązań między nimi powoduje, że zapytania strumieniowe zawierające złączenia są zwykle znacznie mniej wydajne od prostszych zapytań operujących na jednej tabeli. Prawdopodobnie wykorzystanie innego zbioru danych, charakteryzującego się mniejszą normalizacją i większą nadmiarowością przyniosłoby inne wyniki. 
 
-    Zapytania zagnieżdżone są sporym problemem dla przetwarzania strumieniowego. W bazach SQL planista zapytania jest w stanie dokonać analizy kodu i dokonać odpowiednich optymalizacji. W przypadku strumieni żadne tego typu optymalizacje nie występują i nie są możliwe do implementacji w prosty sposób, ponieważ wszystkie funkcje strumieniowe wykonują się w izolacji przez wewnętrzne struktury biblioteki. O ile użycie równoległej odmiany strumieni jest w stanie zwiększyć nieco szybkość przetwarzania, nie są to znaczne przyrosty.
+    Zapytania zagnieżdżone są sporym problemem dla przetwarzania strumieniowego. W bazach SQL optymalizator zapytań jest w stanie dokonać analizy kodu i zadecydować o szczegółach procesu jego wykonania. W przypadku strumieni żadne tego typu optymalizacje nie występują i nie są możliwe do implementacji w prosty sposób, ponieważ wszystkie funkcje strumieniowe wykonują się w izolacji przez wewnętrzne struktury biblioteki. O ile użycie równoległej odmiany strumieni jest w stanie zwiększyć nieco szybkość przetwarzania, nie są to znaczne przyrosty.
 
 
 \subsection{Porównanie ilości zajętej pamięci}
@@ -1027,7 +1066,7 @@ Niniejszy wykres obrazuje porównanie szybkości wykonywania się złączenia ko
 \begin{figure}[H]
 \centering
 \includegraphics[width=13cm]{plots/memory}
-\caption{Tpc14Benchmark}
+\caption{Ilość zajętej pamięci w zależności od wielkości zbioru danych}
     \label{fig:memoryconsumption}
 \end{figure}
     
@@ -1062,61 +1101,65 @@ Celem pracy było przeprowadzenie analizy porównawczej możliwości przetwarzan
         Andreq Troelsen,
         \textit{Pro C\# 5.0 and the .NET 4.5 Framework}, wyd. Apress, 2012
 
+    \bibitem{orm} 
+        Christian Bauer,
+        \textit{Java Persistence with Hibernate},
+        wyd. Manning Publications, 2015
+
+    \bibitem{jdbc} 
+        Oracle Corporation,
+        \textit{JDBC Database Access}, 
+        \url{https://docs.oracle.com/javase/tutorial/jdbc/}, czas dostępu 15.06.2017
+
     \bibitem{ullman} 
         J.D. Ullman, J. Widom,
         \textit{A first course in database systems}, 
         Prentice Hall, 2008
+
+    \bibitem{streamsdoc1} 
+        Oracle Corporation,
+        \textit{java.util.stream Javadoc documentation},
+        \url{http://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html}, czas dostępu 29.05.2017
+
+    \bibitem{streamsdoc2} 
+        Raoul-Gabriel Urma,
+        \textit{Processing Data with Java SE 8 Streams, Part 1}, 
+        \url{http://www.oracle.com/technetwork/articles/java/ma14-java-se-8-streams-2177646.html}, czas dostępu 26.05.2017
+
+
+    \bibitem{fjpdocs} 
+        Oracle Corporation,
+        \textit{ForkJoinPool documentation}, 
+        \url{https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html}, czas dostępu 29.05.2017
+
+    \bibitem{goetz}
+        Brian Goetz,
+        \textit{Wypowiedź na portalu StackOverflow},
+        \url{https://stackoverflow.com/questions/17960656/is-it-possible-to-use-java-8-streams-api-for-asynchronous-processing/18826615\#comment36545451\_18826615}, czas dostępu 29.05.2017
+
+    \bibitem{generics} 
+        Oracle Corporation,
+        \textit{The Java Tutorials: Generics}, 
+        \url{https://docs.oracle.com/javase/tutorial/java/generics/types.html}, czas dostępu 29.05.2017
+
+    \bibitem{joolambda} 
+        \textit{Biblioteka JOO$\lambda$}, \url{https://www.jooq.org/products/}, czas dostępu 28.05.2017
+
+    \bibitem{streamex} 
+        \textit{Biblioteka StreamEx}, \url{https://github.com/amaembo/streamex}, czas dostępu 28.05.2017
+
+    \bibitem{h2maven} 
+        \textit{Informacje o pakietach bazy H2 na portalu Maven Central}, \url{https://mvnrepository.com/artifact/com.h2database/h2}, czas dostępu 28.05.2017
+
+    \bibitem{matplotlib} 
+        \textit{Dokumentacja biblioteki matplotlib}, \url{https://matplotlib.org/users/pyplot\_tutorial.html}, czas dostępu 15.05.2017
 
     \bibitem{tpcresults} 
         TPC Council,
         \textit{TPC Benchmark H Standard Specification, page 136},
         1993-2014 TPC Council
 
-    \bibitem{orm} 
-        Christian Bauer,
-        \textit{Java Persistence with Hibernate},
-        wyd. Manning Publications, 2015
 
-    \bibitem{streamsjavadoc} 
-        Oracle Corporation
-        \textit{java.util.stream Javadoc documentation},
-        http://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html, czas dostępu 29.05.2017
-
-    \bibitem{latexcompanion} 
-        Raoul-Gabriel Urma
-        \textit{Processing Data with Java SE 8 Streams, Part 1}, 
-        http://www.oracle.com/technetwork/articles/java/ma14-java-se-8-streams-2177646.html, czas dostępu 26.05.2017
-
-    \bibitem{fjpdocs} 
-        Oracle Corporation
-        \textit{ForkJoinPool documentation}, 
-        https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html, czas dostępu 29.05.2017
-
-    \bibitem{generics} 
-        Oracle Corporation
-        \textit{The Java Tutorials: Generics}, 
-        https://docs.oracle.com/javase/tutorial/java/generics/types.html, czas dostępu 29.05.2017
-
-    \bibitem{jdbc} 
-        Oracle Corporation
-        \textit{JDBC Database Access}, 
-        https://docs.oracle.com/javase/tutorial/jdbc/, czas dostępu 15.06.2017
-
-    \bibitem{goetz}
-        \textit{Wypowiedź architekta języka Java, Brian Goetz}
-        https://stackoverflow.com/questions/17960656/is-it-possible-to-use-java-8-streams-api-for-asynchronous-processing/18826615\#comment36545451\_18826615, czas dostępu 29.05.2017
-
-    \bibitem{joolambda} 
-        \textit{Biblioteka JOO$\lambda$}, https://www.jooq.org/products/, czas dostępu 28.05.2017
-
-    \bibitem{streamex} 
-        \textit{Biblioteka StreamEx} https://github.com/amaembo/streamex, czas dostępu 28.05.2017
-
-    \bibitem{h2maven} 
-        \textit{Informacje o pakietach bazy H2 na portalu Maven Central} https://mvnrepository.com/artifact/com.h2database/h2, czas dostępu 28.05.2017
-
-    \bibitem{matplotlib} 
-        \textit{Dokumentacja biblioteki matplotlib} https://matplotlib.org/users/pyplot\_tutorial.html, czas dostępu 15.05.2017
 
 \end{thebibliography}
 
