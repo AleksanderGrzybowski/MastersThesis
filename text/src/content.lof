@@ -1,0 +1,19 @@
+\select@language {polish}
+\contentsline {figure}{\numberline {1}{\ignorespaces Popularno\IeC {\'s}\IeC {\'c} rozwi\IeC {\k a}za\IeC {\'n} DBMS, \IeC {\'z}r\IeC {\'o}d\IeC {\l }o: Stack Overflow Developer Survey 2017\relax }}{11}{figure.caption.5}
+\contentsline {figure}{\numberline {2}{\ignorespaces Wizualizacja przep\IeC {\l }ywu danych\relax }}{13}{figure.caption.6}
+\contentsline {figure}{\numberline {3}{\ignorespaces Wizualizacja dzia\IeC {\l }ania mechanizmu Fork-Join (\IeC {\'z}r\IeC {\'o}d\IeC {\l }o: http://www.developer.com /imagesvr\_ce/3378 /join-fork-image001.png)\relax }}{19}{figure.caption.7}
+\contentsline {figure}{\numberline {4}{\ignorespaces Pr\IeC {\k e}dko\IeC {\'s}\IeC {\'c} wykonywania sortowania 1000000 liczb w puli w\IeC {\k a}tk\IeC {\'o}w FJP, zale\IeC {\.z}nie od liczby w\IeC {\k a}tk\IeC {\'o}w\relax }}{19}{figure.caption.8}
+\contentsline {figure}{\numberline {5}{\ignorespaces Migawka statystyk wykorzystania pami\IeC {\k e}ci maszyny wirtualnej (narz\IeC {\k e}dzie VisualVM)\relax }}{23}{figure.caption.9}
+\contentsline {figure}{\numberline {6}{\ignorespaces SummingIntegers\relax }}{41}{figure.caption.12}
+\contentsline {figure}{\numberline {7}{\ignorespaces GroupingAndSumming\relax }}{42}{figure.caption.13}
+\contentsline {figure}{\numberline {8}{\ignorespaces CrossJoinAndFilter\relax }}{43}{figure.caption.14}
+\contentsline {figure}{\numberline {9}{\ignorespaces FilteringAndCountingIntegers\relax }}{44}{figure.caption.15}
+\contentsline {figure}{\numberline {10}{\ignorespaces SortingStrings\relax }}{45}{figure.caption.16}
+\contentsline {figure}{\numberline {11}{\ignorespaces Schemat bazy danych TPC-H\relax }}{48}{figure.caption.17}
+\contentsline {figure}{\numberline {12}{\ignorespaces Tpc1Benchmark\relax }}{50}{figure.caption.18}
+\contentsline {figure}{\numberline {13}{\ignorespaces Tpc4Benchmark\relax }}{51}{figure.caption.19}
+\contentsline {figure}{\numberline {14}{\ignorespaces Tpc6Benchmark\relax }}{52}{figure.caption.20}
+\contentsline {figure}{\numberline {15}{\ignorespaces Tpc12Benchmark\relax }}{53}{figure.caption.21}
+\contentsline {figure}{\numberline {16}{\ignorespaces Tpc14Benchmark\relax }}{54}{figure.caption.22}
+\contentsline {figure}{\numberline {17}{\ignorespaces Por\IeC {\'o}wnanie wydajno\IeC {\'s}ci z\IeC {\l }\IeC {\k a}czenia naturalnego\relax }}{55}{figure.caption.23}
+\contentsline {figure}{\numberline {18}{\ignorespaces Tpc14Benchmark\relax }}{56}{figure.caption.24}
