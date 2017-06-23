@@ -1032,7 +1032,7 @@ out.println(results.get(1).getSum());
     \label{fig:tpc12}
 \end{figure}
 
-    Test nr 12 (rysunek \ref{fig:tpc12}) pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających. Podobnie jak w przypadku testu nr 4, nie przeprowadzony wszystkich testów ze względu na długi czas wykonania.
+    Test nr 12 (rysunek \ref{fig:tpc12}) pokazuje, jak nieefektywna jest najprostsza metoda łączenia strumieni, przy wykorzystaniu metody \texttt{Stream.flatMap}. Duża aktywność odśmiecacza pamięci spowodowana ciągłym tworzeniem obiektów reprezentujących iloczyn kartezjański wpływa dodatkowo negatywnie na wynik. Bazy relacyjne reprezentują znacznie większą prędkość wykonywania zapytania, natomiast najlepszym rozwiązaniem okazuje się ręcznie zaimplementowany operator złączenia naturalnego, bazujący na kolekcjach mieszających. Podobnie jak w przypadku testu nr 4, nie przeprowadzono wszystkich testów ze względu na długi czas wykonania.
 
 \newpage
 \begin{figure}[H]
